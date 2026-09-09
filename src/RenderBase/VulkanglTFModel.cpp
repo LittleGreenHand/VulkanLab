@@ -844,6 +844,10 @@ void vkglTF::Model::Destroy()
 	for (auto& skin : skins) {
 		delete skin;
 	}
+	m_indexBuffer.clear();
+	m_vertexBuffer.clear();
+
+	meshes.clear();
 	materials.clear();
 	animations.clear();
 	vkDestroyDescriptorPool(device->logicalDevice, descriptorPool, nullptr);
@@ -1087,6 +1091,8 @@ void vkglTF::Model::loadNode(vkglTF::Node *parent, const tinygltf::Node &node, u
 			newMesh->primitives.push_back(newPrimitive);
 		}
 		newNode->mesh = newMesh;
+		newMesh->parentNode = newNode;
+		meshes.push_back(newMesh);
 	}
 	if (parent) {
 		parent->children.push_back(newNode);
@@ -1364,8 +1370,6 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 #endif
 	bool fileLoaded = gltfContext.LoadASCIIFromFile(&gltfModel, &error, &warning, filename);
 
-	std::vector<uint32_t> indexBuffer;
-	std::vector<Vertex> vertexBuffer;
 
 	if (fileLoaded) {
 		if (!(fileLoadingFlags & FileLoadingFlags::DontLoadImages)) {
@@ -1378,7 +1382,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 		nodes.push_back(rootNode);
 		for (size_t i = 0; i < scene.nodes.size(); i++) {
 			const tinygltf::Node node = gltfModel.nodes[scene.nodes[i]];
-			loadNode(rootNode, node, scene.nodes[i] + 1, gltfModel, indexBuffer, vertexBuffer, scale);
+			loadNode(rootNode, node, scene.nodes[i] + 1, gltfModel, m_indexBuffer, m_vertexBuffer, scale);
 		}
 		if (gltfModel.animations.size() > 0) {
 			loadAnimations(gltfModel);
@@ -1413,7 +1417,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 					glm::vec3 min = glm::vec3(FLT_MAX);
 					glm::vec3 max = glm::vec3(-FLT_MAX);
 					for (uint32_t i = 0; i < primitive->vertexCount; i++) {
-						Vertex& vertex = vertexBuffer[primitive->firstVertex + i];
+						Vertex& vertex = m_vertexBuffer[primitive->firstVertex + i];
 						// Pre-transform vertex positions by node-hierarchy
 						if (preTransform) {
 							vertex.pos = glm::vec3(localMatrix * glm::vec4(vertex.pos, 1.0f));
@@ -1456,10 +1460,10 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 		}
 	}
 
-	size_t vertexBufferSize = vertexBuffer.size() * sizeof(Vertex);
-	size_t indexBufferSize = indexBuffer.size() * sizeof(uint32_t);
-	indices.count = static_cast<uint32_t>(indexBuffer.size());
-	vertices.count = static_cast<uint32_t>(vertexBuffer.size());
+	size_t vertexBufferSize = m_vertexBuffer.size() * sizeof(Vertex);
+	size_t indexBufferSize = m_indexBuffer.size() * sizeof(uint32_t);
+	indices.count = static_cast<uint32_t>(m_indexBuffer.size());
+	vertices.count = static_cast<uint32_t>(m_vertexBuffer.size());
 
 	assert((vertexBufferSize > 0) && (indexBufferSize > 0));
 
@@ -1476,7 +1480,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 		vertexBufferSize,
 		&vertexStaging.buffer,
 		&vertexStaging.memory,
-		vertexBuffer.data()));
+		m_vertexBuffer.data()));
 	// Index data
 	VK_CHECK_RESULT(device->createBuffer(
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -1484,7 +1488,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 		indexBufferSize,
 		&indexStaging.buffer,
 		&indexStaging.memory,
-		indexBuffer.data()));
+		m_indexBuffer.data()));
 
 	// Create device local buffers
 	// Vertex buffer
@@ -1830,4 +1834,14 @@ void vkglTF::Model::updatePrevMatrix()
 			continue;
 		updateChildPrevMatrix(node);
 	}
+}
+
+std::span<const vkglTF::Vertex> vkglTF::Model::GetPrimitiveVertices(const Primitive& primitive) const
+{
+	return std::span<const Vertex>(m_vertexBuffer.data() + primitive.firstVertex, primitive.vertexCount);
+}
+
+std::span<const uint32_t> vkglTF::Model::GetPrimitiveIndices(const Primitive& primitive) const
+{
+	return std::span<const uint32_t>(m_indexBuffer.data() + primitive.firstIndex, primitive.indexCount);
 }

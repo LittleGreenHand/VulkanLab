@@ -9,6 +9,7 @@
 #include "Render/VulkanContext.h"
 #include "Render/VulkanRenderer.h"
 #include "RenderResource/MeshManager.h"
+#include "Simulation/PhysicsContext.h"
 #include "Core/FrameClock.h"
 
 // 用于跟踪选中的节点
@@ -245,7 +246,8 @@ void ImGuiLayer::BeginFrame()
 		return;
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
+	ImGui::NewFrame(); 
+	Update();
 }
 
 void ImGuiLayer::Update()
@@ -256,6 +258,8 @@ void ImGuiLayer::Update()
 	{
 		auto renderer = VulkanContext::GetVulkanRenderer();
 		ImGui::Text("FPS: %.1f  (%.3f ms)", FrameClock::Get().FPS(), FrameClock::Get().DeltaSeconds()*1000);
+		ImGui::Checkbox("启动物理模拟", &PhysicsContext::Get().isSimulationEnabled);
+
 		if (ImGui::CollapsingHeader("相机")) {
 			ImGui::Indent();
 			{
@@ -408,20 +412,20 @@ void ImGuiLayer::Update()
 			{
 				if (visibleAll)
 				{
-					for (auto& [key, model] : MeshManager::Get().models)
+					for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 					{
 						model.nodes[0]->visible = true;
 					}
 				}
 				else
 				{
-					for (auto& [key, model] : MeshManager::Get().models)
+					for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 					{
 						model.nodes[0]->visible = false;
 					}
 				}
 			}
-			for (auto& [key, model] : MeshManager::Get().models)
+			for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 			{
 				DrawNodeTree(model.nodes[0], nodeId);
 			}

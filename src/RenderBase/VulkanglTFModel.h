@@ -221,9 +221,9 @@ namespace vkglTF
 	*/
 	struct Primitive {
 		uint32_t firstIndex;
-		uint32_t indexCount;
+		uint32_t indexCount = 0;
 		uint32_t firstVertex;
-		uint32_t vertexCount;
+		uint32_t vertexCount = 0;
 		Material& material;
 
 		struct Dimensions {
@@ -243,6 +243,7 @@ namespace vkglTF
 	*/
 	struct Mesh {
 		vks::VulkanDevice* device;
+		Node* parentNode = nullptr;//所属节点
 
 		std::vector<Primitive*> primitives;
 		std::string name;
@@ -389,6 +390,8 @@ namespace vkglTF
 		VkDescriptorPool descriptorPool;
 		std::string modelName;
 
+		std::vector<Vertex> m_vertexBuffer{};
+		std::vector<uint32_t> m_indexBuffer{};
 		struct Vertices {
 			int count;
 			VkBuffer buffer;
@@ -402,6 +405,7 @@ namespace vkglTF
 
 		std::vector<Node*> nodes;
 		std::vector<Node*> linearNodes;
+		std::vector<Mesh*> meshes;
 
 		std::vector<Skin*> skins;
 
@@ -411,6 +415,8 @@ namespace vkglTF
 		
 		Dimensions dimensions;
 
+		bool isPhysics = false;// 是否启用物理模拟
+		bool isDynamic = false;// 以动态还是静态物体的方式执行物理模拟
 		bool metallicRoughnessWorkflow = true;
 		bool buffersBound = false;
 		std::string path;
@@ -438,5 +444,7 @@ namespace vkglTF
 		Node* nodeFromIndex(uint32_t index);
 		void prepareNodeDescriptor(vkglTF::Node* node, VkDescriptorSetLayout descriptorSetLayout);
 		void updatePrevMatrix();
+		std::span<const Vertex> GetPrimitiveVertices(const Primitive& primitive)const;
+		std::span<const uint32_t> GetPrimitiveIndices(const Primitive& primitive)const;
 	};
 }

@@ -2,6 +2,8 @@
 #include "FrameClock.h"
 #include "Log.h"
 #include <thread>
+#include "RenderResource/MeshManager.h"
+#include "Simulation/PhysicsContext.h"
 bool Application::m_init = false;
 bool Application::Init()
 {
@@ -15,6 +17,14 @@ bool Application::Init()
 			return false;
 		}
 	}
+
+	// PhysX
+	{
+		if (!PhysicsContext::Get().Init()) {
+			LOG_ERROR("Failed to initialize PhysX");
+		}
+	}
+
 	// 初始化Vulkan与渲染器
 	{
 		uint32_t extCount = 0;
@@ -65,14 +75,6 @@ bool Application::Init()
 		}
 	}
 
-	// PhysX
-	{
-		m_physicsWorld = std::make_unique<PhysicsWorld>();
-		if (!m_physicsWorld->Init()) {
-			LOG_ERROR("Failed to initialize PhysX");
-			return false;
-		}
-	}
 	m_init = true;
 	LOG_DEBUG("Application initialized successfully");
 	return true;
@@ -84,7 +86,7 @@ void Application::Destroy()
 	m_guiLayer.reset();
 	m_renderer.reset();
 	m_window.reset();
-	m_physicsWorld.reset();
+	PhysicsContext::Get().Destroy();
 	m_init = false;
 	LOG_DEBUG("Application destroyed");
 }
@@ -148,14 +150,15 @@ bool Application::BeginFrame()
 
 void Application::UpdateScene()
 {
-	m_guiLayer->Update();
 }
 
 void Application::Simulate()
 {
-	m_physicsWorld->Update(FrameClock::Get().DeltaSeconds());
-	physx::PxTransform pose = m_physicsWorld->dynamicBox->getGlobalPose();
-	LOG_DEBUG("Box Position: {}, {}, {}", pose.p.x, pose.p.y, pose.p.z);
+	if (PhysicsContext::Get().IsInit())
+	{
+		PhysicsContext::Get().Simulate(FrameClock::Get().DeltaSeconds());
+		MeshManager::Get().UpdateSimulationResults();
+	}
 }
 
 void Application::Render()

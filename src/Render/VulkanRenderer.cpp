@@ -350,7 +350,7 @@ void VulkanRenderer::prepareUniformBuffers()
 
 void VulkanRenderer::updateUniformBuffers()
 {
-	for (auto& [key, model] : MeshManager::Get().models)
+	for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 	{
 		model.updatePrevMatrix();
 	}
@@ -455,7 +455,7 @@ void VulkanRenderer::render()
 				//绘制不透明物体
 				vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_DEFER_GEOMETRY_Opaque].layout, 0, descriptorSetCount, descriptorSetsArray.data(), 0, nullptr);
 				vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_DEFER_GEOMETRY_Opaque].pipeline);
-				for (auto& [key, model] : MeshManager::Get().models)
+				for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 				{
 					model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderOpaqueNodes, pipelines[PL_PBR_DEFER_GEOMETRY_Opaque].layout);
 				}
@@ -463,7 +463,7 @@ void VulkanRenderer::render()
 				//绘制遮罩物体
 				vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_DEFER_GEOMETRY_AlphaMasked].layout, 0, descriptorSetCount, descriptorSetsArray.data(), 0, nullptr);
 				vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_DEFER_GEOMETRY_AlphaMasked].pipeline);
-				for (auto& [key, model] : MeshManager::Get().models)
+				for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 				{
 					model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderAlphaMaskedNodes, pipelines[PL_PBR_DEFER_GEOMETRY_AlphaMasked].layout);
 				}
@@ -519,7 +519,7 @@ void VulkanRenderer::render()
 			VulkanDebugUtils::CmdBeginLabel(cmdBuffer, "PBR_AlphaBLEND", { 1.0f, 1.0f, 1.0f });
 			vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_BLEND].layout, 0, descriptorSetCount, descriptorSetsArray.data(), 0, nullptr);
 			vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_BLEND].pipeline);
-			for (auto& [key, model] : MeshManager::Get().models)
+			for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 			{
 				model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderAlphaBlendedNodes, pipelines[PL_PBR_BLEND].layout);
 			}

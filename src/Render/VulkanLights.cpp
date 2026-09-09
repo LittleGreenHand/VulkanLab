@@ -377,7 +377,7 @@ namespace vkLight {
 					renderPassBeginInfo.framebuffer = lightResource.frameBuffers[index];
 					vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-					for (auto& [key, model] : MeshManager::Get().models)
+					for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 					{
 						vkCmdPushConstants(cmdBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4) * 2, sizeof(glm::vec4), &lightData.pointLights[id].position);
 						model.drawWithPushConstant(cmdBuffer, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, pipelineLayout, shadowProj * glm::translate(viewMatrix[face], glm::vec3(-lightData.pointLights[id].position)), true); 
@@ -467,7 +467,7 @@ namespace vkLight {
 			glm::vec3 minExtents = -maxExtents;
 
 			glm::vec3 lightDir = glm::normalize(-lightData.directLight.direct);
-			glm::vec3 up = MathUtils::GenerateUpVector(lightDir);
+			glm::vec3 up = GenerateUpVector(lightDir);
 			glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, up);
 			glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 			lightOrthoMatrix[1][1] *= -1.0f;
@@ -711,7 +711,7 @@ namespace vkLight {
 				renderPassBeginInfo.framebuffer = cascades[j].frameBuffer;
 				vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-				for (auto& [key, model] : MeshManager::Get().models)
+				for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 				{
 					model.drawWithPushConstant(cmdBuffer, VK_SHADER_STAGE_VERTEX_BIT, pipelineLayout, cascades[j].viewProjMatrix);
 				}

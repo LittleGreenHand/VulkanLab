@@ -15,7 +15,7 @@ enum DescriptorSetBindIndex {
 	LBI_COUNT
 };
 
-enum GLTFModels {
+enum BaseModels {
 	M_Cube,
 	M_Cerberus,
 	M_Sponza,

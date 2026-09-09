@@ -3,7 +3,6 @@
 #include "Render/VulkanRenderer.h"
 #include "GlfwWindow.h"
 #include "ImGuiLayer.h"
-#include "Simulation/PhysicsWorld.h"
 class Application
 {
 public:
@@ -42,5 +41,4 @@ private:
 	std::unique_ptr<VulkanRenderer> m_renderer;
 	std::unique_ptr<GlfwWindow> m_window;
 	std::unique_ptr<ImGuiLayer> m_guiLayer;
-	std::unique_ptr<PhysicsWorld> m_physicsWorld;
 };

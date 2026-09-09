@@ -54,6 +54,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     PhysXCooking_64
     PhysXFoundation_64
     PhysXExtensions_static_64
+    PhysXPvdSDK_static_64
 )
 
 # 编译后复制PhysX DLL到输出目录
