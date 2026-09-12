@@ -154,7 +154,7 @@ void Application::UpdateScene()
 
 void Application::Simulate()
 {
-	if (PhysicsContext::Get().IsInit())
+	if (PhysicsContext::Get().IsInit() && PhysicsContext::Get().IsSimulationEnabled())
 	{
 		PhysicsContext::Get().Simulate(FrameClock::Get().DeltaSeconds());
 		MeshManager::Get().UpdateSimulationResults();

@@ -20,6 +20,10 @@
 #include "VulkanglTFModel.h"
 #include "Render/VulkanContext.h"
 #include "Render/VulkanDebugUtils.h"
+#include "glm/gtx/matrix_decompose.inl"
+#include "core/Log.h"
+#include "Math/MathUtils.h"
+#include "Simulation/PhysicsContext.h"
 
 VkDescriptorSetLayout vkglTF::MaterialDescriptorSetLayout = VK_NULL_HANDLE;
 VkDescriptorSetLayout vkglTF::MeshDescriptorSetLayout = VK_NULL_HANDLE;
@@ -412,6 +416,35 @@ void fromglTfImage(vks::Texture& texture, tinygltf::Image& gltfimage, std::strin
 	texture.descriptor.imageLayout = texture.imageLayout;
 }
 
+MeshTopology ConvertTopology(int mode)
+{
+	switch (mode)
+	{
+	case TINYGLTF_MODE_POINTS:
+		return MeshTopology::Points;
+
+	case TINYGLTF_MODE_LINE:
+		return MeshTopology::Lines;
+
+	case TINYGLTF_MODE_LINE_LOOP:
+		return MeshTopology::LineLoop;
+
+	case TINYGLTF_MODE_LINE_STRIP:
+		return MeshTopology::LineStrip;
+
+	case TINYGLTF_MODE_TRIANGLES:
+		return MeshTopology::TriangleList;
+
+	case TINYGLTF_MODE_TRIANGLE_STRIP:
+		return MeshTopology::TriangleStrip;
+
+	case TINYGLTF_MODE_TRIANGLE_FAN:
+		return MeshTopology::TriangleFan;
+
+	default:
+		return MeshTopology::TriangleList;
+	}
+}
 
 /*
 	glTF material
@@ -577,35 +610,45 @@ vkglTF::Mesh::~Mesh() {
     {
         delete primitive;
     }
+	if(physicsMesh.convexMesh)
+	{
+		physicsMesh.convexMesh->release();
+		physicsMesh.convexMesh = nullptr;
+	}
+	if(physicsMesh.triangleMesh)
+	{
+		physicsMesh.triangleMesh->release();
+		physicsMesh.triangleMesh = nullptr;
+	}
 }
 
 /*
 	glTF node
 */
-glm::mat4 vkglTF::Node::localMatrix() {
+glm::mat4 vkglTF::Node::GetLocalMatrix() {
 	return glm::translate(glm::mat4(1.0f), translation) * glm::mat4(rotation) * glm::scale(glm::mat4(1.0f), scale) * matrix;
 }
 
-glm::mat4 vkglTF::Node::getWorldMatrix() {
-	glm::mat4 m = localMatrix();
+glm::mat4 vkglTF::Node::GetWorldMatrix() {
+	glm::mat4 m = GetLocalMatrix();
 	vkglTF::Node *p = parent;
 	while (p) {
-		m = p->localMatrix() * m;
+		m = p->GetLocalMatrix() * m;
 		p = p->parent;
 	}
 	return m;
 }
 
-void vkglTF::Node::update() {
+void vkglTF::Node::update(bool isTransformChanged) {
 	if (mesh) {
-		glm::mat4 m = getWorldMatrix();
+		glm::mat4 m = GetWorldMatrix();
 		mesh->uniformBlock.modelMatrix = m;
 		if (skin) {
 			// Update join matrices
 			glm::mat4 inverseTransform = glm::inverse(m);
 			for (size_t i = 0; i < skin->joints.size(); i++) {
 				vkglTF::Node *jointNode = skin->joints[i];
-				glm::mat4 jointMat = jointNode->getWorldMatrix() * skin->inverseBindMatrices[i];
+				glm::mat4 jointMat = jointNode->GetWorldMatrix() * skin->inverseBindMatrices[i];
 				jointMat = inverseTransform * jointMat;
 				mesh->uniformBlock.jointMatrix[i] = jointMat;
 			}
@@ -614,10 +657,32 @@ void vkglTF::Node::update() {
 		} else {
 			memcpy(mesh->uniformBuffer.mapped, &m, sizeof(glm::mat4));
 		}
+
+		if (isTransformChanged)
+		{
+			if (physicsComponent.physicsActor)
+			{
+				glm::vec3 worldScale;
+				glm::quat worldRotation;
+				glm::vec3 worldTranslation;
+				glm::vec3 skew;
+				glm::vec4 perspective;
+				if (glm::decompose(m, worldScale, worldRotation, worldTranslation, skew, perspective))
+				{
+					worldRotation = glm::normalize(worldRotation);
+					PhysicsContext::Get().UpdateActorTransform(physicsComponent.physicsActor, worldTranslation, worldRotation);
+					PhysicsContext::Get().UpdateActorScale(physicsComponent.physicsActor, worldScale);
+				}
+				else
+				{
+					LOG_WARNING("[MeshManager] Failed to decompose Node transform: {}", name);
+				}
+			}
+		}
 	}
 
 	for (auto& child : children) {
-		child->update();
+		child->update(isTransformChanged);
 	}
 }
 
@@ -639,6 +704,10 @@ vkglTF::Node::~Node() {
 	}
 	for (auto& child : children) {
 		delete child;
+	}
+	if (physicsComponent.physicsActor) {
+		physicsComponent.physicsActor->release();
+		physicsComponent.physicsActor = nullptr;
 	}
 }
 
@@ -1088,6 +1157,7 @@ void vkglTF::Model::loadNode(vkglTF::Node *parent, const tinygltf::Node &node, u
 			newPrimitive->firstVertex = vertexStart;
 			newPrimitive->vertexCount = vertexCount;
 			newPrimitive->setDimensions(posMin, posMax);
+			newPrimitive->topology = ConvertTopology(primitive.mode);
 			newMesh->primitives.push_back(newPrimitive);
 		}
 		newNode->mesh = newMesh;
@@ -1412,7 +1482,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 		const bool flipY = fileLoadingFlags & FileLoadingFlags::FlipY;
 		for (Node* node : linearNodes) {
 			if (node->mesh) {
-				const glm::mat4 localMatrix = node->getWorldMatrix();
+				const glm::mat4 localMatrix = node->GetWorldMatrix();
 				for (Primitive* primitive : node->mesh->primitives) {
 					glm::vec3 min = glm::vec3(FLT_MAX);
 					glm::vec3 max = glm::vec3(-FLT_MAX);
@@ -1681,8 +1751,8 @@ void vkglTF::Model::getNodeDimensions(Node *node, glm::vec3 &min, glm::vec3 &max
 		return;
 	if (node->mesh) {
 		for (Primitive *primitive : node->mesh->primitives) {
-			glm::vec4 locMin =node->getWorldMatrix()  * glm::vec4(primitive->dimensions.min, 1.0f);
-			glm::vec4 locMax =node->getWorldMatrix() *  glm::vec4(primitive->dimensions.max, 1.0f);
+			glm::vec4 locMin =node->GetWorldMatrix()  * glm::vec4(primitive->dimensions.min, 1.0f);
+			glm::vec4 locMax =node->GetWorldMatrix() *  glm::vec4(primitive->dimensions.max, 1.0f);
 			if (locMin.x < min.x) { min.x = locMin.x; }
 			if (locMin.y < min.y) { min.y = locMin.y; }
 			if (locMin.z < min.z) { min.z = locMin.z; }

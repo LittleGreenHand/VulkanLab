@@ -5,42 +5,18 @@
 #include "Render/VulkanDebugUtils.h"
 #include "Math/MathUtils.h"
 #include "Core/Log.h"
+#include <glm/gtx/matrix_decompose.hpp>
+#include <algorithm>
 
 void MeshManager::Destroy()
 {
-	LOG_DEBUG("[MeshManager] Destroying mesh manager resources");
-	if(isModelsLoaded)
+	if (isModelsLoaded)
 	{
 		vkDeviceWaitIdle(VulkanContext::GetVkDevice());
 		m_sceneTree.clear();
 		skybox.Destroy();
 		vkglTF::destroyEmptyTexture();
 	}
-	m_physicsMeshes.clear();
-	for (auto& [model, triangleMesh] : m_pxTriangleMeshes)
-	{
-		if (triangleMesh)
-			triangleMesh->release();
-	}
-	for (auto& [model, staticActor] : m_pxStaticActors)
-	{
-		if (staticActor)
-			staticActor->release();
-	}
-	for (auto& [model, convexMesh] : m_pxConvexMeshes)
-	{
-		if (convexMesh)
-			convexMesh->release();
-	}
-	for (auto& [model, dynamicActor] : m_pxDynamicActors)
-	{
-		if (dynamicActor)
-			dynamicActor->release();
-	}
-	m_pxTriangleMeshes.clear();
-	m_pxStaticActors.clear();
-	m_pxConvexMeshes.clear();
-	m_pxDynamicActors.clear();
 	isModelsLoaded = false;
 	LOG_DEBUG("[MeshManager] Destroying mesh manager resources successfully");
 }
@@ -49,6 +25,7 @@ void MeshManager::LoadModels()
 {
 	LOG_DEBUG("[MeshManager] Loading glTF models");
 	vks::VulkanDevice* vulkanDevice = VulkanContext::GetVulkanDevice();
+	//uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreMultiplyVertexColors;
 	uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors;
 
 	m_sceneTree[M_Cube].loadFromFile(getAssetPath() + "models/cube.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
@@ -76,7 +53,8 @@ void MeshManager::LoadModels()
 
 	m_sceneTree[M_Sponza].loadFromFile(getAssetPath() + "models/sponza/sponza.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
 	m_sceneTree[M_Sponza].nodes[0]->clearTransform();
-	m_sceneTree[M_Sponza].nodes[0]->rotation =EularToQuaternion(glm::vec3(0, 90, 0));
+	m_sceneTree[M_Sponza].nodes[0]->rotation = EularToQuaternion(glm::vec3(0, 90, 0));
+	//m_sceneTree[M_Sponza].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
 	m_sceneTree[M_Sponza].nodes[0]->translation = (glm::vec3(0, -1, 0));
 	m_sceneTree[M_Sponza].nodes[0]->update();
 
@@ -105,177 +83,335 @@ void MeshManager::LoadModels()
 	isModelsLoaded = true;
 	LOG_DEBUG("[MeshManager] glTF models loaded successfully");
 
-	ApplyPhysics(M_Cube, true);
-	ApplyPhysics(M_Sponza, false);
+	if (PhysicsContext::Get().IsInit())
+	{
+		ApplyPhysics(M_Sphere, true);
+		ApplyPhysics(M_Sponza, false);
+	}
 }
-
 bool MeshManager::ApplyPhysics(BaseModels key, bool isDynamic)
 {
-	m_sceneTree[key].isPhysics = true;
-	m_sceneTree[key].isDynamic = isDynamic;
+	if (!PhysicsContext::Get().IsInit())
+	{
+		LOG_WARNING("[MeshManager] PhysX is not initialized.");
+		return false;
+	}
 
-	auto& physicsMesh = m_physicsMeshes[key];
+	auto iter = m_sceneTree.find(key);
+	if (iter == m_sceneTree.end())
+	{
+		LOG_WARNING("[MeshManager] Model not found.");
+		return false;
+	}
+
+	auto& model = iter->second;
+	bool result = true;
+	for (auto* rootNode : model.nodes)
+	{
+		if (!ApplyPhysics(model, rootNode, isDynamic))
+		{
+			result = false;
+		}
+	}
+	return result;
+}
+bool MeshManager::ApplyPhysics(vkglTF::Model& model, vkglTF::Node* node, bool isDynamic)
+{
+	if (!node)
+		return true;
+
+	bool result = true;
+	if (node->mesh)
+	{
+		if (!CreatePhysicsActor(model, node, isDynamic))
+		{
+			result = false;
+		}
+	}
+
+	for (auto* child : node->children)
+	{
+		if (!ApplyPhysics(model, child, isDynamic))
+		{
+			result = false;
+		}
+	}
+
+	return result;
+}
+
+bool MeshManager::BuildPhysicsMeshData(const vkglTF::Model& model, const vkglTF::Mesh& mesh, PhysicsMeshData& physicsMesh, bool isDynamic)
+{
 	physicsMesh.vertices.clear();
-	physicsMesh.indices.clear();
-	physicsMesh.vertices.reserve(m_sceneTree[key].m_vertexBuffer.size());
-	physicsMesh.indices.reserve(m_sceneTree[key].m_indexBuffer.size());
-
-	for (auto* rootNode : m_sceneTree[key].nodes)
+	physicsMesh.indices.clear();		
+	physicsMesh.topology = MeshTopology::TriangleList;// 一个 Mesh 最终合成为一个 PxTriangleMesh，所以统一转换成 TriangleList
+	for (const auto* primitive : mesh.primitives)
 	{
-		BuildPhysicsTriangleMeshData(m_sceneTree[key], rootNode, physicsMesh);
+		if (!primitive || primitive->vertexCount == 0)
+			continue;
+
+		// PxConvexMesh 只需要点集
+		if (isDynamic)
+		{
+			auto vertices = model.GetPrimitiveVertices(*primitive);
+			for (const auto& vertex : vertices)
+			{
+				physicsMesh.vertices.emplace_back(vertex.pos.x, vertex.pos.y, vertex.pos.z); 
+			}
+			continue;
+		}
+
+		auto vertices = model.GetPrimitiveVertices(*primitive);
+		auto indices = model.GetPrimitiveIndices(*primitive);
+		if (vertices.empty() || indices.empty())
+			continue;
+
+		const uint32_t baseVertex = static_cast<uint32_t>(physicsMesh.vertices.size());
+		for (const auto& vertex : vertices)
+		{
+			physicsMesh.vertices.emplace_back(vertex.pos.x, vertex.pos.y, vertex.pos.z);
+		}
+
+		auto GetLocalIndex =
+			[&](uint32_t globalIndex) -> uint32_t
+			{
+				return baseVertex +
+					(globalIndex - primitive->firstVertex);
+			};
+
+		auto AddTriangle =
+			[&](uint32_t i0, uint32_t i1, uint32_t i2)
+			{
+				// 跳过退化三角形
+				if (i0 == i1 || i1 == i2 || i0 == i2)
+					return;
+
+				physicsMesh.indices.push_back(i0);
+				physicsMesh.indices.push_back(i1);
+				physicsMesh.indices.push_back(i2);
+			};
+
+		switch (primitive->topology)
+		{
+		case MeshTopology::TriangleList:
+		{
+			if (indices.size() % 3 != 0)
+			{
+				LOG_WARNING("[MeshManager] Invalid TriangleList index count in mesh: {}", mesh.name);
+				return false;
+			}
+
+			for (size_t i = 0; i < indices.size(); i += 3)
+			{
+				AddTriangle(GetLocalIndex(indices[i]), GetLocalIndex(indices[i + 1]), GetLocalIndex(indices[i + 2]));
+			}
+			break;
+		}
+
+		case MeshTopology::TriangleStrip:
+		{
+			if (indices.size() < 3)
+				continue;
+
+			for (size_t i = 0; i + 2 < indices.size(); ++i)
+			{
+				uint32_t i0 = GetLocalIndex(indices[i]);
+				uint32_t i1 = GetLocalIndex(indices[i + 1]);
+				uint32_t i2 = GetLocalIndex(indices[i + 2]);
+
+				if (i & 1)
+					std::swap(i0, i1);
+
+				AddTriangle(i0, i1, i2);
+			}
+			break;
+		}
+
+		case MeshTopology::TriangleFan:
+		{
+			if (indices.size() < 3)
+				continue;
+
+			const uint32_t center = GetLocalIndex(indices[0]);
+
+			for (size_t i = 1; i + 1 < indices.size(); ++i)
+			{
+				AddTriangle(center, GetLocalIndex(indices[i]), GetLocalIndex(indices[i + 1]));
+			}
+			break;
+		}
+
+		case MeshTopology::Points:
+		case MeshTopology::Lines:
+		case MeshTopology::LineLoop:
+		case MeshTopology::LineStrip:
+		{
+			LOG_WARNING(
+				"[MeshManager] Unsupported topology for PxTriangleMesh, mesh: {}",
+				mesh.name);
+			break;
+		}
+		}
 	}
 
-	if (isDynamic)
-	{
-		auto convexMesh = PhysicsContext::Get().CreateConvexMesh(physicsMesh);
-		if (!convexMesh)
-		{
-			LOG_WARNING("[MeshManager] Failed to create ConvexMesh for model: {}", m_sceneTree[key].modelName);
-			return false;
-		}
-		if (m_pxConvexMeshes.find(key) != m_pxConvexMeshes.end())
-		{
-			if (m_pxConvexMeshes[key])
-				m_pxConvexMeshes[key]->release();
-		}
-		m_pxConvexMeshes[key] = convexMesh;
+	if (physicsMesh.vertices.empty())
+		return false;
 
-		const physx::PxTransform actorTransform(physx::PxIdentity);
-		auto actor = PhysicsContext::Get().CreateDynamicActor(m_pxConvexMeshes[key], actorTransform, 1.0f);
-		if (!actor)
-		{
-			LOG_WARNING("[MeshManager] Failed to create dynamic actor for model: {}", m_sceneTree[key].modelName);
-			return false;
-		}
-		if (m_pxDynamicActors.find(key) != m_pxDynamicActors.end())
-		{
-			if (m_pxDynamicActors[key])
-				m_pxDynamicActors[key]->release();
-		}
-		m_pxDynamicActors[key] = actor;
-		PhysicsContext::Get().AddActor(actor);
-	}
-	else
-	{
-		auto triangleMesh = PhysicsContext::Get().CreateTriangleMesh(physicsMesh);
-		if (!triangleMesh)
-		{
-			LOG_WARNING("[MeshManager] Failed to create TriangleMesh for model: {}", m_sceneTree[key].modelName);
-			return false;
-		}
-		if (m_pxTriangleMeshes.find(key) != m_pxTriangleMeshes.end())
-		{
-			if (m_pxTriangleMeshes[key])
-				m_pxTriangleMeshes[key]->release();
-		}
-		m_pxTriangleMeshes[key] = triangleMesh;
+	if (!isDynamic && physicsMesh.indices.empty())
+		return false;
 
-		const physx::PxTransform actorTransform(physx::PxIdentity);// Node 层级变换已经全部烘焙到顶点中
-		auto actor = PhysicsContext::Get().CreateStaticActor(m_pxTriangleMeshes[key], actorTransform);
-		if (!actor)
-		{
-			LOG_WARNING("[MeshManager] Failed to create static actor for model: {}", m_sceneTree[key].modelName);
-			return false;
-		}
-		if (m_pxStaticActors.find(key) != m_pxStaticActors.end())
-		{
-			if (m_pxStaticActors[key])
-				m_pxStaticActors[key]->release();
-		}
-		m_pxStaticActors[key] = actor;
-		PhysicsContext::Get().AddActor(actor);
-	}
 	return true;
 }
 
-void MeshManager::BuildPhysicsTriangleMeshData(	vkglTF::Model& model, vkglTF::Node* node, PhysicsTriangleMeshData& physicsMesh)
+bool MeshManager::CreatePhysicsActor(vkglTF::Model& model, vkglTF::Node* node,	bool isDynamic)
+{
+	if (!node || !node->mesh)
+		return false;
+
+	auto* mesh = node->mesh;
+	if (node->physicsComponent.physicsActor)
+	{
+		node->physicsComponent.physicsActor->release();
+		node->physicsComponent.physicsActor = nullptr;
+	}
+	if (mesh->physicsMesh.triangleMesh)
+	{
+		mesh->physicsMesh.triangleMesh->release();
+		mesh->physicsMesh.triangleMesh = nullptr;
+	}
+
+	if (mesh->physicsMesh.convexMesh)
+	{
+		mesh->physicsMesh.convexMesh->release();
+		mesh->physicsMesh.convexMesh = nullptr;
+	}
+
+	PhysicsMeshData physicsMesh;
+	if (!BuildPhysicsMeshData(model, *mesh,	physicsMesh, isDynamic))
+	{
+		LOG_WARNING("[MeshManager] Failed to build physics mesh data for mesh: {}",	mesh->name);
+		return false;
+	}
+
+	glm::vec3 worldScale;
+	glm::quat worldRotation;
+	glm::vec3 worldTranslation;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	if (!glm::decompose(node->GetWorldMatrix(), worldScale, worldRotation, worldTranslation, skew, perspective))
+	{
+		LOG_WARNING("[MeshManager] Failed to decompose Node transform: {}",	node->name);
+		return false;
+	}
+
+	worldRotation = glm::normalize(worldRotation);
+	const physx::PxTransform actorTransform = ToPxTransform(worldTranslation, worldRotation);
+	const physx::PxMeshScale meshScale(	ToPxVec3(worldScale));
+	if (isDynamic)
+	{
+		auto* convexMesh = PhysicsContext::Get().CreateConvexMesh(physicsMesh);
+		if (!convexMesh)
+		{
+			LOG_WARNING("[MeshManager] Failed to create PxConvexMesh: {}", mesh->name);
+			return false;
+		}
+
+		mesh->physicsMesh.convexMesh = convexMesh;
+		auto* actor = PhysicsContext::Get().CreateDynamicActor(convexMesh, actorTransform, meshScale, 1.0f);
+
+		if (!actor)
+		{
+			convexMesh->release();
+			mesh->physicsMesh.convexMesh = nullptr;
+			return false;
+		}
+		node->physicsComponent.physicsActor = actor;
+	}
+	else
+	{
+		auto* triangleMesh = PhysicsContext::Get().CreateTriangleMesh(physicsMesh);
+		if (!triangleMesh)
+		{
+			LOG_WARNING("[MeshManager] Failed to create PxTriangleMesh: {}", mesh->name);
+			return false;
+		}
+		mesh->physicsMesh.triangleMesh = triangleMesh;
+		auto* actor = PhysicsContext::Get().CreateStaticActor(triangleMesh, actorTransform, meshScale);
+		if (!actor)
+		{
+			triangleMesh->release();
+			mesh->physicsMesh.triangleMesh = nullptr;
+			return false;
+		}
+		node->physicsComponent.physicsActor = actor;
+	}
+
+	node->physicsComponent.isPhysics = true;
+	node->physicsComponent.isDynamic = isDynamic;
+
+	PhysicsContext::Get().AddActor(node->physicsComponent.physicsActor);
+	return true;
+}
+
+void MeshManager::UpdateSimulationResults()
+{
+	if (!PhysicsContext::Get().IsInit())
+		return;
+
+	for (auto& [key, model] : m_sceneTree)
+	{
+		for (auto* rootNode : model.nodes)
+		{
+			UpdateSimulationResults(rootNode);
+			rootNode->update();
+		}
+	}
+}
+
+void MeshManager::UpdateSimulationResults(vkglTF::Node* node)
 {
 	if (!node)
 		return;
 
-	glm::mat4 nodeMatrix = node->getWorldMatrix();
-
-	if (node->mesh)
+	if (node->physicsComponent.isPhysics && node->physicsComponent.isDynamic && node->physicsComponent.physicsActor)
 	{
-		// 同一个 Node 下可以让多个 Primitive 共用已经转换过的顶点
-		std::unordered_map<uint32_t, uint32_t> vertexRemap;
-
-		for (const auto* primitive : node->mesh->primitives)
+		auto* dynamicActor = node->physicsComponent.physicsActor->is<physx::PxRigidDynamic>();
+		if (dynamicActor)
 		{
-			if (!primitive || primitive->indexCount == 0)
-				continue;
+			const physx::PxTransform pose = dynamicActor->getGlobalPose();
 
-			// 当前阶段默认 glTF Primitive 为 TRIANGLES
-			// TriangleMesh 要求最终索引能够组成三角形
-			if((primitive->indexCount % 3 != 0))
+			glm::vec3 worldScale;
+			glm::quat oldWorldRotation;
+			glm::vec3 oldWorldTranslation;
+			glm::vec3 skew;
+			glm::vec4 perspective;
+			glm::decompose(node->GetWorldMatrix(), worldScale, oldWorldRotation, oldWorldTranslation, skew, perspective);
+			glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pose.p.x, pose.p.y, pose.p.z)) * glm::mat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z)) * glm::scale(glm::mat4(1.0f), worldScale);
+
+			glm::mat4 localMatrix = worldMatrix;
+			if (node->parent)
 			{
-				LOG_WARNING("[MeshManager] Primitive topology is not valid for triangle mesh");
-				continue;
+				localMatrix = glm::inverse(node->parent->GetWorldMatrix()) * worldMatrix;
 			}
 
-			const uint32_t firstIndex = primitive->firstIndex;
-			const uint32_t indexCount = primitive->indexCount;
+			// GetLocalMatrix() 最后还会乘 matrix，因此求回 TRS 时把 matrix 去掉。
+			localMatrix *= glm::inverse(node->matrix);
 
-			for (uint32_t i = 0; i < indexCount; ++i)
+			glm::vec3 localScale;
+			glm::quat localRotation;
+			glm::vec3 localTranslation;
+			if (glm::decompose(localMatrix, localScale, localRotation, localTranslation, skew, perspective))
 			{
-				const uint32_t srcIndex =
-					model.m_indexBuffer[firstIndex + i];
-
-				auto iter = vertexRemap.find(srcIndex);
-
-				uint32_t dstIndex;
-
-				if (iter == vertexRemap.end())
-				{
-					const glm::vec3& srcPosition =
-						model.m_vertexBuffer[srcIndex].pos;
-
-					const glm::vec4 transformedPosition =
-						nodeMatrix * glm::vec4(srcPosition, 1.0f);
-
-					dstIndex =
-						static_cast<uint32_t>(physicsMesh.vertices.size());
-
-					physicsMesh.vertices.emplace_back(
-						transformedPosition.x,
-						transformedPosition.y,
-						transformedPosition.z);
-
-					vertexRemap.emplace(srcIndex, dstIndex);
-				}
-				else
-				{
-					dstIndex = iter->second;
-				}
-
-				physicsMesh.indices.push_back(dstIndex);
+				node->translation = localTranslation;
+				node->rotation = glm::normalize(localRotation);
+				node->scale = localScale;
 			}
 		}
 	}
 
-	// 递归处理子节点
 	for (auto* child : node->children)
 	{
-		BuildPhysicsTriangleMeshData(model, child, physicsMesh);
-	}
-}
-
-
-void MeshManager::UpdateSimulationResults()
-{
-	if (PhysicsContext::Get().IsInit())
-	{
-		for (auto& [key, actor] : m_pxDynamicActors)
-		{
-			if (actor)
-			{
-				physx::PxTransform pose = actor->getGlobalPose();
-
-				m_sceneTree[key].nodes[0]->rotation = glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z);
-				m_sceneTree[key].nodes[0]->translation = glm::vec3(pose.p.x, pose.p.y, pose.p.z);
-				m_sceneTree[key].nodes[0]->update();
-			}
-		}
+		UpdateSimulationResults(child);
 	}
 }
 

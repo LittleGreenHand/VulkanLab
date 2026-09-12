@@ -35,6 +35,11 @@ physx::PxQuat ToPxQuat(const glm::quat& q)
 	return physx::PxQuat(q.x, q.y, q.z, q.w);
 }
 
+physx::PxMeshScale ToPxMeshScale(const glm::vec3& scale, const glm::quat& rotation)
+{
+	return physx::PxMeshScale(ToPxVec3(scale), ToPxQuat(rotation));
+}
+
 physx::PxTransform ToPxTransform(const glm::vec3& position, const glm::quat& rotation)
 {
 	return physx::PxTransform(

@@ -44,6 +44,7 @@
 #if defined(__ANDROID__)
 #include <android/asset_manager.h>
 #endif
+#include "PxPhysicsAPI.h"
 
 namespace vkglTF
 {
@@ -224,6 +225,7 @@ namespace vkglTF
 		uint32_t indexCount = 0;
 		uint32_t firstVertex;
 		uint32_t vertexCount = 0;
+		MeshTopology topology = MeshTopology::TriangleList;
 		Material& material;
 
 		struct Dimensions {
@@ -238,12 +240,18 @@ namespace vkglTF
 		Primitive(uint32_t firstIndex, uint32_t indexCount, Material& material) : firstIndex(firstIndex), indexCount(indexCount), material(material) {};
 	};
 
+	struct PhysicsMesh 
+	{
+		physx::PxConvexMesh* convexMesh = nullptr;
+		physx::PxTriangleMesh* triangleMesh = nullptr;
+	};
 	/*
 		glTF mesh
 	*/
 	struct Mesh {
 		vks::VulkanDevice* device;
 		Node* parentNode = nullptr;//所属节点
+		PhysicsMesh physicsMesh;
 
 		std::vector<Primitive*> primitives;
 		std::string name;
@@ -286,6 +294,12 @@ namespace vkglTF
 		std::vector<Node*> joints;
 	};
 
+	struct PhysicsComponent
+	{
+		physx::PxRigidActor* physicsActor = nullptr;
+		bool isPhysics = false;// 是否启用物理模拟
+		bool isDynamic = false;// 以动态还是静态物体的方式执行物理模拟
+	};
 	/*
 		glTF node
 	*/
@@ -298,13 +312,14 @@ namespace vkglTF
 		bool visible = true;
 		Mesh* mesh = nullptr;
 		Skin* skin = nullptr;
+		PhysicsComponent physicsComponent;
 		int32_t skinIndex = -1;
 		glm::vec3 translation{0, 0, 0};
 		glm::vec3 scale{ 1.0f };
 		glm::quat rotation = glm::quat(0, 0, 0, 1);
-		glm::mat4 localMatrix();
-		glm::mat4 getWorldMatrix();
-		void update();
+		glm::mat4 GetLocalMatrix();
+		glm::mat4 GetWorldMatrix();
+		void update(bool isTransformChanged = false);
 		//将节点和子节点的变换重置为默认值
 		void clearTransform();
 		~Node();
@@ -403,7 +418,7 @@ namespace vkglTF
 			VkDeviceMemory memory;
 		} indices;
 
-		std::vector<Node*> nodes;
+		std::vector<Node*> nodes;//nodes[0]是根节点
 		std::vector<Node*> linearNodes;
 		std::vector<Mesh*> meshes;
 
@@ -415,8 +430,6 @@ namespace vkglTF
 		
 		Dimensions dimensions;
 
-		bool isPhysics = false;// 是否启用物理模拟
-		bool isDynamic = false;// 以动态还是静态物体的方式执行物理模拟
 		bool metallicRoughnessWorkflow = true;
 		bool buffersBound = false;
 		std::string path;

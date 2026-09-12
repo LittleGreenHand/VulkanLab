@@ -98,18 +98,22 @@ void DrawNodePropertiesPanel()
 	// 可见性控制
 	ImGui::Checkbox("Visible", &selectedNode->visible);
 
-	// 平移
-	ImGui::InputFloat3("Translation", &selectedNode->translation.x);
-
-	// 旋转 (欧拉角)
+	bool isTransformChanged = false;
+	if (ImGui::InputFloat3("Translation", &selectedNode->translation.x))
+	{
+		isTransformChanged = true;
+	}
 	glm::vec3 rotationEuler = glm::eulerAngles(selectedNode->rotation) * (180.0f / glm::pi<float>());
 	if (ImGui::InputFloat3("Rotation (deg)", &rotationEuler.x))
 	{
+		isTransformChanged = true;
 		selectedNode->rotation = glm::quat(glm::radians(rotationEuler));
 	}
+	if (ImGui::InputFloat3("Scale", &selectedNode->scale.x))
+	{
+		isTransformChanged = true;
+	}
 
-	// 缩放
-	ImGui::InputFloat3("Scale", &selectedNode->scale.x);
 	ImGui::Separator();
 	ImGui::Separator();
 	ImGui::Separator();
@@ -169,7 +173,7 @@ void DrawNodePropertiesPanel()
 			ImGui::PopID();
 		}
 	}
-	selectedNode->update();
+	selectedNode->update(isTransformChanged);
 	// 取消选择按钮
 	if (ImGui::Button("Deselect"))
 	{

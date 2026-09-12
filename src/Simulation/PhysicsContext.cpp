@@ -3,6 +3,84 @@
 #include <thread>
 #include <string>
 
+namespace
+{
+	bool BuildTriangleListIndices(const PhysicsMeshData& meshData, std::vector<physx::PxU32>& triangleIndices)
+	{
+		const auto& indices = meshData.indices;
+		switch (meshData.topology)
+		{
+		case MeshTopology::TriangleList:
+			if (indices.size() % 3 != 0)
+			{
+				LOG_ERROR(
+					"[PhysX] TriangleList index count ({}) is not a multiple of 3.",
+					indices.size());
+				return false;
+			}
+
+			triangleIndices = indices;
+			return true;
+
+		case MeshTopology::TriangleStrip:
+			if (indices.size() < 3)
+				return false;
+
+			triangleIndices.reserve((indices.size() - 2) * 3);
+			for (size_t i = 0; i + 2 < indices.size(); ++i)
+			{
+				physx::PxU32 i0 = indices[i];
+				physx::PxU32 i1 = indices[i + 1];
+				physx::PxU32 i2 = indices[i + 2];
+
+				// TriangleStrip 绕序逐三角形交替
+				if (i & 1)
+					std::swap(i0, i1);
+
+				if (i0 == i1 || i1 == i2 || i0 == i2)
+					continue;
+
+				triangleIndices.push_back(i0);
+				triangleIndices.push_back(i1);
+				triangleIndices.push_back(i2);
+			}
+			return !triangleIndices.empty();
+
+		case MeshTopology::TriangleFan:
+			if (indices.size() < 3)
+				return false;
+
+			triangleIndices.reserve((indices.size() - 2) * 3);
+
+			for (size_t i = 1; i + 1 < indices.size(); ++i)
+			{
+				const physx::PxU32 i0 = indices[0];
+				const physx::PxU32 i1 = indices[i];
+				const physx::PxU32 i2 = indices[i + 1];
+
+				if (i0 == i1 || i1 == i2 || i0 == i2)
+					continue;
+
+				triangleIndices.push_back(i0);
+				triangleIndices.push_back(i1);
+				triangleIndices.push_back(i2);
+			}
+
+			return !triangleIndices.empty();
+
+		case MeshTopology::Points:
+		case MeshTopology::Lines:
+		case MeshTopology::LineLoop:
+		case MeshTopology::LineStrip:
+			LOG_ERROR(
+				"[PhysX] The mesh topology cannot be converted to PxTriangleMesh.");
+			return false;
+		}
+
+		return false;
+	}
+}
+
 PhysicsContext::PhysicsContext()
 {
 
@@ -89,9 +167,8 @@ bool PhysicsContext::Init()
 
 void PhysicsContext::Destroy()
 {
-	if (!m_isInitialized)
-		return;
-
+	if (m_isInitialized)
+		PxCloseExtensions();
 	m_isInitialized = false;
 	if (m_scene)
 	{
@@ -107,8 +184,7 @@ void PhysicsContext::Destroy()
 	{
 		m_dispatcher->release();
 		m_dispatcher = nullptr;
-	}
-	PxCloseExtensions();
+	}	
 	if (m_physics)
 	{
 		m_physics->release();
@@ -123,7 +199,7 @@ void PhysicsContext::Destroy()
 
 void PhysicsContext::Simulate(float deltaTime)
 {
-	if (!m_isInitialized || !isSimulationEnabled)
+	if (!m_isInitialized)
 		return;
 	mAccumulator += deltaTime;
 
@@ -136,7 +212,7 @@ void PhysicsContext::Simulate(float deltaTime)
 	}
 }
 
-physx::PxTriangleMesh* PhysicsContext::CreateTriangleMesh(const PhysicsTriangleMeshData& meshData)
+physx::PxTriangleMesh* PhysicsContext::CreateTriangleMesh(const PhysicsMeshData& meshData)
 {
 	if (meshData.vertices.empty() || meshData.indices.empty())
 	{
@@ -144,9 +220,10 @@ physx::PxTriangleMesh* PhysicsContext::CreateTriangleMesh(const PhysicsTriangleM
 		return nullptr;
 	}
 
-	if (meshData.indices.size() % 3 != 0)
+	std::vector<physx::PxU32> triangleIndices;
+	if (!BuildTriangleListIndices(meshData, triangleIndices))
 	{
-		LOG_ERROR("[PhysX] CreateTriangleMesh failed! Indices count is not a multiple of 3.");
+		LOG_ERROR("[PhysX] CreateTriangleMesh failed! Invalid or unsupported mesh topology.");
 		return nullptr;
 	}
 
@@ -154,9 +231,9 @@ physx::PxTriangleMesh* PhysicsContext::CreateTriangleMesh(const PhysicsTriangleM
 	meshDesc.points.count = static_cast<physx::PxU32>(meshData.vertices.size());
 	meshDesc.points.stride = sizeof(physx::PxVec3);
 	meshDesc.points.data = meshData.vertices.data();
-	meshDesc.triangles.count = static_cast<physx::PxU32>(meshData.indices.size() / 3);
+	meshDesc.triangles.count = static_cast<physx::PxU32>(triangleIndices.size() / 3);
 	meshDesc.triangles.stride = sizeof(physx::PxU32) * 3;
-	meshDesc.triangles.data = meshData.indices.data();
+	meshDesc.triangles.data = triangleIndices.data();
 
 	LOG_DEBUG("[PhysX] CreateTriangleMesh: {} vertices with {} stride, {} triangles with {} stride", meshDesc.points.count, meshDesc.points.stride, meshDesc.triangles.count, meshDesc.triangles.stride);
 
@@ -169,10 +246,15 @@ physx::PxTriangleMesh* PhysicsContext::CreateTriangleMesh(const PhysicsTriangleM
 	physx::PxTriangleMeshCookingResult::Enum result;
 	physx::PxTriangleMesh* triangleMesh = PxCreateTriangleMesh(GetCookingParams(), meshDesc, m_physics->getPhysicsInsertionCallback(), &result);
 	LOG_DEBUG("[PhysX] TriangleMesh cooking result: {}", std::to_string(result));
+	if (!triangleMesh)
+	{
+		LOG_ERROR("[PhysX] Create PxTriangleMesh failed! PxTriangleMeshCookingResult: {}", std::to_string(result));
+		return nullptr;
+	}
 	return triangleMesh;
 }
 
-physx::PxRigidStatic* PhysicsContext::CreateStaticActor(physx::PxTriangleMesh* triangleMesh, const physx::PxTransform& transform)
+physx::PxRigidStatic* PhysicsContext::CreateStaticActor(physx::PxTriangleMesh* triangleMesh, const physx::PxTransform& transform, physx::PxMeshScale scale)
 {
 	physx::PxRigidStatic* actor = m_physics->createRigidStatic(transform);
 	if (!actor)
@@ -192,7 +274,7 @@ physx::PxRigidStatic* PhysicsContext::CreateStaticActor(physx::PxTriangleMesh* t
 	return actor;
 }
 
-physx::PxConvexMesh* PhysicsContext::CreateConvexMesh(const PhysicsTriangleMeshData& meshData)
+physx::PxConvexMesh* PhysicsContext::CreateConvexMesh(const PhysicsMeshData& meshData)
 {
 	if (meshData.vertices.empty())
 	{
@@ -209,7 +291,6 @@ physx::PxConvexMesh* PhysicsContext::CreateConvexMesh(const PhysicsTriangleMeshD
 
 	physx::PxConvexMeshCookingResult::Enum result;
 	physx::PxConvexMesh* convexMesh = PxCreateConvexMesh(m_cookingParams, convexDesc, m_physics->getPhysicsInsertionCallback(), &result);
-
 	if (!convexMesh)
 	{
 		LOG_ERROR("[PhysX] Create PxConvexMesh failed! PxConvexMeshCookingResult: {}", std::to_string(result));
@@ -219,7 +300,7 @@ physx::PxConvexMesh* PhysicsContext::CreateConvexMesh(const PhysicsTriangleMeshD
 	return convexMesh;
 }
 
-physx::PxRigidDynamic* PhysicsContext::CreateDynamicActor(physx::PxConvexMesh* convexMesh, const physx::PxTransform& transform, float density)
+physx::PxRigidDynamic* PhysicsContext::CreateDynamicActor(physx::PxConvexMesh* convexMesh, const physx::PxTransform& transform, physx::PxMeshScale scale, float density)
 {
 	physx::PxRigidDynamic* actor = m_physics->createRigidDynamic(transform);
 	if (!actor)
@@ -228,7 +309,7 @@ physx::PxRigidDynamic* PhysicsContext::CreateDynamicActor(physx::PxConvexMesh* c
 		return nullptr;
 	}
 
-	physx::PxConvexMeshGeometry geometry(convexMesh);
+	physx::PxConvexMeshGeometry geometry(convexMesh, scale);
 	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*actor, geometry, *m_defaultMaterial);
 	if (!shape)
 	{
@@ -236,7 +317,55 @@ physx::PxRigidDynamic* PhysicsContext::CreateDynamicActor(physx::PxConvexMesh* c
 		actor->release();
 		return nullptr;
 	}
-
+	
 	physx::PxRigidBodyExt::updateMassAndInertia(*actor,	density);
 	return actor;
+}
+
+void PhysicsContext::UpdateActorTransform(physx::PxRigidActor* actor, const glm::vec3& translation, const glm::quat& rotation)
+{
+	if (!actor)
+		return;
+	
+	const physx::PxTransform pose(physx::PxVec3(translation.x, translation.y, translation.z), physx::PxQuat(rotation.x, rotation.y, rotation.z, rotation.w));
+	actor->setGlobalPose(pose);
+}
+
+void PhysicsContext::UpdateActorScale(physx::PxRigidActor* actor, const glm::vec3& scale)
+{
+	if (!actor)
+		return;
+
+	const physx::PxU32 shapeCount = actor->getNbShapes();
+	if (shapeCount == 0)
+		return;
+
+	const physx::PxVec3 pxScale(scale.x, scale.y, scale.z);
+	std::vector<physx::PxShape*> shapes(shapeCount);
+	actor->getShapes(shapes.data(), shapeCount);
+	for (physx::PxShape* shape : shapes)
+	{
+		physx::PxGeometryHolder geometry = shape->getGeometry();
+		switch (geometry.getType())
+		{
+		case physx::PxGeometryType::eTRIANGLEMESH:
+		{
+			auto geom = geometry.triangleMesh();
+			geom.scale = physx::PxMeshScale(pxScale);
+			shape->setGeometry(geom);
+			break;
+		}
+
+		case physx::PxGeometryType::eCONVEXMESH:
+		{
+			auto geom = geometry.convexMesh();
+			geom.scale = physx::PxMeshScale(pxScale);
+			shape->setGeometry(geom);
+			break;
+		}
+
+		default:
+			break;
+		}
+	}
 }

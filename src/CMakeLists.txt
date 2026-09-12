@@ -37,6 +37,7 @@ option(ENABLE_DEBUG_LOG "在启用LOG的前提下，是否启用DEBUG LOG" ON)
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     ENABLE_LOG=$<BOOL:${ENABLE_LOG}>
     ENABLE_DEBUG_LOG=$<BOOL:${ENABLE_DEBUG_LOG}>
+    GLM_ENABLE_EXPERIMENTAL
 )
 
 # --------------------------------PhysX--------------------------------
@@ -57,7 +58,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     PhysXPvdSDK_static_64
 )
 
-# 编译后复制PhysX DLL到输出目录
+# 编译项目后自动复制PhysX DLL到输出目录
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysX_64.dll"

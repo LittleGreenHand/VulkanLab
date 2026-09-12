@@ -129,3 +129,14 @@ struct GBuffer {
 			texture[i].destroy();
 	}
 };
+
+enum class MeshTopology
+{
+	Points,
+	Lines,
+	LineLoop,
+	LineStrip,
+	TriangleList,
+	TriangleStrip,
+	TriangleFan,
+};
