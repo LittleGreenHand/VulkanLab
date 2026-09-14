@@ -263,7 +263,7 @@ physx::PxRigidStatic* PhysicsContext::CreateStaticActor(physx::PxTriangleMesh* t
 		return nullptr;
 	}
 	
-	physx::PxTriangleMeshGeometry geometry(triangleMesh);// 创建 Geometry	
+	physx::PxTriangleMeshGeometry geometry(triangleMesh, scale);// 创建 Geometry	
 	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*actor, geometry, *m_defaultMaterial);// 创建 Shape 并 Attach 到 Actor
 	if (!shape)
 	{
