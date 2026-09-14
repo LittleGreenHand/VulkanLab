@@ -37,6 +37,7 @@ public:
 private:
 	static bool m_init;
 	bool m_needResize = false; // 窗口是否处于Resize状态
+	bool m_minimized = false; // 窗口是否处于最小化状态
 	std::chrono::steady_clock::time_point m_lastResizeTime;//记录最后一次调用OnFramebufferResize的时间
 	std::unique_ptr<VulkanRenderer> m_renderer;
 	std::unique_ptr<GlfwWindow> m_window;

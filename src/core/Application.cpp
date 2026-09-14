@@ -118,6 +118,8 @@ bool Application::BeginFrame()
 {
 	m_window->PollEvents();
 
+	if (m_minimized)
+		return false;
 	// 后缓冲延迟Resize，避免连续reszie
 	{
 		if (m_needResize)
@@ -299,5 +301,13 @@ void Application::OnFramebufferResize(int framebufferWidth, int framebufferHeigh
 {
 	m_lastResizeTime = std::chrono::steady_clock::now();
 	m_needResize = true;
+	if (framebufferWidth == 0 || framebufferHeight == 0)
+	{
+		m_minimized = true;
+	}
+	else
+	{
+		m_minimized = false;
+	}
 }
 
