@@ -15,7 +15,6 @@
 #include <map>
 #include <vulkan/vulkan.h>
 #include "RenderBase/VulkanRendererBase.h"
-#include "RenderBase/VulkanglTFModel.h"
 #include "VulkanLights.h"
 
 enum PipelinesIndex {

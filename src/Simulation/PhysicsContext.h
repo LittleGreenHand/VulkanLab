@@ -1,6 +1,6 @@
 #pragma once
 #include "PxPhysicsAPI.h"
-#include "Types.hpp"
+#include "RenderResource/GeometryTypes.hpp"
 #include <vector>
 #include <glm/gtc/quaternion.hpp>
 

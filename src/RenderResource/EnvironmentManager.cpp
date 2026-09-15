@@ -4,6 +4,7 @@
 #include "MeshManager.h"
 #include "Render/VulkanDebugUtils.h"
 #include "Core/Log.h"
+#include "RenderBase/glTF/VulkanglTFVertex.h"
 void EnvironmentManager::Destroy()
 {
 	LOG_DEBUG("Destroying environment resources");

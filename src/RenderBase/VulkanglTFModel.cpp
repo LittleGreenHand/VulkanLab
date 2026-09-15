@@ -16,20 +16,49 @@
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE_WRITE
-#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+
+#include "tiny_gltf.h"
 #include "VulkanglTFModel.h"
-#include "Render/VulkanContext.h"
+#include "RenderConfig.hpp"
+#include "VulkanDevice.h"
+#include "VulkanTexture.h"
 #include "Render/VulkanDebugUtils.h"
-#include "glm/gtx/matrix_decompose.inl"
-#include "core/Log.h"
-#include "Math/MathUtils.h"
-#include "Simulation/PhysicsContext.h"
+#include <glm/gtc/type_ptr.hpp>
 
 VkDescriptorSetLayout vkglTF::MaterialDescriptorSetLayout = VK_NULL_HANDLE;
 VkDescriptorSetLayout vkglTF::MeshDescriptorSetLayout = VK_NULL_HANDLE;
 VkMemoryPropertyFlags vkglTF::memoryPropertyFlags = 0;
 uint32_t vkglTF::descriptorBindingFlags = vkglTF::DescriptorBindingFlags::allTexture;
 vks::Texture vkglTF::emptyTexture = {};
+
+void vkglTF::destroyEmptyTexture()
+{
+	if (emptyTexture.image == VK_NULL_HANDLE)
+		return;
+	emptyTexture.destroy();
+}
+
+namespace vkglTF
+{
+	static void createMeshDescriptorSetLayout(VkDevice device)
+	{
+		VkDescriptorSetLayoutBinding setLayoutBinding = vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+			0);
+		VkDescriptorSetLayoutCreateInfo descriptorLayoutCI{};
+		descriptorLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		descriptorLayoutCI.bindingCount = 1;
+		descriptorLayoutCI.pBindings = &setLayoutBinding;
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayoutCI, nullptr, &MeshDescriptorSetLayout));
+	}
+}
+
 /*
 	We use a custom image loading function with tinyglTF, so we can do custom stuff loading ktx textures
 */
@@ -444,326 +473,6 @@ MeshTopology ConvertTopology(int mode)
 	default:
 		return MeshTopology::TriangleList;
 	}
-}
-
-/*
-	glTF material
-*/
-void vkglTF::Material::initMaterialTexture(vks::Texture* emptyTexture)
-{
-	if (!baseColorTexture)
-	{
-		baseColorTexture = emptyTexture;
-		materialParameters.baseColorTextureEmpty = true;
-	}
-
-	if (!normalTexture)
-	{
-		normalTexture = emptyTexture;
-		materialParameters.normalTextureEmpty = true;
-	}
-
-	if (!metallicRoughnessTexture)
-	{
-		metallicRoughnessTexture = emptyTexture;
-		materialParameters.metallicRoughnessTextureEmpty = true;
-	}
-
-	if (!metallicTexture)
-	{
-		metallicTexture = emptyTexture;
-		 materialParameters.metallicTextureEmpty = true;
-	}
-
-	if (!roughnessTexture)
-	{
-		roughnessTexture = emptyTexture;
-		 materialParameters.roughnessTextureEmpty = true;
-	}
-
-	if (!occlusionTexture)
-	{
-		occlusionTexture = emptyTexture;
-		 materialParameters.occlusionTextureEmpty = true;
-	}
-
-	if (!emissiveTexture)
-	{
-		emissiveTexture = emptyTexture;
-		 materialParameters.emissiveTextureEmpty = true;
-	}
-
-	if (!AOTexture)
-	{
-		AOTexture = emptyTexture;
-		 materialParameters.AOTextureEmpty = true;
-	}
-
-	if (!diffuseTexture)
-	{
-		diffuseTexture = emptyTexture;
-		 materialParameters.diffuseTextureEmpty = true;
-	}
-
-	if (!specularGlossinessTexture)
-	{
-		specularGlossinessTexture = emptyTexture;
-		 materialParameters.specularGlossinessTextureEmpty = true;
-	}
-}
-
-//定义每种贴图对应的固定绑定点
-const std::unordered_map<vkglTF::DescriptorBindingFlags, uint32_t> bindingMap = {
-	{vkglTF::DescriptorBindingFlags::baseColorTexture, vkglTF::baseColorTextureIndex},
-	{vkglTF::DescriptorBindingFlags::normalTexture, vkglTF::normalTextureIndex},
-	{vkglTF::DescriptorBindingFlags::metallicRoughnessTexture, vkglTF::metallicRoughnessTextureIndex},
-	{vkglTF::DescriptorBindingFlags::metallicTexture, vkglTF::metallicTextureIndex},
-	{vkglTF::DescriptorBindingFlags::RoughnessTexture, vkglTF::RoughnessTextureIndex},
-	{vkglTF::DescriptorBindingFlags::occlusionTexture, vkglTF::occlusionTextureIndex},
-	{vkglTF::DescriptorBindingFlags::emissiveTexture, vkglTF::emissiveTextureIndex},
-	{vkglTF::DescriptorBindingFlags::AOTexture, vkglTF::AOTextureIndex},
-	{vkglTF::DescriptorBindingFlags::diffuseTexture, vkglTF::diffuseTextureIndex},
-	{vkglTF::DescriptorBindingFlags::specularGlossinessTexture, vkglTF::specularGlossinessTextureIndex}
-};
-void vkglTF::Material::allocateDescriptorSet(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, uint32_t descriptorBindingFlags)
-{
-	VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
-	descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	descriptorSetAllocInfo.descriptorPool = descriptorPool;
-	descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
-	descriptorSetAllocInfo.descriptorSetCount = 1;
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(device->logicalDevice, &descriptorSetAllocInfo, &descriptorSet));}
-
-void vkglTF::Material::updateMaterialParametersBuffer() {
-	memcpy(MaterialParametersBuffer.mapped, &materialParameters, sizeof(Material::MaterialParameters));
-}
-
-void vkglTF::Material::updateDescriptorSet() {
-	//遍历所有贴图并获取描述符
-	std::vector<std::pair<DescriptorBindingFlags, VkDescriptorImageInfo*>> textureInfos = {
-		{DescriptorBindingFlags::baseColorTexture, &baseColorTexture->descriptor},
-		{DescriptorBindingFlags::normalTexture, &normalTexture->descriptor},
-		{DescriptorBindingFlags::metallicRoughnessTexture, &metallicRoughnessTexture->descriptor},
-		{DescriptorBindingFlags::metallicTexture, &metallicTexture->descriptor},
-		{DescriptorBindingFlags::RoughnessTexture, &roughnessTexture->descriptor},
-		{DescriptorBindingFlags::occlusionTexture, &occlusionTexture->descriptor},
-		{DescriptorBindingFlags::emissiveTexture, &emissiveTexture->descriptor},
-		{DescriptorBindingFlags::AOTexture, &AOTexture->descriptor},
-		{DescriptorBindingFlags::diffuseTexture, &diffuseTexture->descriptor},
-		{DescriptorBindingFlags::specularGlossinessTexture, &specularGlossinessTexture->descriptor}
-	};
-
-	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
-	//绑定缓冲区
-	{
-		VkWriteDescriptorSet write{
-			vks::initializers::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &MaterialParametersBuffer.descriptor) };
-		writeDescriptorSets.push_back(write);
-	}
-	//绑定贴图
-	for (const auto& [flag, imageInfo] : textureInfos) {
-		if ((descriptorBindingFlags & flag) && imageInfo != nullptr) {
-			VkWriteDescriptorSet write{};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstSet = descriptorSet;
-			write.dstBinding = bindingMap.at(flag);
-			write.descriptorCount = 1;
-			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			write.pImageInfo = imageInfo;
-			writeDescriptorSets.push_back(write);
-		}
-	}
-	vkUpdateDescriptorSets(device->logicalDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
-}
-/*
-	glTF primitive
-*/
-void vkglTF::Primitive::setDimensions(glm::vec3 min, glm::vec3 max) {
-	dimensions.min = min;
-	dimensions.max = max;
-	dimensions.size = max - min;
-	dimensions.center = (min + max) / 2.0f;
-	dimensions.radius = glm::distance(min, max) / 2.0f;
-}
-
-/*
-	glTF mesh
-*/
-vkglTF::Mesh::Mesh(vks::VulkanDevice *device, glm::mat4 matrix) {
-	this->device = device;
-	this->uniformBlock.modelMatrix = matrix;
-	VK_CHECK_RESULT(device->createBuffer(
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		sizeof(uniformBlock),
-		&uniformBuffer.buffer,
-		&uniformBuffer.memory,
-		&uniformBlock));
-	VK_CHECK_RESULT(vkMapMemory(device->logicalDevice, uniformBuffer.memory, 0, sizeof(uniformBlock), 0, &uniformBuffer.mapped));
-	uniformBuffer.descriptor = { uniformBuffer.buffer, 0, sizeof(uniformBlock) };
-};
-
-vkglTF::Mesh::~Mesh() {
-	vkDestroyBuffer(device->logicalDevice, uniformBuffer.buffer, nullptr);
-	vkFreeMemory(device->logicalDevice, uniformBuffer.memory, nullptr);
-    for(auto primitive : primitives)
-    {
-        delete primitive;
-    }
-	if(physicsMesh.convexMesh)
-	{
-		physicsMesh.convexMesh->release();
-		physicsMesh.convexMesh = nullptr;
-	}
-	if(physicsMesh.triangleMesh)
-	{
-		physicsMesh.triangleMesh->release();
-		physicsMesh.triangleMesh = nullptr;
-	}
-}
-
-/*
-	glTF node
-*/
-glm::mat4 vkglTF::Node::GetLocalMatrix() {
-	return glm::translate(glm::mat4(1.0f), translation) * glm::mat4(rotation) * glm::scale(glm::mat4(1.0f), scale) * matrix;
-}
-
-glm::mat4 vkglTF::Node::GetWorldMatrix() {
-	glm::mat4 m = GetLocalMatrix();
-	vkglTF::Node *p = parent;
-	while (p) {
-		m = p->GetLocalMatrix() * m;
-		p = p->parent;
-	}
-	return m;
-}
-
-void vkglTF::Node::update(bool isTransformChanged) {
-	if (mesh) {
-		glm::mat4 m = GetWorldMatrix();
-		mesh->uniformBlock.modelMatrix = m;
-		if (skin) {
-			// Update join matrices
-			glm::mat4 inverseTransform = glm::inverse(m);
-			for (size_t i = 0; i < skin->joints.size(); i++) {
-				vkglTF::Node *jointNode = skin->joints[i];
-				glm::mat4 jointMat = jointNode->GetWorldMatrix() * skin->inverseBindMatrices[i];
-				jointMat = inverseTransform * jointMat;
-				mesh->uniformBlock.jointMatrix[i] = jointMat;
-			}
-			mesh->uniformBlock.jointcount = (float)skin->joints.size();
-			memcpy(mesh->uniformBuffer.mapped, &mesh->uniformBlock, sizeof(mesh->uniformBlock));
-		} else {
-			memcpy(mesh->uniformBuffer.mapped, &m, sizeof(glm::mat4));
-		}
-
-		if (isTransformChanged)
-		{
-			if (physicsComponent.physicsActor)
-			{
-				glm::vec3 worldScale;
-				glm::quat worldRotation;
-				glm::vec3 worldTranslation;
-				glm::vec3 skew;
-				glm::vec4 perspective;
-				if (glm::decompose(m, worldScale, worldRotation, worldTranslation, skew, perspective))
-				{
-					worldRotation = glm::normalize(worldRotation);
-					PhysicsContext::Get().UpdateActorTransform(physicsComponent.physicsActor, worldTranslation, worldRotation);
-					PhysicsContext::Get().UpdateActorScale(physicsComponent.physicsActor, worldScale);
-				}
-				else
-				{
-					LOG_WARNING("[MeshManager] Failed to decompose Node transform: {}", name);
-				}
-			}
-		}
-	}
-
-	for (auto& child : children) {
-		child->update(isTransformChanged);
-	}
-}
-
-void vkglTF::Node::clearTransform() {
-	translation = { 0, 0, 0 };
-	scale = { 1.0f, 1.0f, 1.0f };
-	rotation.x = 0;
-	rotation.y = 0;
-	rotation.z = 0;
-	rotation.w = 1;
-	for (auto& child : children) {
-		child->clearTransform();
-	}
-}
-
-vkglTF::Node::~Node() {
-	if (mesh) {
-		delete mesh;
-	}
-	for (auto& child : children) {
-		delete child;
-	}
-	if (physicsComponent.physicsActor) {
-		physicsComponent.physicsActor->release();
-		physicsComponent.physicsActor = nullptr;
-	}
-}
-
-/*
-	glTF default vertex layout with easy Vulkan mapping functions
-*/
-
-VkVertexInputBindingDescription vkglTF::Vertex::vertexInputBindingDescription;
-std::vector<VkVertexInputAttributeDescription> vkglTF::Vertex::vertexInputAttributeDescriptions;
-VkPipelineVertexInputStateCreateInfo vkglTF::Vertex::pipelineVertexInputStateCreateInfo;
-
-VkVertexInputBindingDescription vkglTF::Vertex::inputBindingDescription(uint32_t binding) {
-	return VkVertexInputBindingDescription({ binding, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX });
-}
-
-VkVertexInputAttributeDescription vkglTF::Vertex::inputAttributeDescription(uint32_t binding, uint32_t location, VertexComponent component) {
-	switch (component) {
-		case VertexComponent::Position: 
-			return VkVertexInputAttributeDescription({ location, binding, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, pos) });
-		case VertexComponent::Normal:
-			return VkVertexInputAttributeDescription({ location, binding, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
-		case VertexComponent::UV:
-			return VkVertexInputAttributeDescription({ location, binding, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
-		case VertexComponent::Color:
-			return VkVertexInputAttributeDescription({ location, binding, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, color) });
-		case VertexComponent::Tangent:
-			return VkVertexInputAttributeDescription({ location, binding, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, tangent)} );
-		case VertexComponent::Joint0:
-			return VkVertexInputAttributeDescription({ location, binding, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, joint0) });
-		case VertexComponent::Weight0:
-			return VkVertexInputAttributeDescription({ location, binding, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, weight0) });
-		default:
-			return VkVertexInputAttributeDescription({});
-	}
-}
-
-std::vector<VkVertexInputAttributeDescription> vkglTF::Vertex::inputAttributeDescriptions(uint32_t binding, const std::vector<VertexComponent> components) {
-	std::vector<VkVertexInputAttributeDescription> result;
-	uint32_t location = 0;
-	for (VertexComponent component : components) {
-		result.push_back(Vertex::inputAttributeDescription(binding, location, component));
-		location++;
-	}
-	return result;
-}
-
-/** @brief Returns the default pipeline vertex input state create info structure for the requested vertex components */
-VkPipelineVertexInputStateCreateInfo* vkglTF::Vertex::getPipelineVertexInputState(const std::vector<VertexComponent> components) {
-	vertexInputBindingDescription = Vertex::inputBindingDescription(0);
-	Vertex::vertexInputAttributeDescriptions = Vertex::inputAttributeDescriptions(0, components);
-	pipelineVertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
-	pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = &Vertex::vertexInputBindingDescription;
-	pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(Vertex::vertexInputAttributeDescriptions.size());
-	pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = Vertex::vertexInputAttributeDescriptions.data();
-	return &pipelineVertexInputStateCreateInfo;
 }
 
 vks::Texture* vkglTF::Model::getTexture(uint32_t index)
@@ -1610,7 +1319,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 			imageCount++;
 		}
 	}
-	imageBindingCount = imageDescriptorBindingCount * materials.size();
+	imageBindingCount = detail::imageDescriptorBindingCount * materials.size();
 	std::vector<VkDescriptorPoolSize> poolSizes = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uboCount + 1 },
 	};
@@ -1618,7 +1327,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 	{
 		if (descriptorBindingFlags & DescriptorBindingFlags::allTexture)
 		{
-			//for(int i =0; i < imageDescriptorBindingCount; i++)
+			//for(int i =0; i < detail::imageDescriptorBindingCount; i++)
 			{
 				poolSizes.push_back({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageBindingCount});
 			}
@@ -1646,7 +1355,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 	//if (imageCount > 0)
 	{
 		if (MaterialDescriptorSetLayout == VK_NULL_HANDLE) {
-			createMaterialDescriptorSetLayout(device->logicalDevice);
+			detail::createMaterialDescriptorSetLayout(device->logicalDevice);
 		}
 		for (auto& material : materials) {
 			VK_CHECK_RESULT(device->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &material.MaterialParametersBuffer, sizeof(Material::materialParameters)));

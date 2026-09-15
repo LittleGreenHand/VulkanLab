@@ -2,9 +2,19 @@
 
 #include <map>
 
-#include "Types.hpp"
 #include "RenderBase/VulkanglTFModel.h"
+#include "RenderResource/GeometryTypes.hpp"
 #include "Simulation/PhysicsContext.h"
+
+enum class BaseModel
+{
+	Cube,
+	Cerberus,
+	Sponza,
+	Sphere,
+	Axis,
+	Terrain
+};
 
 class MeshManager
 {
@@ -25,7 +35,7 @@ public:
 public:
 	void Destroy();
 	void LoadModels();
-	bool ApplyPhysics(BaseModels key, bool isDynamic = false);
+	bool ApplyPhysics(BaseModel key, bool isDynamic = false);
 	void UpdateSimulationResults();
 
 	Dimensions GetSceneDimensions();
@@ -41,5 +51,5 @@ public:
 	vkglTF::Model skybox;
 	bool isModelsLoaded = false;
 
-	std::map<BaseModels, vkglTF::Model> m_sceneTree;
+	std::map<BaseModel, vkglTF::Model> m_sceneTree;
 };

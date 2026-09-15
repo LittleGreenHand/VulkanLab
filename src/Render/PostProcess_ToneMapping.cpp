@@ -1,5 +1,6 @@
 #include "PostProcess_ToneMapping.h"
 #include "PipelineBuilder.h"
+#include "VulkanRenderer.h"
 #include "RenderBase/VulkanInitializers.hpp"
 #include "VulkanDebugUtils.h"
 

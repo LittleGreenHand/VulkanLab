@@ -1,7 +1,7 @@
 #pragma once
 #include "PostProcessBase.h"
 #include <array>
-#include "Types.hpp"
+#include "RenderBase/RenderConfig.hpp"
 
 struct MotionBlurConstants {
 	glm::vec2  screenSize;       // 屏幕分辨率 (width, height)

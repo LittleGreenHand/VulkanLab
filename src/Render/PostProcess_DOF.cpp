@@ -1,5 +1,6 @@
 #include "PostProcess_DOF.h"
 #include "PipelineBuilder.h"
+#include "VulkanRenderer.h"
 #include "VulkanDebugUtils.h"
 
 void PostProcessDOF::prepare()

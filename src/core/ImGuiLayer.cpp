@@ -11,6 +11,7 @@
 #include "RenderResource/MeshManager.h"
 #include "Simulation/PhysicsContext.h"
 #include "Core/FrameClock.h"
+#include "RenderBase/glTF/VulkanglTFScene.h"
 
 // 用于跟踪选中的节点
 vkglTF::Node* selectedNode = nullptr;

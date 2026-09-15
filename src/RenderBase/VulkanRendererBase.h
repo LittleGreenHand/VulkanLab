@@ -35,7 +35,9 @@
 #include "RenderBase/VulkanInitializers.hpp"
 #include "RenderBase/camera.hpp"
 #include "RenderBase/benchmark.hpp"
-#include "Types.hpp"
+#include "RenderBase/RenderConfig.hpp"
+#include "RenderBase/VulkanRenderTypes.hpp"
+#include "Render/GBuffer.hpp"
 
 //主要负责Vulkan的初始化
 class VulkanRendererBase

@@ -1,7 +1,10 @@
 #include "VulkanRenderer.h"
 #include "VulkanContext.h"
 #include "VulkanImageUtils.h"
-#include "Types.hpp"
+#include "RenderBase/RenderConfig.hpp"
+#include "Render/GBuffer.hpp"
+#include "RenderBase/glTF/VulkanglTFMaterial.h"
+#include "RenderBase/glTF/VulkanglTFTypes.h"
 #include "PostProcessBase.h"
 #include "PipelineBuilder.h"
 #include "PostProcess_ToneMapping.h"
@@ -367,9 +370,9 @@ void VulkanRenderer::updateUniformBuffers()
 	memcpy(globalParamBuffers[currentBuffer].globalParamBuffer.mapped, &globalParam, sizeof(GlobalParams));
 
 	postProcessManager->dofProcess->setDOFParams(camera.znear, camera.zfar, camera.focusDistance, camera.focusRange, camera.maxBlurRadius, camera.aperture);
-	//models[M_Cerberus].nodes[0]->scale = (glm::vec3(0.2f * (timer + 1)));
-	//models[M_Cerberus].nodes[0]->rotation = VulkanUtils::eularToQuaternion(glm::vec3(-90, 90, (timer + 1) * 360.0));
-	//models[M_Cerberus].nodes[0]->update();
+	//models[BaseModel::Cerberus].nodes[0]->scale = (glm::vec3(0.2f * (timer + 1)));
+	//models[BaseModel::Cerberus].nodes[0]->rotation = VulkanUtils::eularToQuaternion(glm::vec3(-90, 90, (timer + 1) * 360.0));
+	//models[BaseModel::Cerberus].nodes[0]->update();
 	
 }
 

@@ -28,55 +28,55 @@ void MeshManager::LoadModels()
 	//uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreMultiplyVertexColors;
 	uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors;
 
-	m_sceneTree[M_Cube].loadFromFile(getAssetPath() + "models/cube.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
-	m_sceneTree[M_Cube].nodes[0]->clearTransform();
-	m_sceneTree[M_Cube].nodes[0]->scale = (glm::vec3(0.01, 0.01, 0.01));
-	m_sceneTree[M_Cube].nodes[0]->translation = (glm::vec3(0, -0, -1));
-	//m_sceneTree[M_Cube].nodes[0]->visible = false;
-	m_sceneTree[M_Cube].nodes[0]->update();
+	m_sceneTree[BaseModel::Cube].loadFromFile(getAssetPath() + "models/cube.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
+	m_sceneTree[BaseModel::Cube].nodes[0]->clearTransform();
+	m_sceneTree[BaseModel::Cube].nodes[0]->scale = (glm::vec3(0.01, 0.01, 0.01));
+	m_sceneTree[BaseModel::Cube].nodes[0]->translation = (glm::vec3(0, -0, -1));
+	//m_sceneTree[BaseModel::Cube].nodes[0]->visible = false;
+	m_sceneTree[BaseModel::Cube].nodes[0]->update();
 
-	m_sceneTree[M_Cerberus].loadFromFile(getAssetPath() + "models/cerberus/cerberus.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.setBaseColorTexture(&TextureManager::Get().textures.albedoMap);
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.setNormalTexture(&TextureManager::Get().textures.normalMap);
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.setAOTexture(&TextureManager::Get().textures.aoMap);
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.setMetallicTexture(&TextureManager::Get().textures.metallicMap);
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.setRoughnessTexture(&TextureManager::Get().textures.roughnessMap);
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.updateDescriptorSet();
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.materialParameters.metallicFactor = 1;
-	m_sceneTree[M_Cerberus].linearNodes[0]->mesh->primitives[0]->material.materialParameters.roughnessFactor = 1;
-	m_sceneTree[M_Cerberus].nodes[0]->clearTransform();
-	m_sceneTree[M_Cerberus].nodes[0]->rotation = EularToQuaternion(glm::vec3(-90, 90, 0));
-	m_sceneTree[M_Cerberus].nodes[0]->translation = (glm::vec3(0.2, -0.15, -2.5));
-	m_sceneTree[M_Cerberus].nodes[0]->scale = (glm::vec3(0.2, 0.2, 0.2));
-	m_sceneTree[M_Cerberus].nodes[0]->visible = false;
-	m_sceneTree[M_Cerberus].nodes[0]->update();
+	m_sceneTree[BaseModel::Cerberus].loadFromFile(getAssetPath() + "models/cerberus/cerberus.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setBaseColorTexture(&TextureManager::Get().textures.albedoMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setNormalTexture(&TextureManager::Get().textures.normalMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setAOTexture(&TextureManager::Get().textures.aoMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setMetallicTexture(&TextureManager::Get().textures.metallicMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setRoughnessTexture(&TextureManager::Get().textures.roughnessMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.updateDescriptorSet();
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.materialParameters.metallicFactor = 1;
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.materialParameters.roughnessFactor = 1;
+	m_sceneTree[BaseModel::Cerberus].nodes[0]->clearTransform();
+	m_sceneTree[BaseModel::Cerberus].nodes[0]->rotation = EularToQuaternion(glm::vec3(-90, 90, 0));
+	m_sceneTree[BaseModel::Cerberus].nodes[0]->translation = (glm::vec3(0.2, -0.15, -2.5));
+	m_sceneTree[BaseModel::Cerberus].nodes[0]->scale = (glm::vec3(0.2, 0.2, 0.2));
+	m_sceneTree[BaseModel::Cerberus].nodes[0]->visible = false;
+	m_sceneTree[BaseModel::Cerberus].nodes[0]->update();
 
-	m_sceneTree[M_Sponza].loadFromFile(getAssetPath() + "models/sponza/sponza.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
-	m_sceneTree[M_Sponza].nodes[0]->clearTransform();
-	m_sceneTree[M_Sponza].nodes[0]->rotation = EularToQuaternion(glm::vec3(0, 90, 0));
-	//m_sceneTree[M_Sponza].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
-	m_sceneTree[M_Sponza].nodes[0]->translation = (glm::vec3(0, -1, 0));
-	m_sceneTree[M_Sponza].nodes[0]->update();
+	m_sceneTree[BaseModel::Sponza].loadFromFile(getAssetPath() + "models/sponza/sponza.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
+	m_sceneTree[BaseModel::Sponza].nodes[0]->clearTransform();
+	m_sceneTree[BaseModel::Sponza].nodes[0]->rotation = EularToQuaternion(glm::vec3(0, 90, 0));
+	//m_sceneTree[BaseModel::Sponza].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
+	m_sceneTree[BaseModel::Sponza].nodes[0]->translation = (glm::vec3(0, -1, 0));
+	m_sceneTree[BaseModel::Sponza].nodes[0]->update();
 
-	m_sceneTree[M_Sphere].loadFromFile(getAssetPath() + "models/sphere.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
-	m_sceneTree[M_Sphere].nodes[0]->clearTransform();
-	m_sceneTree[M_Sphere].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
-	m_sceneTree[M_Sphere].nodes[0]->translation = (glm::vec3(0, -0, -2));
-	m_sceneTree[M_Sphere].nodes[0]->visible = true;
-	m_sceneTree[M_Sphere].materials[0].materialParameters.baseColorFactor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_sceneTree[M_Sphere].materials[0].materialParameters.metallicFactor = 0.0f;
-	m_sceneTree[M_Sphere].materials[0].materialParameters.roughnessFactor = 0.5f;
-	m_sceneTree[M_Sphere].materials[0].alphaMode = vkglTF::Material::ALPHAMODE_BLEND;
-	m_sceneTree[M_Sphere].nodes[0]->update();
+	m_sceneTree[BaseModel::Sphere].loadFromFile(getAssetPath() + "models/sphere.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
+	m_sceneTree[BaseModel::Sphere].nodes[0]->clearTransform();
+	m_sceneTree[BaseModel::Sphere].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
+	m_sceneTree[BaseModel::Sphere].nodes[0]->translation = (glm::vec3(0, -0, -2));
+	m_sceneTree[BaseModel::Sphere].nodes[0]->visible = true;
+	m_sceneTree[BaseModel::Sphere].materials[0].materialParameters.baseColorFactor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_sceneTree[BaseModel::Sphere].materials[0].materialParameters.metallicFactor = 0.0f;
+	m_sceneTree[BaseModel::Sphere].materials[0].materialParameters.roughnessFactor = 0.5f;
+	m_sceneTree[BaseModel::Sphere].materials[0].alphaMode = vkglTF::Material::ALPHAMODE_BLEND;
+	m_sceneTree[BaseModel::Sphere].nodes[0]->update();
 
-	m_sceneTree[M_Axis].loadFromFile(getAssetPath() + "models/axis.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
-	m_sceneTree[M_Axis].nodes[0]->clearTransform();
-	m_sceneTree[M_Axis].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
-	m_sceneTree[M_Axis].nodes[0]->translation = (glm::vec3(0, -0.15, -1));
-	m_sceneTree[M_Axis].nodes[0]->visible = false;
-	m_sceneTree[M_Axis].nodes[0]->update();
+	m_sceneTree[BaseModel::Axis].loadFromFile(getAssetPath() + "models/axis.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
+	m_sceneTree[BaseModel::Axis].nodes[0]->clearTransform();
+	m_sceneTree[BaseModel::Axis].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
+	m_sceneTree[BaseModel::Axis].nodes[0]->translation = (glm::vec3(0, -0.15, -1));
+	m_sceneTree[BaseModel::Axis].nodes[0]->visible = false;
+	m_sceneTree[BaseModel::Axis].nodes[0]->update();
 
-	//models[M_Terrain].loadFromFile(getAssetPath() + "models/Terrain.gltf", vulkanDevice, queue, glTFLoadingFlags);
+	//models[BaseModel::Terrain].loadFromFile(getAssetPath() + "models/Terrain.gltf", vulkanDevice, queue, glTFLoadingFlags);
 
 	skybox.loadFromFile(getAssetPath() + "models/cube.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
 	InitModelsSourceDebugName();
@@ -85,11 +85,11 @@ void MeshManager::LoadModels()
 
 	if (PhysicsContext::Get().IsInit())
 	{
-		ApplyPhysics(M_Sphere, true);
-		ApplyPhysics(M_Sponza, false);
+		ApplyPhysics(BaseModel::Sphere, true);
+		ApplyPhysics(BaseModel::Sponza, false);
 	}
 }
-bool MeshManager::ApplyPhysics(BaseModels key, bool isDynamic)
+bool MeshManager::ApplyPhysics(BaseModel key, bool isDynamic)
 {
 	if (!PhysicsContext::Get().IsInit())
 	{

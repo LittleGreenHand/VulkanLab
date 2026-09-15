@@ -1,7 +1,7 @@
 #pragma once
 #include "PostProcessBase.h"
 #include <array>
-#include "Types.hpp"
+#include "RenderBase/RenderConfig.hpp"
 
 class PostProcessToneMapping : public PostProcessBase
 {

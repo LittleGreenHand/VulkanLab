@@ -18,7 +18,7 @@ public struct PBR_VSOutput
     public float4 prevClipPos;
 };
 
-//以下定义对应于C++端的types.hpp中的枚举DescriptorSetBindIndex
+//以下定义对应于C++端RenderConfig.hpp中的枚举DescriptorSetBindIndex
 public static const uint LBI_GLOBAL = 0;
 public static const uint LBI_IBL = 1;
 public static const uint LBI_LIGHTS = 2;

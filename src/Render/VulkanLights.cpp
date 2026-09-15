@@ -1,6 +1,7 @@
 #include "VulkanLights.h"
 #include "VulkanContext.h"
 #include "PipelineBuilder.h"
+#include "VulkanRenderer.h"
 #include "RenderResource/MeshManager.h"
 #include "VulkanDebugUtils.h"
 #include "Math/MathUtils.h"
