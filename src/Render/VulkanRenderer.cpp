@@ -14,7 +14,7 @@
 #include "RenderResource/MeshManager.h"
 #include "RenderResource/EnvironmentManager.h"
 #include "VulkanDebugUtils.h"
-#include "core/Log.h"
+#include "Core/Log.h"
 
 VulkanRenderer::VulkanRenderer() : VulkanRendererBase()
 {
@@ -575,7 +575,8 @@ void VulkanRenderer::render()
 
 bool VulkanRenderer::BeginFrame(double deltaTime)
 {
-	if (VulkanRendererBase::prepareFrame() != VK_SUCCESS)
+	const VkResult acquireResult = VulkanRendererBase::prepareFrame();
+	if (acquireResult != VK_SUCCESS && acquireResult != VK_SUBOPTIMAL_KHR)
 		return false;
 
 	frameCounter++;

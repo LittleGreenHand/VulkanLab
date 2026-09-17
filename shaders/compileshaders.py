@@ -86,7 +86,7 @@ def checkRenameFiles(samplename):
                 "scene.geom.spv": "multiview.geom.spv",
             }
     for x, y in mappings.items():
-        move(samplename + "\\" + x, samplename + "\\" + y)
+        move(os.path.join(samplename, x), os.path.join(samplename, y))
 
 parser = argparse.ArgumentParser(description='Compile all slang shaders')
 parser.add_argument('--slangc', type=str, help='path to slangc executable')

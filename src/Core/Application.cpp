@@ -143,7 +143,7 @@ bool Application::BeginFrame()
 	FrameClock::Get().Tick();
 	if (!m_renderer->BeginFrame(FrameClock::Get().DeltaSeconds()))
 	{
-		LOG_ERROR("Failed to begin frame");
+		LOG_DEBUG("Frame skipped while the swapchain is being updated");
 		return false;
 	}
 	m_guiLayer->BeginFrame();
@@ -310,4 +310,3 @@ void Application::OnFramebufferResize(int framebufferWidth, int framebufferHeigh
 		m_minimized = false;
 	}
 }
-

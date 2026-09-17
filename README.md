@@ -45,6 +45,20 @@
 - 6.Generate成功后点击Open Project打开VS，将VulkanLab设置为启动项目并编译即可。
     - 编译时会自动将PhysX的DLL文件复制到输出目录。
 
+## Linux 构建与运行
+
+需要安装 CMake（3.21 或更新版本）、Clang、Python 3、Vulkan SDK、GLFW 所需的 X11 或 Wayland 开发库，以及可用的 Vulkan 图形驱动。请先初始化子模块：
+
+```bash
+git submodule update --init --recursive
+cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+cmake --build build-linux -j
+./build-linux/bin/VulkanLab
+```
+
+Linux 构建会自动将 PhysX 作为 CPU-only 静态库编译，并将 Slang Shader 编译到 `build-linux/bin/shaders`。已在 Clang 21 和 Vulkan SDK 1.4.357.1 上验证。
+
 ## Features
 目前已经实现的主要功能包括：
 - Hybrid Deferred

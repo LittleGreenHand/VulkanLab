@@ -1,5 +1,6 @@
 #include "RenderBase/VulkanRendererBase.h"
 #include "Core/Application.h"
+#include <iostream>
 
 int main(int argc, char** argv)
 {
@@ -17,12 +18,14 @@ int main(int argc, char** argv)
 
 	auto& application = Application::GetInstance();
 	if (application.Init())
-	{
+	{		
 		application.Run();
 	}
 	else
 	{
-		MessageBoxA(nullptr, "Failed to initialize application!", "Error", MB_OK | MB_ICONERROR);
+		std::cerr << "Failed to initialize application!\n";
+		application.Destroy();
+		return 1;
 	}
 	application.Destroy();
 	return 0;

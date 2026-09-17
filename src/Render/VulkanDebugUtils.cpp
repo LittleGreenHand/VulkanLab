@@ -1,6 +1,7 @@
 #include "VulkanDebugUtils.h"
 #include <iostream>
-#include "core/Log.h"
+#include "Core/Log.h"
+#include <cstring>
 
 namespace VulkanDebugUtils
 {

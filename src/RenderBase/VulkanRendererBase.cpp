@@ -181,11 +181,14 @@ VkResult VulkanRendererBase::prepareFrame(bool waitForFence)
 	// Ensure command buffer execution has finished
 	if (waitForFence) {
 		VK_CHECK_RESULT(vkWaitForFences(device, 1, &waitFences[currentBuffer], VK_TRUE, UINT64_MAX));
+	}
+
+	// Acquire the next image from the swap chain
+	const VkResult result = swapChain.acquireNextImage(presentCompleteSemaphores[currentBuffer], currentImageIndex);
+	if (waitForFence && (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)) {
 		VK_CHECK_RESULT(vkResetFences(device, 1, &waitFences[currentBuffer]));
 	}
-	
-	// Acquire the next image from the swap chain
-	return swapChain.acquireNextImage(presentCompleteSemaphores[currentBuffer], currentImageIndex);
+	return result;
 }
 
 void VulkanRendererBase::submitFrame(bool skipQueueSubmit)
@@ -293,7 +296,7 @@ VulkanRendererBase::VulkanRendererBase()
 	if (stat(getAssetPath().c_str(), &info) != 0)
 	{
 		std::string msg = "Could not locate asset path in \"" + getAssetPath() + "\" !";
-		MessageBox(NULL, msg.c_str(), "Fatal error", MB_OK | MB_ICONERROR);
+		std::cerr << msg << std::endl;
 		exit(-1);
 	}
 

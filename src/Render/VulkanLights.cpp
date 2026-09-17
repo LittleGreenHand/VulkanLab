@@ -315,8 +315,8 @@ namespace vkLight {
 		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
 		PipelineBuilder builder(device);
-		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "Light_point.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
-		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "Light_point.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
+		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "light_point.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "light_point.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 		builder.setDepthStencilState(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
 		builder.buildPipeline(renderPass.renderPass, VulkanContext::GetVulkanRenderer()->pipelineCache, pipelineLayout, pipeline);
 		VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_PIPELINE, (uint64_t)pipeline, "DirectLightShadowMapGenerate pipeline");
@@ -671,7 +671,7 @@ namespace vkLight {
 		PipelineBuilder builder(device);
 		// 启用深度测试和写入，仅当前像素深度值“小于或等于”深度缓冲区中已存值时，通过测试
 		builder.setDepthStencilState(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
-		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "Light_direct.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "light_direct.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 		builder.colorBlendState.attachmentCount = 0;
 		builder.rasterizationState.cullMode = VK_CULL_MODE_NONE;
 		builder.rasterizationState.depthBiasEnable = VK_TRUE;

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cassert>
+#include <cstdio>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
@@ -89,8 +90,7 @@ void DrawNodePropertiesPanel()
 
 	// 节点名称编辑
 	char nameBuffer[256];
-	strncpy_s(nameBuffer, selectedNode->name.c_str(), sizeof(nameBuffer) - 1);
-	nameBuffer[sizeof(nameBuffer) - 1] = '\0';
+	std::snprintf(nameBuffer, sizeof(nameBuffer), "%s", selectedNode->name.c_str());
 	if (ImGui::InputText("Name", nameBuffer, sizeof(nameBuffer)))
 	{
 		selectedNode->name = nameBuffer;

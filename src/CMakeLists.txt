@@ -42,29 +42,28 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 
 # --------------------------------PhysX--------------------------------
 set(PHYSX_ROOT "${CMAKE_SOURCE_DIR}/thirdParty/PhysX/physx")
-set(PHYSX_BIN_DIR "${PHYSX_ROOT}/bin/win.x86_64.vc143.md" CACHE PATH "PhysX二进制文件目录")
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${PHYSX_ROOT}/include")
 
-set(PHYSX_CONFIG_DIR "$<IF:$<CONFIG:Debug>,debug,release>")
-target_link_directories(${PROJECT_NAME} PRIVATE "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}")
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    PhysX_64
-    PhysXCommon_64
-    PhysXCooking_64
-    PhysXFoundation_64
-    PhysXExtensions_static_64
-    PhysXPvdSDK_static_64
-)
-
-# 编译项目后自动复制PhysX DLL到输出目录
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysX_64.dll"
-        "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXCommon_64.dll"
-        "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXCooking_64.dll"
-        "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXFoundation_64.dll"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-)
+if(UNIX AND NOT APPLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        PhysX PhysXCommon PhysXCooking PhysXFoundation PhysXExtensions PhysXPvdSDK
+    )
+else()
+    set(PHYSX_BIN_DIR "${PHYSX_ROOT}/bin/win.x86_64.vc143.md" CACHE PATH "PhysX二进制文件目录")
+    set(PHYSX_CONFIG_DIR "$<IF:$<CONFIG:Debug>,debug,release>")
+    target_link_directories(${PROJECT_NAME} PRIVATE "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}")
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        PhysX_64 PhysXCommon_64 PhysXCooking_64 PhysXFoundation_64
+        PhysXExtensions_static_64 PhysXPvdSDK_static_64
+    )
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysX_64.dll"
+            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXCommon_64.dll"
+            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXCooking_64.dll"
+            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXFoundation_64.dll"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+    )
+endif()
 #--------------------------------PhysX End--------------------------------
