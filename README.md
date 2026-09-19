@@ -11,6 +11,7 @@
 - CMake 4.4
 - C++ 20
 - Vulkan 1.4
+- OpenCV 5.0
 - Python
 - Git
 - Visual Studio 2026
