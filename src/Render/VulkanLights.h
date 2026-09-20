@@ -103,7 +103,6 @@ namespace vkLight
 			this->isDescriptorUpdated = isDescriptorUpdated;
 			this->vulkanDevice = vulkanDevice;
 			device = vulkanDevice->logicalDevice;
-			this->renderPass = renderPass;
 			renderPass.width = shadowCubeSize;
 			renderPass.height = shadowCubeSize;
 			shadowDepthFormat = depthFormat;

@@ -254,18 +254,22 @@ void Application::OnMouseButton(int button, int action, int mods, double cursorX
 	if (action == GLFW_PRESS)
 		m_renderer->mouseState.position = glm::vec2(static_cast<float>(cursorX), static_cast<float>(cursorY));
 
-	const bool pressed = action == GLFW_PRESS;
-	switch (button)
+
+	if (!m_guiLayer->WantCaptureMouse())
 	{
-	case GLFW_MOUSE_BUTTON_LEFT:
-		m_renderer->mouseState.buttons.left = pressed;
-		break;
-	case GLFW_MOUSE_BUTTON_RIGHT:
-		m_renderer->mouseState.buttons.right = pressed;
-		break;
-	case GLFW_MOUSE_BUTTON_MIDDLE:
-		m_renderer->mouseState.buttons.middle = pressed;
-		break;
+		const bool pressed = action == GLFW_PRESS;
+		switch (button)
+		{
+		case GLFW_MOUSE_BUTTON_LEFT:
+			m_renderer->mouseState.buttons.left = pressed;
+			break;
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			m_renderer->mouseState.buttons.right = pressed;
+			break;
+		case GLFW_MOUSE_BUTTON_MIDDLE:
+			m_renderer->mouseState.buttons.middle = pressed;
+			break;
+		}
 	}
 }
 
@@ -293,8 +297,10 @@ void Application::OnMouseMove(double x, double y)
 
 void Application::OnScroll(double xOffset, double yOffset)
 {
-	auto camFront = m_renderer->camera.GetFront() * (static_cast<float>(-yOffset) * 120.0f * 0.005f);
-	m_renderer->camera.Translate(camFront);
+	if (!m_guiLayer->WantCaptureMouse()){
+		auto camFront = m_renderer->camera.GetFront() * (static_cast<float>(-yOffset) * 120.0f * 0.005f);
+		m_renderer->camera.Translate(camFront);
+	}
 }
 
 void Application::OnFramebufferResize(int framebufferWidth, int framebufferHeight)

@@ -6,8 +6,24 @@
 
 本项目的主要目标是在一个稳定的 Vulkan 基础渲染框架上，持续研究和实现Realtime Rendering、物理模拟与引擎架构，项目中使用的是Y向上的右手系，XYZ旋转顺序。
 
-# 个人开发环境
-- Windows 10/11
+## Features
+目前已经实现的主要功能包括：
+- Hybrid Deferred
+- PBR渲染
+- IBL
+- 金属度-粗糙度工作流的PBR材质
+- 各向异性高光
+- DOF
+- 定向光与点光源
+- 定向光CSM阴影与点光源的Omni阴影
+- PCF
+- glTF 2.0 model loading
+- glTF material system
+- KTX texture loading
+- 刚体物理模拟
+
+# 开发环境
+- Windows 10 / Ubuntu 26.04
 - CMake 4.4
 - C++ 20
 - Vulkan 1.4
@@ -16,16 +32,15 @@
 - Git
 - Visual Studio 2026
 
-# 第三方依赖
-- GLFW
+# 第三方依赖，已包含在仓库的thirdParty中
+- GLFW（在Ubuntu中要注意下载相关依赖，一般缺少的是X11和wayland）
 - GLM
 - ImGui
 - tinygltf
 - KTX
-- gli
 - Slang
 - PhysX-For-VS2026
-    - PhysX-For-VS2026是由作者从PhysX官方仓库Fork出来的仓库，区别是添加了生成VS2026的slnx的支持，官方仓库目前不支持生成VS2026。
+    - PhysX-For-VS2026是作者基于PhysX官方仓库Fork出来的仓库，区别是为Windows平台添加了VS2026生成预设，官方仓库目前不支持生成VS2026。并且移除了Werror警告，这个警告在新版的Clang中会造成编译错误。
 
 # 项目构建
 项目当前依赖了PhysX来实现刚体模拟，因此克隆本仓库后需要先下载submodule，然后再通过CMake生成解决方案
@@ -41,14 +56,15 @@
     - 如果要以release运行本仓库项目的话，则需要生成PhysX的release版本。
 
 - 5.生成PhysX后，就可以使用CMake生成本仓库项目，打开CMake GUI，分别设置源码目录和build目录，然后点击Configure按钮，执行结束后再点击Generate按钮，等待执行结束。
-    - 如果PhysX不是使用vc18win64-cpu-only配置生成的slnx，需要通过PHYSX_BIN_DIR变量手动设置PhysX的编译输出目录，默认是${CMAKE_SOURCE_DIR}/thirdParty/PhysX/physx/bin/win.x86_64.vc143.md
+    - 如果PhysX不是使用vc18win64-cpu-only配置生成的slnx，需要在Cmake GUI中通过PHYSX_BIN_DIR变量手动设置PhysX的编译输出目录，默认是${CMAKE_SOURCE_DIR}/thirdParty/PhysX/physx/bin/win.x86_64.vc143.md
 
 - 6.Generate成功后点击Open Project打开VS，将VulkanLab设置为启动项目并编译即可。
     - 编译时会自动将PhysX的DLL文件复制到输出目录。
 
 ## Linux 构建与运行
 
-需要安装 CMake（3.21 或更新版本）、Clang、Python 3、Vulkan SDK、GLFW 所需的 X11 或 Wayland 开发库，以及可用的 Vulkan 图形驱动。请先初始化子模块：
+需要安装 CMake、Clang、Python、Vulkan SDK、GLFW 所需的 X11 或 Wayland 开发库，以及可opencv 5.0。
+在仓库根目录执行以下终端命令：
 
 ```bash
 git submodule update --init --recursive
@@ -57,23 +73,11 @@ cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Release \
 cmake --build build-linux -j
 ./build-linux/bin/VulkanLab
 ```
-
-Linux 构建会自动将 PhysX 作为 CPU-only 静态库编译，并将 Slang Shader 编译到 `build-linux/bin/shaders`。已在 Clang 21 和 Vulkan SDK 1.4.357.1 上验证。
-
-## Features
-目前已经实现的主要功能包括：
-- Hybrid Deferred
-- PBR渲染
-- IBL
-- 金属度-粗糙度工作流的PBR材质
-- 各向异性高光
-- DOF
-- 定向光与点光源
-- 定向光CSM阴影与点光源的Omni阴影
-- PCF
-- glTF 2.0 model loading
-- glTF material system
-- KTX texture loading
+构建成功后可执行以下命令来运行程序：
+```bash
+./build-linux/bin/VulkanLab
+```
+Linux 构建会自动将 PhysX 作为 CPU-only 静态库编译，并将 Slang Shader 编译到 `build-linux/bin/shaders`。
 
 ### Shader System
 Shader 使用Slang着色器语言编写，生成Shaders项目时会通过python脚本编译生成SPIR-V，相关编译设置已经集成到 CMake 文件中。
