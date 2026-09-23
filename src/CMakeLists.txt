@@ -3,6 +3,7 @@ file(GLOB_RECURSE ALL_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
 )
+list(FILTER ALL_SOURCES EXCLUDE REGEX ".*/AI/.*")
 
 add_executable(${PROJECT_NAME}
     ${ALL_SOURCES}
@@ -17,6 +18,7 @@ target_link_libraries(${PROJECT_NAME}
     ktx
     glfw
     ${OpenCV_LIBS}
+    ${AI_PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -87,3 +89,20 @@ if(WIN32)
     )
 endif()
 # ------------------------------OpenCV End--------------------------------
+
+# --------------------------------ONNX Runtime--------------------------------
+
+if(WIN32)
+
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:ONNXRuntime::ONNXRuntime>"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+    )
+
+endif()
+
+# ------------------------------ONNX Runtime End------------------------------

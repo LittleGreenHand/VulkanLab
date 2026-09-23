@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
-set(PROJECT_NAME VulkanLab CACHE STRING "解决方案与项目名称")
-
+set(PROJECT_NAME VulkanLab CACHE STRING "可执行文件")
+set(AI_PROJECT_NAME VulkanLabAI CACHE STRING "管理AI模型与推理后端的静态库")
 project(${PROJECT_NAME})
 
 option(VULKANLAB_BUILD_TESTS "Build VulkanLab unit tests" OFF)
@@ -65,7 +65,9 @@ if(UNIX AND NOT APPLE)
     set(PX_OUTPUT_BIN_DIR "${CMAKE_BINARY_DIR}" CACHE PATH "PhysX binary output directory")
     add_subdirectory("${PHYSX_ROOT_DIR}/compiler/public" physx)
 endif()
+add_subdirectory(thirdParty/ONNX_Runtime)
 
+add_subdirectory(src/AI)
 add_subdirectory(src)
 
 if(VULKANLAB_BUILD_TESTS)

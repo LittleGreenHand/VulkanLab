@@ -4,10 +4,15 @@
 #include <thread>
 #include "RenderResource/MeshManager.h"
 #include "Simulation/PhysicsContext.h"
+#include "RenderBase/VulkanTools.h"
+#include "AI/AIModelManager.h"
 bool Application::m_init = false;
 bool Application::Init()
 {
 	LOG_DEBUG("Initializing application");
+
+	AIModelManager::Get().Initialize(GetAssetRootPath() / "AI_Models");
+
 	// 初始化窗口
 	{
 		GlfwWindow::CreateInfo createInfo;
@@ -83,10 +88,11 @@ bool Application::Init()
 void Application::Destroy()
 {
 	LOG_DEBUG("Destroying application");
-	m_guiLayer.reset();
+	m_guiLayer.reset();	
 	m_renderer.reset();
 	m_window.reset();
 	PhysicsContext::Get().Destroy();
+	AIModelManager::Get().Shutdown();
 	m_init = false;
 	LOG_DEBUG("Application destroyed");
 }

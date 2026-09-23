@@ -13,10 +13,98 @@
 #include "Simulation/PhysicsContext.h"
 #include "Core/FrameClock.h"
 #include "RenderBase/glTF/VulkanglTFScene.h"
+#include "AI/AIModelManager.h"
+
+void DrawAIModels()
+{
+	auto& manager = AIModelManager::Get();
+	ImGui::Begin("AI Models");
+
+	if (ImGui::Button("Rescan Models"))
+		manager.ScanModels();
+
+	ImGui::SameLine();
+	ImGui::TextDisabled("%zu model(s)", manager.GetModels().size());
+	ImGui::Separator();
+
+	if (manager.GetModels().empty())
+	{
+		ImGui::TextDisabled("No ONNX models found in:");
+		ImGui::TextWrapped("%s", manager.GetModelRoot().string().c_str());
+		ImGui::End();
+		return;
+	}
+
+	constexpr const char* backendNames[] = { "OpenCV DNN", "ONNX Runtime" };
+	for (const std::unique_ptr<AIModel>& modelPtr : manager.GetModels())
+	{
+		AIModel& model = *modelPtr;
+		const ModelInfo& info = model.GetInfo();
+		ImGui::PushID(modelPtr.get());
+
+		bool enabled = model.IsEnabled();
+		if (ImGui::Checkbox("##Enabled", &enabled))
+			model.SetEnabled(enabled);
+		ImGui::SameLine();
+
+		const bool open = ImGui::CollapsingHeader(info.Name.c_str());
+		if (open)
+		{
+			ImGui::Indent();
+			std::error_code pathError;
+			std::filesystem::path displayPath = std::filesystem::relative(
+				info.Path,
+				manager.GetModelRoot().parent_path(),
+				pathError);
+			if (pathError)
+				displayPath = info.Path;
+
+			ImGui::Text("Path: %s", displayPath.generic_string().c_str());
+			ImGui::Text("Format: %s", ToString(info.Format));
+
+			int backendIndex = model.GetBackendType() == InferenceBackendType::OpenCVDNN ? 0 : 1;
+			if (ImGui::Combo("Backend", &backendIndex, backendNames, IM_ARRAYSIZE(backendNames)))
+			{
+				model.SetBackend(backendIndex == 0
+					? InferenceBackendType::OpenCVDNN
+					: InferenceBackendType::ONNXRuntime);
+			}
+
+			const ModelState state = model.GetState();
+			if (state == ModelState::Error)
+				ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "State: %s", ToString(state));
+			else if (state == ModelState::Loaded)
+				ImGui::TextColored(ImVec4(0.35f, 0.9f, 0.45f, 1.0f), "State: %s", ToString(state));
+			else
+				ImGui::Text("State: %s", ToString(state));
+
+			if (const auto inferenceTime = model.GetLastInferenceTimeMs())
+				ImGui::Text("Inference Time: %.3f ms", *inferenceTime);
+			else
+				ImGui::TextDisabled("Inference Time: N/A");
+
+			if (!model.GetInputInfos().empty() || !model.GetOutputInfos().empty())
+				ImGui::TextDisabled("Inputs: %zu  Outputs: %zu",
+					model.GetInputInfos().size(), model.GetOutputInfos().size());
+
+			if (!model.GetLastError().empty())
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.45f, 0.35f, 1.0f));
+				ImGui::TextWrapped("Error: %s", model.GetLastError().c_str());
+				ImGui::PopStyleColor();
+			}
+			ImGui::Unindent();
+		}
+
+		ImGui::Separator();
+		ImGui::PopID();
+	}
+
+	ImGui::End();
+}
 
 // 用于跟踪选中的节点
 vkglTF::Node* selectedNode = nullptr;
-
 void DrawNodeTree(vkglTF::Node* node, int& nodeId)
 {
 	if (!node) return;
@@ -253,6 +341,8 @@ void ImGuiLayer::BeginFrame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame(); 
 	Update();
+	if (m_showAIModelPanel)
+		DrawAIModels();
 }
 
 void ImGuiLayer::Update()
@@ -262,7 +352,8 @@ void ImGuiLayer::Update()
 	//渲染设置
 	{
 		auto renderer = VulkanContext::GetVulkanRenderer();
-		ImGui::Text("FPS: %.1f  (%.3f ms)", FrameClock::Get().FPS(), FrameClock::Get().DeltaSeconds()*1000);
+		ImGui::Text("FPS: %.1f  (%.3f ms)", FrameClock::Get().FPS(), FrameClock::Get().DeltaSeconds() * 1000);
+		ImGui::Checkbox("显示AI模型面板", &m_showAIModelPanel);
 		ImGui::Checkbox("启动物理模拟", &PhysicsContext::Get().isSimulationEnabled);
 
 		if (ImGui::CollapsingHeader("相机")) {
@@ -457,7 +548,7 @@ void ImGuiLayer::Render()
 	VulkanContext::GetVulkanRenderer()->DrawImGui();
 }
 
-void ImGuiLayer::SetMinImageCount(uint32_t minImageCount)
+void ImGuiLayer::SetMinImageCount(int minImageCount)
 {
 	if (!m_init)
 		return;
