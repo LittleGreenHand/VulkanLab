@@ -14,6 +14,59 @@
 #include "Core/FrameClock.h"
 #include "RenderBase/glTF/VulkanglTFScene.h"
 #include "AI/AIModelManager.h"
+#include "Device/CameraDevice.h"
+
+void DrawCameraDevices()
+{
+	ImGui::SetNextWindowSize(ImVec2(560, 420), ImGuiCond_FirstUseEver);
+	ImGui::Begin("相机设备");
+
+	if (ImGui::Button("刷新相机列表"))
+		CameraDevice::RefreshCameraList();
+	ImGui::SameLine();
+	ImGui::TextDisabled("设备检测可能需要几秒钟");
+	const auto& cameras = CameraDevice::GetCameraDeviceList();
+	ImGui::Text("相机数量: %zu", cameras.size());
+	ImGui::TextWrapped("参数为检测时的当前或默认值。");
+	ImGui::Separator();
+
+	if (cameras.empty())
+		ImGui::TextDisabled("未检测到相机设备");
+
+	for (size_t index = 0; index < cameras.size(); ++index)
+	{
+		const auto& camera = cameras[index];
+		ImGui::PushID(static_cast<int>(index));
+		const std::string title = "[" + std::to_string(index) + "] " + camera.DeviceName;
+		if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Indent();
+			ImGui::Text("列表索引 (CameraDevice::Open): %zu", index);
+			ImGui::Text("OpenCV 设备索引: %d", camera.DeviceIndex);
+			ImGui::TextWrapped("名称: %s", camera.DeviceName.empty() ? "未知" : camera.DeviceName.c_str());
+			ImGui::TextWrapped("设备路径: %s", camera.DevicePath.empty() ? "未知" : camera.DevicePath.c_str());
+			ImGui::Text("后端: %s (%d)", camera.BackendName.c_str(), camera.Backend);
+			ImGui::Text("状态: %s", camera.Available ? "可用" : "不可用");
+			if (camera.Width > 0)
+				ImGui::Text("宽度: %d", camera.Width);
+			else
+				ImGui::TextDisabled("宽度: 未知");
+			if (camera.Height > 0)
+				ImGui::Text("高度: %d", camera.Height);
+			else
+				ImGui::TextDisabled("高度: 未知");
+			if (camera.FPS > 0.0)
+				ImGui::Text("帧率: %.2f FPS", camera.FPS);
+			else
+				ImGui::TextDisabled("帧率: 未知");
+			if (!camera.Error.empty())
+				ImGui::TextWrapped("检测信息: %s", camera.Error.c_str());
+			ImGui::Unindent();
+		}
+		ImGui::PopID();
+	}
+	ImGui::End();
+}
 
 void DrawAIModels()
 {
@@ -39,7 +92,6 @@ void DrawAIModels()
 	for (const std::unique_ptr<AIModel>& modelPtr : manager.GetModels())
 	{
 		AIModel& model = *modelPtr;
-		const ModelInfo& info = model.GetInfo();
 		ImGui::PushID(modelPtr.get());
 
 		bool enabled = model.IsEnabled();
@@ -47,52 +99,12 @@ void DrawAIModels()
 			model.SetEnabled(enabled);
 		ImGui::SameLine();
 
+		const ModelInfo& info = model.GetInfo();
 		const bool open = ImGui::CollapsingHeader(info.Name.c_str());
 		if (open)
 		{
 			ImGui::Indent();
-			std::error_code pathError;
-			std::filesystem::path displayPath = std::filesystem::relative(
-				info.Path,
-				manager.GetModelRoot().parent_path(),
-				pathError);
-			if (pathError)
-				displayPath = info.Path;
-
-			ImGui::Text("Path: %s", displayPath.generic_string().c_str());
-			ImGui::Text("Format: %s", ToString(info.Format));
-
-			int backendIndex = model.GetBackendType() == InferenceBackendType::OpenCVDNN ? 0 : 1;
-			if (ImGui::Combo("Backend", &backendIndex, backendNames, IM_ARRAYSIZE(backendNames)))
-			{
-				model.SetBackend(backendIndex == 0
-					? InferenceBackendType::OpenCVDNN
-					: InferenceBackendType::ONNXRuntime);
-			}
-
-			const ModelState state = model.GetState();
-			if (state == ModelState::Error)
-				ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "State: %s", ToString(state));
-			else if (state == ModelState::Loaded)
-				ImGui::TextColored(ImVec4(0.35f, 0.9f, 0.45f, 1.0f), "State: %s", ToString(state));
-			else
-				ImGui::Text("State: %s", ToString(state));
-
-			if (const auto inferenceTime = model.GetLastInferenceTimeMs())
-				ImGui::Text("Inference Time: %.3f ms", *inferenceTime);
-			else
-				ImGui::TextDisabled("Inference Time: N/A");
-
-			if (!model.GetInputInfos().empty() || !model.GetOutputInfos().empty())
-				ImGui::TextDisabled("Inputs: %zu  Outputs: %zu",
-					model.GetInputInfos().size(), model.GetOutputInfos().size());
-
-			if (!model.GetLastError().empty())
-			{
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.45f, 0.35f, 1.0f));
-				ImGui::TextWrapped("Error: %s", model.GetLastError().c_str());
-				ImGui::PopStyleColor();
-			}
+			model.DrawUI();			
 			ImGui::Unindent();
 		}
 
@@ -301,7 +313,7 @@ bool ImGuiLayer::Init(GLFWwindow* window)
 	initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorAttachmentFormat;
 	initInfo.UseDynamicRendering = true;
 
-	if (!ImGui_ImplVulkan_Init(&initInfo))
+	if (!ImGui_ImplVulkan_Init(&initInfo)) 
 	{
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -343,6 +355,8 @@ void ImGuiLayer::BeginFrame()
 	Update();
 	if (m_showAIModelPanel)
 		DrawAIModels();
+	if (m_showCameraDevicePanel)
+		DrawCameraDevices();
 }
 
 void ImGuiLayer::Update()
@@ -354,6 +368,7 @@ void ImGuiLayer::Update()
 		auto renderer = VulkanContext::GetVulkanRenderer();
 		ImGui::Text("FPS: %.1f  (%.3f ms)", FrameClock::Get().FPS(), FrameClock::Get().DeltaSeconds() * 1000);
 		ImGui::Checkbox("显示AI模型面板", &m_showAIModelPanel);
+		ImGui::Checkbox("显示相机设备面板", &m_showCameraDevicePanel);
 		ImGui::Checkbox("启动物理模拟", &PhysicsContext::Get().isSimulationEnabled);
 
 		if (ImGui::CollapsingHeader("相机")) {

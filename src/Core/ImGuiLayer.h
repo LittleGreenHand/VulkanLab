@@ -31,5 +31,6 @@ public:
 
 private:
 	bool m_init = false;
-	bool m_showAIModelPanel = true;
+	bool m_showAIModelPanel = false;
+	bool m_showCameraDevicePanel = false;
 };

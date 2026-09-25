@@ -1,5 +1,5 @@
 #pragma once
-#include "InferenceBackend.h"
+#include "IInferenceBackend.h"
 #include <opencv2/dnn.hpp>
 
 class OpenCVDNNBackend final : public IInferenceBackend

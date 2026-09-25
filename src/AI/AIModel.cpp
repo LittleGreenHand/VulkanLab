@@ -1,7 +1,9 @@
 #include "AIModel.h"
+#include "Adapter/IModelAdapter.h"
 #include "Backend/ONNXRuntimeBackend.h"
 #include "Backend/OpenCVDNNBackend.h"
 #include "../Core/Log.h"
+#include <imgui.h>
 
 #include <chrono>
 #include <utility>
@@ -121,7 +123,7 @@ const char* AIModel::GetBackendName() const
 
 bool AIModel::Run(const InferenceInput& input, InferenceOutput& output)
 {
-	output.Tensors.clear();
+	output = {};
 	if (!m_enabled)
 	{
 		m_lastError = "Model is disabled";
@@ -177,6 +179,46 @@ bool AIModel::Run(const InferenceInput& input, InferenceOutput& output)
 void AIModel::SetAdapter(std::unique_ptr<IModelAdapter> adapter)
 {
 	m_adapter = std::move(adapter);
+}
+
+
+void AIModel::DrawUI()
+{
+	if (m_adapter)
+		m_adapter->DrawUI();
+
+	ImGui::Text("Path: %s", m_info.Path.generic_string().c_str());
+	ImGui::Text("Format: %s", ToString(m_info.Format));
+
+	int backendIndex = static_cast<int>(GetBackendType());
+	if (ImGui::Combo("Backend", &backendIndex, InferenceBackendTypeString, IM_ARRAYSIZE(InferenceBackendTypeString)))
+	{
+		SetBackend(static_cast<InferenceBackendType>(backendIndex));
+	}
+
+	const ModelState state = GetState();
+	if (state == ModelState::Error)
+		ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "State: %s", ToString(state));
+	else if (state == ModelState::Loaded)
+		ImGui::TextColored(ImVec4(0.35f, 0.9f, 0.45f, 1.0f), "State: %s", ToString(state));
+	else
+		ImGui::Text("State: %s", ToString(state));
+
+	if (const auto inferenceTime = GetLastInferenceTimeMs())
+		ImGui::Text("Inference Time: %.3f ms", *inferenceTime);
+	else
+		ImGui::TextDisabled("Inference Time: N/A");
+
+	if (!GetInputInfos().empty() || !GetOutputInfos().empty())
+		ImGui::TextDisabled("Inputs: %zu  Outputs: %zu",
+			GetInputInfos().size(), GetOutputInfos().size());
+
+	if (!GetLastError().empty())
+	{
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.45f, 0.35f, 1.0f));
+		ImGui::TextWrapped("Error: %s", GetLastError().c_str());
+		ImGui::PopStyleColor();
+	}
 }
 
 const std::vector<TensorInfo>& AIModel::GetInputInfos() const

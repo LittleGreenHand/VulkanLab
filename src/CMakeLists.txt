@@ -22,6 +22,10 @@ target_link_libraries(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ole32 oleaut32 strmiids)
+endif()
+
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin/"
@@ -35,8 +39,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 
 add_dependencies(${PROJECT_NAME} Shaders)
 
-option(ENABLE_LOG "是否启用LOG并在控制台输出" ON)
-option(ENABLE_DEBUG_LOG "在启用LOG的前提下，是否启用DEBUG LOG" ON)
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     ENABLE_LOG=$<BOOL:${ENABLE_LOG}>
     ENABLE_DEBUG_LOG=$<BOOL:${ENABLE_DEBUG_LOG}>

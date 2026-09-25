@@ -215,10 +215,7 @@ bool ONNXRuntimeBackend::IsLoaded() const
     return m_session != nullptr;
 }
 
-bool ONNXRuntimeBackend::Run(
-    const InferenceInput& input,
-    InferenceOutput& output,
-    std::string& error)
+bool ONNXRuntimeBackend::Run(const InferenceInput& input, InferenceOutput& output, std::string& error)
 {
     output.Tensors.clear();
     if (!m_session)

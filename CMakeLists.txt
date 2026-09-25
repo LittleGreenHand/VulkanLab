@@ -4,6 +4,8 @@ set(AI_PROJECT_NAME VulkanLabAI CACHE STRING "管理AI模型与推理后端的�
 project(${PROJECT_NAME})
 
 option(VULKANLAB_BUILD_TESTS "Build VulkanLab unit tests" OFF)
+option(ENABLE_LOG "是否启用LOG并在控制台输出" ON)
+option(ENABLE_DEBUG_LOG "在启用LOG的前提下，是否启用DEBUG LOG" ON)
 
 include_directories(thirdParty)
 include_directories(thirdParty/glm)

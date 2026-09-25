@@ -25,7 +25,8 @@ public:
 public:
 	bool Initialize(const std::filesystem::path& modelRoot);
 	void Shutdown();
-	void ScanModels();
+	void ScanModels();// 扫描模型目录，发现所有支持的模型文件，并创建AIModel对象。
+	void InitModels();// 初始化模型，为模型设置适配器。
 
 	const std::vector<std::unique_ptr<AIModel>>& GetModels() const { return m_models; }
 	AIModel* FindModel(const std::string& name);

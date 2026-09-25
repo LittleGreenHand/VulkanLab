@@ -1,5 +1,5 @@
 #pragma once
-
+#include "InferenceTypes.h"
 #include <filesystem>
 #include <string>
 

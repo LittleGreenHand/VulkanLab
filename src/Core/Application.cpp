@@ -6,12 +6,38 @@
 #include "Simulation/PhysicsContext.h"
 #include "RenderBase/VulkanTools.h"
 #include "AI/AIModelManager.h"
+#include "AI/Adapter/MediaPipeHandAdapter.h"
+
+namespace
+{
+	constexpr const char* DefaultHandPoseModel = "palm_detection_mediapipe_2023feb";
+}
+
 bool Application::m_init = false;
 bool Application::Init()
 {
 	LOG_DEBUG("Initializing application");
 
-	AIModelManager::Get().Initialize(GetAssetRootPath() / "AI_Models");
+	//Camera设备
+	{
+		CameraDevice::RefreshCameraList();
+		if (CameraDevice::GetCameraDeviceCount() > 0)
+		{
+			if (!m_cameraDevice.Open(0))
+			{
+				LOG_ERROR("Failed to open camera device 0");
+			}
+		}
+	}
+	// AI模型
+	{
+		AIModelManager::Get().Initialize(GetAssetRootPath() / "AI_Models");
+		auto* model = AIModelManager::Get().FindModel(DefaultHandPoseModel);
+		if (!model)
+			LOG_ERROR("Default hand pose model not found: {}", DefaultHandPoseModel);
+		else if (!model->SetEnabled(true))
+			LOG_ERROR("Failed to enable MediaPipe hand pose model: {}", model->GetLastError());
+	}
 
 	// 初始化窗口
 	{
@@ -88,6 +114,7 @@ bool Application::Init()
 void Application::Destroy()
 {
 	LOG_DEBUG("Destroying application");
+	m_cameraDevice.Close();
 	m_guiLayer.reset();	
 	m_renderer.reset();
 	m_window.reset();
@@ -112,6 +139,7 @@ bool Application::Run()
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			continue;
 		}
+		AIInference();
 		Simulate();
 		UpdateScene();
 		Render();
@@ -158,6 +186,49 @@ bool Application::BeginFrame()
 
 void Application::UpdateScene()
 {
+}
+
+void Application::AIInference()
+{
+	auto* model = AIModelManager::Get().FindModel(DefaultHandPoseModel);
+	if (!model || !model->IsEnabled() || !m_cameraDevice.IsOpened())
+	{
+		m_cameraDevice.CloseDebugWindow();
+		return;
+	}
+	cv::Mat frame;
+	if (!m_cameraDevice.Capture(frame))
+	{
+		LOG_ERROR("Failed to capture camera frame");
+		m_cameraDevice.CloseDebugWindow();
+		return;
+	}
+	InferenceInput input;
+	InferenceOutput output;
+	std::string error;
+	if (!MediaPipeHandAdapter::CreateInput(frame, input, error))
+	{
+		LOG_ERROR("Failed to create inference input: {}", error);
+		m_cameraDevice.CloseDebugWindow();
+		return;
+	}
+	if (!model->Run(input, output))
+	{
+		LOG_ERROR("Failed to run inference: {}", model->GetLastError());
+		m_cameraDevice.CloseDebugWindow();
+		return;
+	}
+	if (!output.HandPoses)
+	{
+		LOG_ERROR("Hand pose adapter returned no structured result");
+		m_cameraDevice.CloseDebugWindow();
+		return;
+	}
+	if (!m_cameraDevice.ShowHandPoseDebug(frame, *output.HandPoses, error))
+	{
+		LOG_ERROR("Failed to show MediaPipe hand pose debug image: {}", error);
+		m_cameraDevice.CloseDebugWindow();
+	}
 }
 
 void Application::Simulate()

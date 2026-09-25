@@ -1,4 +1,5 @@
 #include "AIModelManager.h"
+#include "Adapter/MediaPipeHandAdapter.h"
 #include "../Core/Log.h"
 
 #include <algorithm>
@@ -133,6 +134,22 @@ void AIModelManager::ScanModels()
 
 	if (m_models.empty())
 		LOG_INFO("No ONNX models found in: {}", m_modelRoot.string());
+	InitModels();
+}
+
+void AIModelManager::InitModels()
+{
+	for (const auto& candidate : m_models)
+	{
+		const auto& path = candidate->GetInfo().Path;
+		const std::string stem = path.stem().string();
+		const std::string prefix = "palm_detection_mediapipe_";
+		if (stem.rfind(prefix, 0) != 0)
+			continue;
+		const auto handPath = path.parent_path().parent_path() / "handpose_estimation_mediapipe" /
+			("handpose_estimation_mediapipe_" + stem.substr(prefix.size()) + ".onnx");
+		candidate->SetAdapter(std::make_unique<MediaPipeHandAdapter>(handPath));
+	}
 }
 
 AIModel* AIModelManager::FindModel(const std::string& name)

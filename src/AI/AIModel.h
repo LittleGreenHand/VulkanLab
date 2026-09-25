@@ -1,27 +1,13 @@
 #pragma once
 
-#include "InferenceBackend.h"
+#include "IInferenceBackend.h"
 #include "ModelInfo.h"
 
 #include <memory>
 #include <optional>
 #include <string>
 
-class IModelAdapter
-{
-public:
-	virtual ~IModelAdapter() = default;
-
-	virtual bool PreProcess(
-		const InferenceInput& source,
-		InferenceInput& destination,
-		std::string& error) = 0;
-	virtual bool PostProcess(
-		const InferenceOutput& source,
-		InferenceOutput& destination,
-		std::string& error) = 0;
-};
-
+class IModelAdapter;
 class AIModel
 {
 public:
@@ -46,6 +32,7 @@ public:
 
 	bool Run(const InferenceInput& input, InferenceOutput& output);
 	void SetAdapter(std::unique_ptr<IModelAdapter> adapter);
+	void DrawUI();
 
 	const ModelInfo& GetInfo() const { return m_info; }
 	ModelState GetState() const { return m_state; }
