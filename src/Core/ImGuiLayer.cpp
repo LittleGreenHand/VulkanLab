@@ -370,6 +370,7 @@ void ImGuiLayer::Update()
 		ImGui::Checkbox("显示AI模型面板", &m_showAIModelPanel);
 		ImGui::Checkbox("显示相机设备面板", &m_showCameraDevicePanel);
 		ImGui::Checkbox("启动物理模拟", &PhysicsContext::Get().isSimulationEnabled);
+		ImGui::Checkbox("运行推理", &m_runInference);
 
 		if (ImGui::CollapsingHeader("相机")) {
 			ImGui::Indent();

@@ -190,6 +190,9 @@ void Application::UpdateScene()
 
 void Application::AIInference()
 {
+	if (!m_guiLayer->RunInference())
+		return;
+
 	auto* model = AIModelManager::Get().FindModel(DefaultHandPoseModel);
 	if (!model || !model->IsEnabled() || !m_cameraDevice.IsOpened())
 	{

@@ -56,7 +56,8 @@ find_package(TBB CONFIG REQUIRED COMPONENTS tbb PATHS "${TBB_DIR}" NO_DEFAULT_PA
 find_package(pxr CONFIG REQUIRED PATHS "${pxr_DIR}" NO_DEFAULT_PATH)
 find_package(PhysX CONFIG REQUIRED PATHS "${PhysX_DIR}" NO_DEFAULT_PATH)
 add_library(VulkanLabDependencies INTERFACE)
-target_link_libraries(VulkanLabDependencies INTERFACE TBB::tbb ${PXR_LIBRARIES} PhysX::physx_lib)
+target_link_libraries(VulkanLabDependencies INTERFACE
+    TBB::tbb usd usdGeom usdShade usdPhysics usdUtils PhysX::physx_lib)
 message(STATUS "VulkanLab SDKs: ${VULKANLAB_SDK_ROOT}")
 
 function(vulkanlab_deploy_dependencies target)

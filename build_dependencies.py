@@ -124,6 +124,8 @@ def build(args):
                 options.append(f"-DPython3_EXECUTABLE={Path(sys.executable).as_posix()}")
             if not windows:
                 options.append(f"-DCMAKE_INSTALL_RPATH={prefix.as_posix()}/lib;{tbb_prefix.as_posix()}/lib")
+                # libstdc++ 不再间接引入 <algorithm>，pxr/base/gf/color.cpp使用了 std::max(initializer_list)，需要显式包含 <algorithm>。
+                options.append("-DCMAKE_CXX_FLAGS=-include algorithm")
         else:
             physx_root = ROOT / "thirdParty/PhysX/physx"
             options += [f"-DPHYSX_ROOT_DIR={physx_root.as_posix()}", f"-DTARGET_BUILD_PLATFORM={system.lower()}",

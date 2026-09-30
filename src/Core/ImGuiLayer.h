@@ -28,9 +28,11 @@ public:
 
 	bool WantCaptureMouse() const;
 	bool WantCaptureKeyboard() const;
+	bool RunInference() const { return m_runInference; }
 
 private:
 	bool m_init = false;
 	bool m_showAIModelPanel = false;
 	bool m_showCameraDevicePanel = false;
+	bool m_runInference = false;
 };
