@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME}
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${ALL_SOURCES})
 
+vulkanlab_deploy_dependencies(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     Vulkan::Vulkan
@@ -19,6 +20,7 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     ${OpenCV_LIBS}
     ${AI_PROJECT_NAME}
+    VulkanLabDependencies
 )
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -45,34 +47,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     GLM_ENABLE_EXPERIMENTAL
 )
 
-# --------------------------------PhysX--------------------------------
-set(PHYSX_ROOT "${CMAKE_SOURCE_DIR}/thirdParty/PhysX/physx")
-
-target_include_directories(${PROJECT_NAME} PRIVATE "${PHYSX_ROOT}/include")
-
-if(UNIX AND NOT APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        PhysX PhysXCommon PhysXCooking PhysXFoundation PhysXExtensions PhysXPvdSDK
-    )
-else()
-    set(PHYSX_BIN_DIR "${PHYSX_ROOT}/bin/win.x86_64.vc143.md" CACHE PATH "PhysX二进制文件目录")
-    set(PHYSX_CONFIG_DIR "$<IF:$<CONFIG:Debug>,debug,release>")
-    target_link_directories(${PROJECT_NAME} PRIVATE "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}")
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        PhysX_64 PhysXCommon_64 PhysXCooking_64 PhysXFoundation_64
-        PhysXExtensions_static_64 PhysXPvdSDK_static_64
-    )
-    # 自动将PhysX的dll拷贝到可执行文件目录下
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysX_64.dll"
-            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXCommon_64.dll"
-            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXCooking_64.dll"
-            "${PHYSX_BIN_DIR}/${PHYSX_CONFIG_DIR}/PhysXFoundation_64.dll"
-            "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-    )
-endif()
-#--------------------------------PhysX End--------------------------------
 
 # --------------------------------OpenCV----------------------------------
 if(WIN32)
@@ -85,7 +59,7 @@ if(WIN32)
     # 自动将OpenCV的dll拷贝到可执行文件目录下
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<IF:$<CONFIG:Release>,${OpenCV_DLLS_RELEASE},${OpenCV_DLLS}>"
+            "$<IF:$<STREQUAL:${VULKANLAB_DEPENDENCY_CONFIG},Release>,${OpenCV_DLLS_RELEASE},${OpenCV_DLLS}>"
             "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
         COMMAND_EXPAND_LISTS
     )

@@ -1,3 +1,9 @@
 [submodule "thirdParty/PhysX"]
 	path = thirdParty/PhysX
 	url = https://github.com/LittleGreenHand/PhysX-For-VS2026.git
+[submodule "thirdParty/oneTBB"]
+	path = thirdParty/oneTBB
+	url = https://github.com/uxlfoundation/oneTBB.git
+[submodule "thirdParty/OpenUSD"]
+	path = thirdParty/OpenUSD
+	url = https://github.com/PixarAnimationStudios/OpenUSD.git
