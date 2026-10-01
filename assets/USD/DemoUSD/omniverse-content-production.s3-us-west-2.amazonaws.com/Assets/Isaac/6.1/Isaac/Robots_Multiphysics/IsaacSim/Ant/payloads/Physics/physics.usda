@@ -1,0 +1,402 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (50000.913137040225, -1.1102433003404901e-11, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (5, 4.9999999999999964, 5.000000000000003)
+                double3 target = (-3.98696791137354e-8, -3.98696791137354e-8, 7.947147739884031e-8)
+            }
+            dictionary Right = {
+                double3 position = (0, -50000.91313708642, -1.1102433003415162e-11)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 50000.25)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./ant.usd"
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "ant"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+over "ant"
+{
+    over "torso" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "torso_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "boundingSphere"
+            }
+
+            over "aux_1_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+
+            over "aux_2_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+
+            over "aux_3_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+
+            over "aux_4_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "front_left_leg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "left_leg_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "joints"
+    {
+        def PhysicsRevoluteJoint "front_left_leg" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/torso>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/front_left_leg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.2, 0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            float physics:lowerLimit = -40
+            float physics:upperLimit = 40
+        }
+
+        def PhysicsRevoluteJoint "front_left_foot" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/front_left_leg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/front_left_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.2, 0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.38268334, 0, 0, 0.9238796)
+            quatf physics:localRot1 = (0.38268334, 0, 0, 0.9238796)
+            float physics:lowerLimit = 30
+            float physics:upperLimit = 100
+        }
+
+        def PhysicsRevoluteJoint "front_right_leg" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/torso>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/front_right_leg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.2, 0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            float physics:lowerLimit = -40
+            float physics:upperLimit = 40
+        }
+
+        def PhysicsRevoluteJoint "front_right_foot" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/front_right_leg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/front_right_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.2, 0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.92387956, 0, 0, 0.38268346)
+            quatf physics:localRot1 = (0.92387956, 0, 0, 0.38268346)
+            float physics:lowerLimit = -100
+            float physics:upperLimit = -30
+        }
+
+        def PhysicsRevoluteJoint "left_back_leg" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/torso>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/left_back_leg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.2, -0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            float physics:lowerLimit = -40
+            float physics:upperLimit = 40
+        }
+
+        def PhysicsRevoluteJoint "left_back_foot" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/left_back_leg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/left_back_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.2, -0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.38268334, 0, 0, 0.9238796)
+            quatf physics:localRot1 = (0.38268334, 0, 0, 0.9238796)
+            float physics:lowerLimit = -100
+            float physics:upperLimit = -30
+        }
+
+        def PhysicsRevoluteJoint "right_back_leg" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/torso>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/right_back_leg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.2, -0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            float physics:lowerLimit = -40
+            float physics:upperLimit = 40
+        }
+
+        def PhysicsRevoluteJoint "right_back_foot" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular"]
+        )
+        {
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </ant/right_back_leg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </ant/right_back_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.2, -0.2, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.92387956, 0, 0, 0.38268346)
+            quatf physics:localRot1 = (0.92387956, 0, 0, 0.38268346)
+            float physics:lowerLimit = 30
+            float physics:upperLimit = 100
+        }
+    }
+
+    over "front_left_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "left_ankle_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "front_right_leg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "right_leg_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "front_right_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "right_ankle_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "left_back_leg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "back_leg_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "left_back_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "third_ankle_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "right_back_leg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "rightback_leg_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+
+    over "right_back_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        float physics:density = 5
+        vector3f physics:velocity = (0, 0, 0)
+
+        over "collisions"
+        {
+            over "fourth_ankle_geom" (
+                prepend apiSchemas = ["PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+            }
+        }
+    }
+}
+
+def PhysicsScene "physicsScene"
+{
+    vector3f physics:gravityDirection = (0, 0, -1)
+    float physics:gravityMagnitude = 9.81
+}
+

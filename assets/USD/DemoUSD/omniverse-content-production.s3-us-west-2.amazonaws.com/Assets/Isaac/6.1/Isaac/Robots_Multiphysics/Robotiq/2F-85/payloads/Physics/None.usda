@@ -1,0 +1,55 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (0.18173853819298824, -0.1889297963908149, 0.24230409941838207)
+                double3 target = (0.07693172486486198, -0.08298867433718148, 0.1449407625441711)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./Robotiq_2F_85_edit.usd"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+        }
+    }
+    defaultPrim = "Robotiq_2F_85"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+def "Robotiq_2F_85" (
+    customData = {
+        string[] variantPrimPaths = ["Robotiq_2F_85/Joints"]
+    }
+)
+{
+    def "Robotiq_2F_85"
+    {
+        def "Joints" (
+            active = false
+        )
+        {
+        }
+    }
+}
+

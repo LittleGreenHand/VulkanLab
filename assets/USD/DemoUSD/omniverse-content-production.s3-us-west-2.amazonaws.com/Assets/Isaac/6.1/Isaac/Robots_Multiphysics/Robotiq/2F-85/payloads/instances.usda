@@ -1,0 +1,921 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (0.18173853819298824, -0.1889297963908149, 0.24230409941838207)
+                double3 target = (0.07693172486486198, -0.08298867433718148, 0.1449407625441711)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./Robotiq_2F_85_edit.usd"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+        }
+    }
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+def Xform "Robotiq_2F_85" (
+    apiSchemas = ["PhysicsArticulationRootAPI", "PhysxArticulationAPI"]
+)
+{
+    bool physxArticulation:enabledSelfCollisions = 0
+    int physxArticulation:solverPositionIterationCount = 64
+    quatd xformOp:orient = (1, 0, 0, 0)
+    double3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, 0, 0)
+    token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+    def Xform "base_link"
+    {
+        def Xform "visuals"
+        {
+            quatd xformOp:orient = (0.4999999999999999, 0.5000000000000001, 0.5000000000000001, 0.5000000000000001)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_basestep_01"
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "Defeatured_2F_85_PAD_OPEN_basestep" (
+                    apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_basestep>
+                )
+                {
+                    double[] inertiaMatrix = [0.0004746842222151654, 1.1593848512898524e-9, -2.353766274892451e-8, 1.1593848512898524e-9, 0.00036290683417457444, -3.0421779496695915e-7, -2.353766274892451e-8, -3.0421779496695915e-7, 0.0005407481985062766]
+                    token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 1
+
+                    over "Defeatured_2F_85_PAD_OPEN_basestep" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.0004746842222151654, 1.1593848512898524e-9, -2.353766274892451e-8, 1.1593848512898524e-9, 0.00036290683417457444, -3.0421779496695915e-7, -2.353766274892451e-8, -3.0421779496695915e-7, 0.0005407481985062766]
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+
+                        over "Cod_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Cod_Gray>
+                        }
+
+                        over "Stack" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Stack>
+                        }
+
+                        over "Chateau_Green" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Chateau_Green>
+                        }
+
+                        over "Gravel" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Gravel>
+                        }
+
+                        over "Silver_Rust" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Silver_Rust>
+                        }
+
+                        over "Gallery" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Gallery>
+                        }
+
+                        over "Blue_Ribbon" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Blue_Ribbon>
+                        }
+
+                        over "Dawn" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Dawn>
+                        }
+
+                        over "White" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/White>
+                        }
+
+                        over "Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Gray>
+                        }
+
+                        over "Mystic" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/base_link/visuals/Defeatured_2F_85_PAD_OPEN_basestep_01/Defeatured_2F_85_PAD_OPEN_basestep/VisualMaterials/Mystic>
+                        }
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Cod_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Cod_Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Stack" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Stack>
+                        )
+                        {
+                        }
+
+                        def Material "Chateau_Green" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Chateau_Green>
+                        )
+                        {
+                        }
+
+                        def Material "Gravel" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Gravel>
+                        )
+                        {
+                        }
+
+                        def Material "Silver_Rust" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Silver_Rust>
+                        )
+                        {
+                        }
+
+                        def Material "Gallery" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Gallery>
+                        )
+                        {
+                        }
+
+                        def Material "Blue_Ribbon" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Blue_Ribbon>
+                        )
+                        {
+                        }
+
+                        def Material "Dawn" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Dawn>
+                        )
+                        {
+                        }
+
+                        def Material "White" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/White>
+                        )
+                        {
+                        }
+
+                        def Material "Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Mystic" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Mystic>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "left_outer_knuckle"
+    {
+        def Xform "visuals"
+        {
+            quatd xformOp:orient = (0.4999999999999999, 0.5000000000000001, 0.5000000000000001, 0.5000000000000001)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_Finger1step_01"
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "Defeatured_2F_85_PAD_OPEN_Finger1step" (
+                    apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_Finger1step>
+                )
+                {
+                    double[] inertiaMatrix = [3.3172591921657694e-7, -1.4530204096372698e-7, 0, -1.4530204096372698e-7, 0.000002045423971425186, 0, 0, 0, 0.0000021349242437293255]
+                    token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 1
+
+                    over "Defeatured_2F_85_PAD_OPEN_Finger1step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [3.3172591921657694e-7, -1.4530204096372698e-7, 0, -1.4530204096372698e-7, 0.000002045423971425186, 0, 0, 0, 0.0000021349242437293255]
+                        custom rel material:binding
+                        prepend rel material:binding = </Robotiq_2F_85/left_outer_knuckle/visuals/Defeatured_2F_85_PAD_OPEN_Finger1step_01/Defeatured_2F_85_PAD_OPEN_Finger1step/VisualMaterials/Pumice>
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Pumice" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Pumice>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "right_outer_knuckle" (
+        apiSchemas = ["PhysicsRigidBodyAPI"]
+    )
+    {
+        quatd xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals"
+        {
+            quatd xformOp:orient = (0.4999999999999999, 0.5000000000000001, -0.5000000000000001, -0.5000000000000001)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_Finger1step_01"
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "Defeatured_2F_85_PAD_OPEN_Finger1step" (
+                    apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_Finger1step>
+                )
+                {
+                    double[] inertiaMatrix = [3.3172591921657694e-7, -1.4530204096372698e-7, 0, -1.4530204096372698e-7, 0.000002045423971425186, 0, 0, 0, 0.0000021349242437293255]
+                    token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 1
+
+                    over "Defeatured_2F_85_PAD_OPEN_Finger1step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [3.3172591921657694e-7, -1.4530204096372698e-7, 0, -1.4530204096372698e-7, 0.000002045423971425186, 0, 0, 0, 0.0000021349242437293255]
+                        custom rel material:binding
+                        prepend rel material:binding = </Robotiq_2F_85/right_outer_knuckle/visuals/Defeatured_2F_85_PAD_OPEN_Finger1step_01/Defeatured_2F_85_PAD_OPEN_Finger1step/VisualMaterials/Pumice>
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Pumice" (
+                            instanceable = true
+                            prepend references = @./base.usda@</Robotiq_2F_85/VisualMaterials/Pumice>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "left_outer_finger"
+    {
+        def Xform "visuals"
+        {
+            quatd xformOp:orient = (0.4999999999999999, 0.5000000000000001, 0.5000000000000001, 0.5000000000000001)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_finger2step_01"
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "Defeatured_2F_85_PAD_OPEN_finger2step" (
+                    apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_finger2step>
+                )
+                {
+                    double[] inertiaMatrix = [0.000012638332145022882, 0.000002203588960140742, -8.504687024042132e-10, 0.000002203588960140742, 0.000004874970457524958, 4.026630666546916e-9, -8.504687024042132e-10, 4.026630666546916e-9, 0.000010880904291232196]
+                    token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 1
+
+                    over "Defeatured_2F_85_PAD_OPEN_finger2step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.000012638332145022882, 0.000002203588960140742, -8.504687024042132e-10, 0.000002203588960140742, 0.000004874970457524958, 4.026630666546916e-9, -8.504687024042132e-10, 4.026630666546916e-9, 0.000010880904291232196]
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+
+                        over "Cod_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_outer_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger2step_01/Defeatured_2F_85_PAD_OPEN_finger2step/VisualMaterials/Cod_Gray>
+                        }
+
+                        over "Periwinkle_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_outer_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger2step_01/Defeatured_2F_85_PAD_OPEN_finger2step/VisualMaterials/Periwinkle_Gray>
+                        }
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Cod_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Cod_Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Periwinkle_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Periwinkle_Gray>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "right_outer_finger" (
+        apiSchemas = ["PhysicsRigidBodyAPI"]
+    )
+    {
+        quatd xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals"
+        {
+            quatd xformOp:orient = (0.4999999999999999, 0.5000000000000001, -0.5000000000000001, -0.5000000000000001)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_finger2step_01"
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "Defeatured_2F_85_PAD_OPEN_finger2step" (
+                    apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_finger2step>
+                )
+                {
+                    double[] inertiaMatrix = [0.000012638332145022882, 0.000002203588960140742, -8.504687024042132e-10, 0.000002203588960140742, 0.000004874970457524958, 4.026630666546916e-9, -8.504687024042132e-10, 4.026630666546916e-9, 0.000010880904291232196]
+                    token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 1
+
+                    over "Defeatured_2F_85_PAD_OPEN_finger2step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.000012638332145022882, 0.000002203588960140742, -8.504687024042132e-10, 0.000002203588960140742, 0.000004874970457524958, 4.026630666546916e-9, -8.504687024042132e-10, 4.026630666546916e-9, 0.000010880904291232196]
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+
+                        over "Cod_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_outer_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger2step_01/Defeatured_2F_85_PAD_OPEN_finger2step/VisualMaterials/Cod_Gray>
+                        }
+
+                        over "Periwinkle_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_outer_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger2step_01/Defeatured_2F_85_PAD_OPEN_finger2step/VisualMaterials/Periwinkle_Gray>
+                        }
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Cod_Gray" (
+                            instanceable = true
+                            prepend references = @./base.usda@</Robotiq_2F_85/VisualMaterials/Cod_Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Periwinkle_Gray" (
+                            instanceable = true
+                            prepend references = @./base.usda@</Robotiq_2F_85/VisualMaterials/Periwinkle_Gray>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "left_inner_finger"
+    {
+        def Xform "visuals"
+        {
+            def Xform "Defeatured_2F_85_PAD_OPEN_finger4step_01"
+            {
+                def Xform "Defeatured_2F_85_PAD_OPEN_finger4step" (
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_finger4step>
+                )
+                {
+                    over "Defeatured_2F_85_PAD_OPEN_finger4step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.0000011378434246221952, -4.158879618135558e-7, 2.8275499473177313e-15, -4.158879618135558e-7, 0.0000017491772225024202, 8.53900277449441e-15, 2.8275499473177313e-15, 8.53900277449441e-15, 0.0000017669586651117354]
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+
+                        over "Cod_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Cod_Gray>
+                        }
+
+                        over "Stack" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Stack>
+                        }
+
+                        over "Periwinkle_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Periwinkle_Gray>
+                        }
+
+                        over "Celeste" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Celeste>
+                        }
+
+                        over "Rangoon_Green" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Rangoon_Green>
+                        }
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Cod_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Cod_Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Stack" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Stack>
+                        )
+                        {
+                        }
+
+                        def Material "Periwinkle_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Periwinkle_Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Celeste" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Celeste>
+                        )
+                        {
+                        }
+
+                        def Material "Rangoon_Green" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Rangoon_Green>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_fingertipsstep_01"
+            {
+                def Xform "Defeatured_2F_85_PAD_OPEN_fingertipsstep" (
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_fingertipsstep>
+                )
+                {
+                    over "Defeatured_2F_85_PAD_OPEN_fingertipsstep" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.0000031000731934045262, -4.80168818288321e-7, 8.335547749061047e-13, -4.80168818288321e-7, 0.0000011082570492185917, 6.6705310614956804e-12, 8.335547749061047e-13, 6.6705310614956804e-12, 0.000002838699742101064]
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+
+                        over "Nobel" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_fingertipsstep_01/Defeatured_2F_85_PAD_OPEN_fingertipsstep/VisualMaterials/Nobel>
+                        }
+
+                        over "Rangoon_Green" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/left_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_fingertipsstep_01/Defeatured_2F_85_PAD_OPEN_fingertipsstep/VisualMaterials/Rangoon_Green>
+                        }
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Nobel" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Nobel>
+                        )
+                        {
+                        }
+
+                        def Material "Rangoon_Green" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Rangoon_Green>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "right_inner_finger"
+    {
+        def Xform "visuals"
+        {
+            def Xform "Defeatured_2F_85_PAD_OPEN_finger4step_01"
+            {
+                def Xform "Defeatured_2F_85_PAD_OPEN_finger4step" (
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_finger4step>
+                )
+                {
+                    over "Defeatured_2F_85_PAD_OPEN_finger4step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.0000011378434246221952, -4.158879618135558e-7, 2.8275499473177313e-15, -4.158879618135558e-7, 0.0000017491772225024202, 8.53900277449441e-15, 2.8275499473177313e-15, 8.53900277449441e-15, 0.0000017669586651117354]
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+
+                        over "Cod_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Cod_Gray>
+                        }
+
+                        over "Stack" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Stack>
+                        }
+
+                        over "Periwinkle_Gray" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Periwinkle_Gray>
+                        }
+
+                        over "Celeste" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Celeste>
+                        }
+
+                        over "Rangoon_Green" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_finger4step_01/Defeatured_2F_85_PAD_OPEN_finger4step/VisualMaterials/Rangoon_Green>
+                        }
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Cod_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Cod_Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Stack" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Stack>
+                        )
+                        {
+                        }
+
+                        def Material "Periwinkle_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Periwinkle_Gray>
+                        )
+                        {
+                        }
+
+                        def Material "Celeste" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Celeste>
+                        )
+                        {
+                        }
+
+                        def Material "Rangoon_Green" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Rangoon_Green>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_fingertipsstep_01"
+            {
+                def Xform "Defeatured_2F_85_PAD_OPEN_fingertipsstep" (
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_fingertipsstep>
+                )
+                {
+                    over "Defeatured_2F_85_PAD_OPEN_fingertipsstep" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.0000031000731934045262, -4.80168818288321e-7, 8.335547749061047e-13, -4.80168818288321e-7, 0.0000011082570492185917, 6.6705310614956804e-12, 8.335547749061047e-13, 6.6705310614956804e-12, 0.000002838699742101064]
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+
+                        over "Nobel" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_fingertipsstep_01/Defeatured_2F_85_PAD_OPEN_fingertipsstep/VisualMaterials/Nobel>
+                        }
+
+                        over "Rangoon_Green" (
+                            apiSchemas = ["MaterialBindingAPI"]
+                        )
+                        {
+                            custom rel material:binding
+                            prepend rel material:binding = </Robotiq_2F_85/right_inner_finger/visuals/Defeatured_2F_85_PAD_OPEN_fingertipsstep_01/Defeatured_2F_85_PAD_OPEN_fingertipsstep/VisualMaterials/Rangoon_Green>
+                        }
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Nobel" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Nobel>
+                        )
+                        {
+                        }
+
+                        def Material "Rangoon_Green" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Rangoon_Green>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "left_inner_knuckle"
+    {
+        def Xform "visuals"
+        {
+            quatd xformOp:orient = (0.4999999999999999, 0.5000000000000001, 0.5000000000000001, 0.5000000000000001)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_finger3step_01"
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "Defeatured_2F_85_PAD_OPEN_finger3step" (
+                    apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_finger3step>
+                )
+                {
+                    double[] inertiaMatrix = [0.000008622018967333509, 0.000003646759055662086, 4.5608098039667545e-14, 0.000003646759055662086, 0.000007704538039225997, -1.4189806527411122e-14, 4.5608098039667545e-14, -1.4189806527411122e-14, 0.00000800488002567704]
+                    token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 1
+
+                    over "Defeatured_2F_85_PAD_OPEN_finger3step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.000008622018967333509, 0.000003646759055662086, 4.5608098039667545e-14, 0.000003646759055662086, 0.000007704538039225997, -1.4189806527411122e-14, 4.5608098039667545e-14, -1.4189806527411122e-14, 0.00000800488002567704]
+                        custom rel material:binding
+                        prepend rel material:binding = </Robotiq_2F_85/left_inner_knuckle/visuals/Defeatured_2F_85_PAD_OPEN_finger3step_01/Defeatured_2F_85_PAD_OPEN_finger3step/VisualMaterials/Cod_Gray>
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Cod_Gray" (
+                            instanceable = true
+                            prepend references = @./materials.usda@</Materials/Cod_Gray>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def Xform "right_inner_knuckle" (
+        apiSchemas = ["PhysicsRigidBodyAPI"]
+    )
+    {
+        quatd xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals"
+        {
+            quatd xformOp:orient = (0.4999999999999999, 0.5000000000000001, -0.5000000000000001, -0.5000000000000001)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Xform "Defeatured_2F_85_PAD_OPEN_finger3step_01"
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "Defeatured_2F_85_PAD_OPEN_finger3step" (
+                    apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    prepend references = @./geometries.usd@</Geometries/Defeatured_2F_85_PAD_OPEN_finger3step>
+                )
+                {
+                    double[] inertiaMatrix = [0.000008622018967333509, 0.000003646759055662086, 4.5608098039667545e-14, 0.000003646759055662086, 0.000007704538039225997, -1.4189806527411122e-14, 4.5608098039667545e-14, -1.4189806527411122e-14, 0.00000800488002567704]
+                    token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 1
+
+                    over "Defeatured_2F_85_PAD_OPEN_finger3step" (
+                        apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxTriangleMeshCollisionAPI", "PhysicsMeshCollisionAPI", "PhysxConvexHullCollisionAPI", "MaterialBindingAPI"]
+                    )
+                    {
+                        double[] inertiaMatrix = [0.000008622018967333509, 0.000003646759055662086, 4.5608098039667545e-14, 0.000003646759055662086, 0.000007704538039225997, -1.4189806527411122e-14, 4.5608098039667545e-14, -1.4189806527411122e-14, 0.00000800488002567704]
+                        custom rel material:binding
+                        prepend rel material:binding = </Robotiq_2F_85/right_inner_knuckle/visuals/Defeatured_2F_85_PAD_OPEN_finger3step_01/Defeatured_2F_85_PAD_OPEN_finger3step/VisualMaterials/Cod_Gray>
+                        token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 1
+                    }
+
+                    def Scope "VisualMaterials"
+                    {
+                        def Material "Cod_Gray" (
+                            instanceable = true
+                            prepend references = @./base.usda@</Robotiq_2F_85/VisualMaterials/Cod_Gray>
+                        )
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

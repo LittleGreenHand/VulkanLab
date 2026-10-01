@@ -1,0 +1,161 @@
+#usda 1.0
+(
+    defaultPrim = "spot"
+)
+
+over "spot"
+{
+    rel isaac:robot:namedPoses = </spot/NamedPoses/arm_rest_pose>
+
+    def Scope "NamedPoses"
+    {
+        def IsaacNamedPose "arm_rest_pose"
+        {
+            rel isaac:robot:pose:endLink = </spot/arm0_link_fngr>
+            bool[] isaac:robot:pose:jointFixed = [0, 0, 0, 0, 0, 0, 0]
+            rel isaac:robot:pose:joints = [
+                </spot/body/arm0_sh0>,
+                </spot/arm0_link_sh0/arm0_sh1>,
+                </spot/arm0_link_sh1/arm0_el0>,
+                </spot/arm0_link_el0/arm0_el1>,
+                </spot/arm0_link_el1/arm0_wr0>,
+                </spot/arm0_link_wr0/arm0_wr1>,
+                </spot/arm0_link_wr1/arm0_f1x>,
+            ]
+            float[] isaac:robot:pose:jointValues = [0.000060095703, -149.45451, 150.80365, 0.00038629316, -7.979186, -0.0003943829, 0]
+            rel isaac:robot:pose:startLink = </spot/body>
+            bool isaac:robot:pose:valid = 1
+            quatd xformOp:orient = (0.9983266870920662, -4.567484309268547e-8, -0.057825823295262826, 5.042399988810089e-8)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0.5203824977201664, 1.3268239946093044e-7, 0.45379830067836974)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+        }
+    }
+
+    over "body"
+    {
+        over "arm0_sh0" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            bool[] isaac:actuator (
+                displayName = "Actuator"
+            )
+            string isaac:NameOverride (
+                displayName = "Joint Name Override"
+            )
+            custom string isaac:nameOverride (
+                displayName = "Name Override"
+                doc = "Name override for prim lookup in body name search"
+            )
+            token[] isaac:physics:DofOffsetOpOrder (
+                displayName = "Dof Offset Op Order"
+            )
+        }
+    }
+
+    over "arm0_link_sh0" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride (
+            displayName = "Name Override"
+        )
+
+        over "arm0_sh1" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "arm0_link_sh1" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride (
+            displayName = "Name Override"
+        )
+
+        over "arm0_el0" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "arm0_link_el0" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "arm0_el1" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "arm0_link_el1" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride (
+            displayName = "Name Override"
+        )
+
+        over "arm0_wr0" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "arm0_link_wr0" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride (
+            displayName = "Name Override"
+        )
+
+        over "arm0_wr1" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "arm0_link_wr1" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride (
+            displayName = "Name Override"
+        )
+
+        over "arm0_f1x" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            bool[] isaac:actuator (
+                displayName = "Actuator"
+            )
+            string isaac:NameOverride (
+                displayName = "Joint Name Override"
+            )
+            token[] isaac:physics:DofOffsetOpOrder (
+                displayName = "Dof Offset Op Order"
+            )
+        }
+    }
+
+    over "arm0_link_fngr" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride (
+            displayName = "Name Override"
+        )
+    }
+}
+

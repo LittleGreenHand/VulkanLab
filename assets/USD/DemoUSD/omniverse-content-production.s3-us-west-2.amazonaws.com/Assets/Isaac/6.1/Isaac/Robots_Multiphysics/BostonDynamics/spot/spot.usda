@@ -1,0 +1,72 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (-1.325775300113189, 0.13250527481682373, 0.5756606489421192)
+                double3 target = (6.490853026073124, 0.6013935022045278, -3.123050672650708)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./spot.usd"
+        }
+        dictionary renderSettings = {
+        }
+    }
+    defaultPrim = "spot"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+def Xform "spot" (
+    prepend references = @./payloads/base.usda@
+    variants = {
+        string Arm = "Disabled"
+        string Physics = "physx"
+    }
+    prepend variantSets = "Arm"
+    append variantSets = "Physics"
+)
+{
+    variantSet "Physics" = {
+        "none" {
+
+        }
+        "physics" (
+            prepend payload = @./payloads/Physics/physics.usda@
+        ) {
+
+        }
+        "physx" (
+            prepend payload = @./payloads/Physics/physx.usda@
+        ) {
+
+        }
+    }
+    variantSet "Arm" = {
+        "Disabled" {
+
+        }
+        "Enabled" (
+            prepend payload = @./payloads/arm/arm.usda@
+        ) {
+
+        }
+    }
+}
+

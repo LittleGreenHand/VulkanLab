@@ -1,0 +1,697 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (0.18173853819298824, -0.1889297963908149, 0.24230409941838207)
+                double3 target = (0.07693172486486198, -0.08298867433718148, 0.1449407625441711)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./Robotiq_2F_85_edit.usd"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+        }
+    }
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+def Scope "Materials"
+{
+    def Material "Cod_Gray"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Cod_Gray/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Cod_Gray/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Cod_Gray/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.039215688, 0.039215688, 0.039215688)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Stack"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Stack/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Stack/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Stack/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.5294118, 0.54901963, 0.54901963)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Chateau_Green"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["emissive"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Chateau_Green/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Chateau_Green/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Chateau_Green/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.28627452, 0.6627451, 0.32941177)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Gravel"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Gravel/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Gravel/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Gravel/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.29803923, 0.29803923, 0.29803923)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Silver_Rust"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "steel"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Silver_Rust/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Silver_Rust/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Silver_Rust/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.7764706, 0.75686276, 0.7372549)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Gallery"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Gallery/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Gallery/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Gallery/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.9372549, 0.9372549, 0.9372549)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Blue_Ribbon"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["emissive"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Blue_Ribbon/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Blue_Ribbon/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Blue_Ribbon/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.13333334, 0.33333334, 1)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Dawn"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Dawn/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Dawn/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Dawn/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.64705884, 0.61960787, 0.5882353)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "White"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/White/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/White/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/White/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (1, 1, 1)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Gray"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "rubber"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Gray/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Gray/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Gray/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.49411765, 0.49411765, 0.49411765)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Mystic"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Mystic/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Mystic/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Mystic/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.8980392, 0.91764706, 0.92941177)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Pumice"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "rubber"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Pumice/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Pumice/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Pumice/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.78431374, 0.78431374, 0.78431374)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Periwinkle_Gray"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "rubber"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Periwinkle_Gray/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Periwinkle_Gray/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Periwinkle_Gray/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.7921569, 0.81960785, 0.93333334)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Celeste"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "rubber"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Celeste/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Celeste/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Celeste/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.8, 0.80784315, 0.8)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Rangoon_Green"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "rubber"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Rangoon_Green/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Rangoon_Green/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Rangoon_Green/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.11764706, 0.11764706, 0.11764706)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+
+    def Material "Nobel"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "rubber"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "displacement" output terminal of a 
+        material.'''
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/Nobel/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/Nobel/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/Nobel/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "surface" output terminal of a
+        material.'''
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+            doc = '''Represents the universal "volume" output terminal of a
+        material.'''
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.7019608, 0.7019608, 0.7019608)
+            color3f inputs:emissive_color = (0, 0, 0)
+            float inputs:emissive_intensity = 0
+            bool inputs:enable_emission = 0
+            float inputs:metallic_constant = 0
+            float inputs:reflection_roughness_constant = 0.5
+            token outputs:out
+        }
+    }
+}
+

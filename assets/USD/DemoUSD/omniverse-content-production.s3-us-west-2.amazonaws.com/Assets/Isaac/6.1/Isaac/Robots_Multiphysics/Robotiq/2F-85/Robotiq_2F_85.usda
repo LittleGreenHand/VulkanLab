@@ -1,0 +1,71 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (0.18173853819298824, -0.1889297963908149, 0.24230409941838207)
+                double3 target = (0.07693172486486197, -0.0829886743371815, 0.14494076254417107)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./Robotiq_2F_85.usda"
+        }
+        dictionary renderSettings = {
+        }
+    }
+    defaultPrim = "Robotiq_2F_85"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+def Xform "Robotiq_2F_85" (
+    prepend references = @./payloads/base.usda@
+    variants = {
+        string Physics = "Physx_Mimic"
+    }
+    append variantSets = "Physics"
+)
+{
+    string isaac:namespace (
+        displayName = "Namespace"
+        doc = "Namespace of the prim in Isaac Sim"
+    )
+    variantSet "Physics" = {
+        "None" (
+            prepend payload = @./payloads/Physics/None.usda@
+        ) {
+
+        }
+        "Physics" (
+            prepend payload = @./payloads/Physics/Physics.usda@
+        ) {
+
+        }
+        "Physx_Loop" (
+            prepend payload = @./payloads/Physics/Physx_Loop.usda@
+        ) {
+
+        }
+        "Physx_Mimic" (
+            prepend payload = @./payloads/Physics/Physx_Mimic.usda@
+        ) {
+
+        }
+    }
+}
+

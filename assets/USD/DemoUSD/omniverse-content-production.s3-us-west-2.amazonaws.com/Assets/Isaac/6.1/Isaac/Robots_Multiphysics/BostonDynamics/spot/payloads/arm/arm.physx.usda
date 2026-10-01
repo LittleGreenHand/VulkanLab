@@ -1,0 +1,88 @@
+#usda 1.0
+(
+    defaultPrim = "spot"
+    subLayers = [
+        @./arm.physics.usda@
+    ]
+)
+
+over "spot"
+{
+    over "body"
+    {
+        over "arm0_sh0" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:jointFriction = 10
+            float physxJoint:maxJointVelocity = 57238.484
+        }
+    }
+
+    over "arm0_link_sh0"
+    {
+        over "arm0_sh1" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:jointFriction = 10
+            float physxJoint:maxJointVelocity = 57238.484
+        }
+    }
+
+    over "arm0_link_sh1"
+    {
+        over "arm0_el0" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:jointFriction = 10
+            float physxJoint:maxJointVelocity = 57238.484
+        }
+    }
+
+    over "arm0_link_el0"
+    {
+        over "arm0_el1" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:jointFriction = 10
+            float physxJoint:maxJointVelocity = 57238.484
+        }
+    }
+
+    over "arm0_link_el1"
+    {
+        over "arm0_wr0" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:jointFriction = 10
+            float physxJoint:maxJointVelocity = 57238.484
+        }
+    }
+
+    over "arm0_link_wr0"
+    {
+        over "arm0_wr1" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:jointFriction = 10
+            float physxJoint:maxJointVelocity = 57238.484
+        }
+    }
+
+    over "arm0_link_wr1"
+    {
+        over "arm0_f1x" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:jointFriction = 10
+            float physxJoint:maxJointVelocity = 57238.484
+        }
+    }
+}
+

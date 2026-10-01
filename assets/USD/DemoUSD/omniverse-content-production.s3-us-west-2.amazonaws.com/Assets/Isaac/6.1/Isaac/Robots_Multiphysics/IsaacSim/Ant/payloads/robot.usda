@@ -1,0 +1,254 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (50000.913137040225, -1.1102433003404901e-11, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (5, 4.9999999999999964, 5.000000000000003)
+                double3 target = (-3.98696791137354e-8, -3.98696791137354e-8, 7.947147739884031e-8)
+            }
+            dictionary Right = {
+                double3 position = (0, -50000.91313708642, -1.1102433003415162e-11)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 50000.25)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./ant.usd"
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "ant"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+over "ant" (
+    prepend apiSchemas = ["IsaacRobotAPI"]
+)
+{
+    string isaac:description
+    string isaac:namespace
+    prepend rel isaac:physics:robotJoints = [
+        </ant/joints/front_left_leg>,
+        </ant/joints/front_left_foot>,
+        </ant/joints/front_right_leg>,
+        </ant/joints/front_right_foot>,
+        </ant/joints/left_back_leg>,
+        </ant/joints/left_back_foot>,
+        </ant/joints/right_back_leg>,
+        </ant/joints/right_back_foot>,
+    ]
+    prepend rel isaac:physics:robotLinks = [
+        </ant/torso>,
+        </ant/front_left_leg>,
+        </ant/front_left_foot>,
+        </ant/front_right_leg>,
+        </ant/front_right_foot>,
+        </ant/left_back_leg>,
+        </ant/left_back_foot>,
+        </ant/right_back_leg>,
+        </ant/right_back_foot>,
+    ]
+
+    over "torso" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "front_left_leg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "joints"
+    {
+        over "front_left_leg" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+
+        over "front_left_foot" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+
+        over "front_right_leg" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+
+        over "front_right_foot" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+
+        over "left_back_leg" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+
+        over "left_back_foot" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+
+        over "right_back_leg" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+
+        over "right_back_foot" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+    }
+
+    over "front_left_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "front_right_leg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "front_right_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "left_back_leg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "left_back_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "right_back_leg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+
+    over "right_back_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        string isaac:nameOverride
+    }
+}
+

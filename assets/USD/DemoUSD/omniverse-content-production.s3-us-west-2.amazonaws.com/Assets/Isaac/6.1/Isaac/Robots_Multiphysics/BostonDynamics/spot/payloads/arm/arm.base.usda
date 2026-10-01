@@ -1,0 +1,164 @@
+#usda 1.0
+(
+    defaultPrim = "spot"
+)
+
+def Xform "spot"
+{
+    def Xform "arm0_link_sh0"
+    {
+        quatd xformOp:orient = (0.9999999999998624, 0, 0, 5.245124073862265e-7)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0.2919999957084656, 0, 0.18799999356269836)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals" (
+            instanceable = true
+            prepend references = @./arm.instances.usda@</Instances/visuals_1>
+        )
+        {
+            over "visuals_1" (
+                apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "arm0_link_sh1"
+    {
+        quatd xformOp:orient = (-0.2634141604199645, -5.059881183103592e-7, 0.9646828391186246, -1.3816399542151618e-7)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0.2919999957084656, 0, 0.18799999356269836)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals"
+        {
+            def Xform "mesh_0" (
+                instanceable = true
+                prepend references = @./arm.instances.usda@</Instances/mesh_0>
+            )
+            {
+                over "mesh_0" (
+                    apiSchemas = ["MaterialBindingAPI"]
+                )
+                {
+                }
+            }
+
+            def Xform "mesh_1" (
+                instanceable = true
+                prepend references = @./arm.instances.usda@</Instances/mesh_1>
+            )
+            {
+                over "mesh_1" (
+                    apiSchemas = ["MaterialBindingAPI"]
+                )
+                {
+                }
+            }
+        }
+
+        def Scope "Looks"
+        {
+        }
+    }
+
+    def Xform "arm0_link_el0"
+    {
+        quatd xformOp:orient = (0.9999306939062823, -6.175170441938004e-9, 0.01177316371353271, 5.244760554799303e-7)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0.00047501414217865356, -3.058169397892431e-7, 0.3600332183822392)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals" (
+            instanceable = true
+            prepend references = @./arm.instances.usda@</Instances/visuals_2>
+        )
+        {
+            over "visuals_2" (
+                apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "arm0_link_el1"
+    {
+        quatd xformOp:orient = (0.9999306939006215, 0.000003364634978260511, 0.011773163715237891, 4.847882051393446e-7)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0.4054290529802107, 1.1898989579410824e-7, 0.4255168548482444)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals" (
+            instanceable = true
+            prepend references = @./arm.instances.usda@</Instances/visuals_3>
+        )
+        {
+            over "visuals_3" (
+                apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "arm0_link_wr0"
+    {
+        quatd xformOp:orient = (0.9983266870863108, 0.0000033902107467581283, -0.05782582329474893, 2.495180020397583e-7)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0.4054290529802107, 1.1898989579410824e-7, 0.4255168548482444)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals" (
+            instanceable = true
+            prepend references = @./arm.instances.usda@</Instances/visuals_4>
+        )
+        {
+            over "visuals_4" (
+                apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "arm0_link_wr1"
+    {
+        quatd xformOp:orient = (0.9983266870920662, -4.567030565130723e-8, -0.05782582329526445, 5.050233595695654e-8)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0.4054290529802107, 1.1898989579410824e-7, 0.4255168548482444)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "visuals" (
+            instanceable = true
+            prepend references = @./arm.instances.usda@</Instances/visuals_5>
+        )
+        {
+            over "visuals_5" (
+                apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "arm0_link_fngr" (
+        instanceable = true
+        prepend references = @./arm.instances.usda@</Instances/visuals_6>
+    )
+    {
+        quatd xformOp:orient = (0.9983266871, -4.567030565e-8, -0.0578258233, 5.050233596e-8)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0.5203824977, 1.327182406e-7, 0.4537983007)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        over "visuals_6" (
+            apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+        }
+    }
+}
+

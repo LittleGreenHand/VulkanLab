@@ -1,0 +1,304 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (-1.325775300113189, 0.13250527481682373, 0.5756606489421192)
+                double3 target = (6.490853026073124, 0.6013935022045278, -3.123050672650708)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./spot.usd"
+        }
+        dictionary renderSettings = {
+        }
+    }
+    defaultPrim = "spot"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+over "spot" (
+    prepend apiSchemas = ["IsaacRobotAPI"]
+)
+{
+    string isaac:description
+    string isaac:namespace (
+        displayName = "Namespace"
+        doc = "Namespace of the prim in Isaac Sim"
+    )
+    prepend rel isaac:physics:robotJoints = [
+        </spot/body/fl_hx>,
+        </spot/fl_hip/fl_hy>,
+        </spot/fl_uleg/fl_kn>,
+        </spot/body/fr_hx>,
+        </spot/fr_hip/fr_hy>,
+        </spot/fr_uleg/fr_kn>,
+        </spot/body/hl_hx>,
+        </spot/hl_hip/hl_hy>,
+        </spot/hl_uleg/hl_kn>,
+        </spot/body/hr_hx>,
+        </spot/hr_hip/hr_hy>,
+        </spot/hr_uleg/hr_kn>,
+        </spot/fl_lleg/fl_ank>,
+        </spot/fr_lleg/fr_ank>,
+        </spot/hl_lleg/hl_ank>,
+        </spot/hr_lleg/hr_ank>,
+    ]
+    prepend rel isaac:physics:robotLinks = [
+        </spot/body>,
+        </spot/fl_hip>,
+        </spot/fl_uleg>,
+        </spot/fl_lleg>,
+        </spot/fl_foot>,
+        </spot/fr_hip>,
+        </spot/fr_uleg>,
+        </spot/fr_lleg>,
+        </spot/fr_foot>,
+        </spot/hl_hip>,
+        </spot/hl_uleg>,
+        </spot/hl_lleg>,
+        </spot/hl_foot>,
+        </spot/hr_hip>,
+        </spot/hr_uleg>,
+        </spot/hr_lleg>,
+        </spot/hr_foot>,
+    ]
+
+    over "fl_lleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "fl_ank" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+    }
+
+    over "fr_lleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "fr_ank" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+    }
+
+    over "hl_lleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "hl_ank" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+    }
+
+    over "hr_lleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "hr_ank" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+            custom string isaac:nameOverride
+            float[] isaac:physics:AccelerationLimit
+            float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+        }
+    }
+
+    over "body" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "fl_hx" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "fr_hx" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "hl_hx" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "hr_hx" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "fl_hip" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "fl_hy" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "fl_uleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "fl_kn" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "fl_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+    }
+
+    over "fr_hip" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "fr_hy" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "fr_uleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "fr_kn" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "fr_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+    }
+
+    over "hl_hip" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "hl_hy" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "hl_uleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "hl_kn" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "hl_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+    }
+
+    over "hr_hip" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "hr_hy" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "hr_uleg" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+        over "hr_kn" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+
+    over "hr_foot" (
+        prepend apiSchemas = ["IsaacLinkAPI"]
+    )
+    {
+    }
+}
+

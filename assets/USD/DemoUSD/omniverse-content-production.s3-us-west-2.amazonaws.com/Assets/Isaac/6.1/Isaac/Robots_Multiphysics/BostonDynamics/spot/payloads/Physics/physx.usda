@@ -1,0 +1,168 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (-1.325775300113189, 0.13250527481682373, 0.5756606489421192)
+                double3 target = (6.490853026073124, 0.6013935022045278, -3.123050672650708)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./spot.usd"
+        }
+        dictionary renderSettings = {
+        }
+    }
+    defaultPrim = "spot"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    subLayers = [
+        @./physics.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "spot" (
+    prepend apiSchemas = ["PhysxArticulationAPI"]
+)
+{
+    int physxArticulation:solverPositionIterationCount = 4
+    int physxArticulation:solverVelocityIterationCount = 0
+
+    over "fl_hip"
+    {
+        over "fl_hy" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "fl_uleg"
+    {
+        over "fl_kn" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "fr_hip"
+    {
+        over "fr_hy" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "fr_uleg"
+    {
+        over "fr_kn" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "hl_hip"
+    {
+        over "hl_hy" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "hl_uleg"
+    {
+        over "hl_kn" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "hr_hip"
+    {
+        over "hr_hy" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "hr_uleg"
+    {
+        over "hr_kn" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+
+    over "body"
+    {
+        over "fl_hx" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+
+        over "fr_hx" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+
+        over "hl_hx" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+
+        over "hr_hx" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 5729.578
+        }
+    }
+}
+
+over "physicsScene" (
+    prepend apiSchemas = ["PhysxSceneAPI"]
+)
+{
+    uniform token physxScene:broadphaseType = "MBP"
+    bool physxScene:enableCCD = 1
+    bool physxScene:enableGPUDynamics = 0
+    bool physxScene:enableStabilization = 1
+    uniform token physxScene:solverType = "TGS"
+}
+

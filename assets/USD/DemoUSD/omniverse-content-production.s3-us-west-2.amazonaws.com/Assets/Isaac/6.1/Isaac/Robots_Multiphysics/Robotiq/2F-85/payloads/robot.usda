@@ -1,0 +1,131 @@
+#usda 1.0
+(
+    defaultPrim = "Robotiq_2F_85"
+)
+
+    over "Robotiq_2F_85" (
+        prepend apiSchemas = ["IsaacRobotAPI"]
+    )
+    {
+        string isaac:namespace (
+            displayName = "Namespace"
+            doc = "Namespace of the prim in Isaac Sim"
+        )
+        rel isaac:physics:robotJoints = [
+            </Robotiq_2F_85/Joints/finger_joint>,
+            </Robotiq_2F_85/Joints/right_outer_knuckle_joint>,
+            </Robotiq_2F_85/Joints/right_inner_finger_joint>,
+            </Robotiq_2F_85/Joints/right_inner_finger_knuckle_joint>,
+            </Robotiq_2F_85/Joints/left_inner_finger_knuckle_joint>,
+            </Robotiq_2F_85/Joints/left_inner_finger_joint>,
+        ]
+        rel isaac:physics:robotLinks = [
+            </Robotiq_2F_85/base_link>,
+            </Robotiq_2F_85/left_outer_knuckle>,
+            </Robotiq_2F_85/left_outer_finger>,
+            </Robotiq_2F_85/left_inner_finger>,
+            </Robotiq_2F_85/left_inner_knuckle>,
+            </Robotiq_2F_85/right_outer_knuckle>,
+            </Robotiq_2F_85/right_outer_finger>,
+            </Robotiq_2F_85/right_inner_finger>,
+            </Robotiq_2F_85/right_inner_knuckle>,
+        ]
+
+        over "base_link" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+            string isaac:nameOverride (
+                displayName = "Name Override"
+                doc = "Name override for prim lookup in base name search"
+            )
+        }
+
+        over "left_outer_knuckle" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "left_outer_finger" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "left_inner_finger" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "left_inner_knuckle" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "right_outer_knuckle" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "right_outer_finger" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "right_inner_finger" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "right_inner_knuckle" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+        }
+
+        over "Joints"
+        {
+            over "finger_joint" (
+                prepend apiSchemas = ["IsaacJointAPI"]
+            )
+            {
+            }
+
+            over "right_outer_knuckle_joint" (
+                prepend apiSchemas = ["IsaacJointAPI"]
+            )
+            {
+            }
+
+            over "right_inner_finger_joint" (
+                prepend apiSchemas = ["IsaacJointAPI"]
+            )
+            {
+            }
+
+            over "right_inner_finger_knuckle_joint" (
+                prepend apiSchemas = ["IsaacJointAPI"]
+            )
+            {
+            }
+
+            over "left_inner_finger_knuckle_joint" (
+                prepend apiSchemas = ["IsaacJointAPI"]
+            )
+            {
+            }
+
+            over "left_inner_finger_joint" (
+                prepend apiSchemas = ["IsaacJointAPI"]
+            )
+            {
+            }
+        }
+    }
+

@@ -1,0 +1,537 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary audioSettings = {
+            double dopplerLimit = 2
+            double dopplerScale = 1
+            double nonSpatialTimeScale = 1
+            double spatialTimeScale = 1
+            double speedOfSound = 340
+        }
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (1000.0000000000005, -2.2204460492503136e-13, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (1.9755832156208093, 0.918544123983318, 0.5874775538777527)
+                double radius = 808.1671358505603
+                double3 target = (-3.0952298253692048, -1.402244195632354, 0.9887232962856027)
+            }
+            dictionary Right = {
+                double3 position = (0, -1000, -2.220446049250313e-13)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 1000)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary navmeshSettings = {
+            double agentHeight = 180
+            double agentRadius = 20
+            bool excludeRigidBodies = 1
+            int ver = 1
+            double voxelCeiling = 460
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./franka.usd"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary physicsSettings = {
+            int "/persistent/simulation/minFrameRate" = 60
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "panda"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    subLayers = [
+        @./robot.usda@
+    ]
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def Xform "panda" (
+    customData = {
+        string[] variantPrimPaths = ["panda_link4/geometry", "panda_link2/geometry", "panda_link1/geometry", "panda_link5/geometry", "panda_link6/geometry", "panda_link3/geometry", "panda_link7/geometry", "panda_link0/geometry"]
+    }
+)
+{
+    quatd xformOp:orient = (1, 0, 0, 0)
+    double3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+    def Xform "panda_link0" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-2.3841857e-9, 2.9802322e-10, 2.3841856e-8)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            instanceable = false
+            kind = ""
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link0" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link0>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_link1" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (9.685754e-10, 1.2636184e-7, 0.33300033)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            instanceable = false
+            kind = ""
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link1" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link1>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_link2" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (-0.7071066, 0.70710695, -1.4901161e-8, 1.359731e-7)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (6.081536e-9, -1.1205673e-7, 0.33300003)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            instanceable = false
+            kind = ""
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 3.0185458e-7, 3.0185456e-7)
+            float3 xformOp:scale = (1, 1.0000001, 1.0000001)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link2" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link2>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_link3" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-1.5258789e-7, -5.7220458e-8, 0.649)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            instanceable = false
+            kind = ""
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link3" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link3>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_link4" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (0.7071062, 0.70710737, -7.4505806e-8, -1.527369e-7)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.08250008, 5.7220458e-8, 0.6489999)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            instanceable = false
+            kind = ""
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 6.0370934e-7, 0)
+            float3 xformOp:scale = (1, 0.99999994, 0.99999994)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link4" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link4>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_link5" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (5.960464e-9, -2.4318695e-7, 1.0330003)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            instanceable = false
+            kind = ""
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link5" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link5>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_link6" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (0.70710564, 0.7071079, 1.0477379e-8, 1.9324943e-8)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-1.4781952e-7, -4.2319297e-8, 1.0329999)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+            instanceable = false
+            kind = ""
+        )
+        {
+            rel material:binding (
+                bindMaterialAs = "strongerThanDescendants"
+            )
+            float3 xformOp:rotateZYX = (0, 0, 0.0000011319547)
+            float3 xformOp:scale = (1, 1.0000004, 1.0000004)
+            double3 xformOp:translate = (-5.692792449209269e-9, 4.372753403814045e-7, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link6" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link6>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_link7" (
+        instanceable = false
+    )
+    {
+        token visibility = "inherited"
+        quatf xformOp:orient = (6.123234e-17, 1, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.08799997, -1.02519984e-7, 1.033)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "geometry" (
+            instanceable = false
+            kind = ""
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 0, 0)
+            float3 xformOp:scale = (1, 1.0000005, 1.0000005)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+
+            def Xform "panda_link7" (
+                instanceable = true
+                prepend references = @./instances.usda@</Instances/panda_link7>
+            )
+            {
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (0.009999999776, 0.009999999776, 0.009999999776)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Scope "Looks" (
+                instanceable = false
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "panda_hand" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (-6.5592767e-9, 0.9238795, 0.38268355, 1.8626451e-9)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.08799997, -4.865229e-8, 0.92599994)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "geometry" (
+            instanceable = false
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 0, 0)
+            float3 xformOp:scale = (1.0000001, 0.9999986, 0.9999987)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+        }
+
+        def Xform "tool_center" (
+            apiSchemas = None
+        )
+        {
+            quatd xformOp:orient = (1, 0, 0, 0)
+            double3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (-6.938893903907228e-18, 0, 0.10340000000000016)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+        }
+    }
+
+    def Xform "panda_rightfinger" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (6.123234e-17, 0.9238795, 0.38268346, -6.19799e-17)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.08799997, -6.9141386e-8, 0.8676001)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "geometry" (
+            instanceable = false
+        )
+        {
+            float3 xformOp:rotateZYX = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZYX", "xformOp:scale"]
+        }
+    }
+
+    def Xform "panda_leftfinger" (
+        instanceable = false
+    )
+    {
+        quatf xformOp:orient = (6.123234e-17, 0.92387944, 0.38268366, -2.6890988e-17)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.087999955, -3.159046e-8, 0.8676001)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "geometry" (
+            instanceable = false
+        )
+        {
+        }
+    }
+
+    over "Robotiq_2F_85_edit"
+    {
+        string isaac:namespace (
+            displayName = "Namespace"
+            doc = "Namespace of the prim in Isaac Sim"
+        )
+
+        over "Robotiq_2F_85"
+        {
+            over "base_link"
+            {
+            }
+
+            over "left_outer_knuckle"
+            {
+            }
+
+            over "left_outer_finger"
+            {
+            }
+
+            over "left_inner_finger"
+            {
+            }
+
+            over "left_inner_knuckle"
+            {
+            }
+
+            over "right_outer_knuckle"
+            {
+            }
+
+            over "right_outer_finger"
+            {
+            }
+
+            over "right_inner_finger"
+            {
+            }
+
+            over "right_inner_knuckle"
+            {
+            }
+
+            over "Joints"
+            {
+                over "finger_joint"
+                {
+                    float state:angular:physics:position = -3.5326963e-8
+                    float state:angular:physics:velocity = -0.016860245
+                }
+
+                over "right_outer_knuckle_joint"
+                {
+                    float state:angular:physics:position = -9.79341e-8
+                    float state:angular:physics:velocity = 0.013710747
+                }
+
+                over "left_inner_finger_joint"
+                {
+                    float state:angular:physics:position = 0.000033165823
+                    float state:angular:physics:velocity = 0.016860252
+                }
+
+                over "right_inner_finger_joint"
+                {
+                    float state:angular:physics:position = 0.00011276541
+                    float state:angular:physics:velocity = -0.15847589
+                }
+
+                over "left_inner_finger_knuckle_joint"
+                {
+                    float state:angular:physics:position = 0.00003212196
+                    float state:angular:physics:velocity = -0.040696997
+                }
+
+                over "right_inner_finger_knuckle_joint"
+                {
+                    float state:angular:physics:position = -0.000023753099
+                    float state:angular:physics:velocity = 0.014815701
+                }
+            }
+        }
+    }
+
+    def Scope "VisualMaterials"
+    {
+    }
+}
+

@@ -1,0 +1,268 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (50000.913137040225, -1.1102433003404901e-11, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (5, 4.9999999999999964, 5.000000000000003)
+                double3 target = (-3.98696791137354e-8, -3.98696791137354e-8, 7.947147739884031e-8)
+            }
+            dictionary Right = {
+                double3 position = (0, -50000.91313708642, -1.1102433003415162e-11)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 50000.25)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./ant.usd"
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "ant"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    subLayers = [
+        @./physics.usda@
+    ]
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+over "ant"
+{
+    over "torso" (
+        prepend apiSchemas = ["PhysxArticulationAPI"]
+    )
+    {
+        over "collisions"
+        {
+            over "torso_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+
+            over "aux_1_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+
+            over "aux_2_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+
+            over "aux_3_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+
+            over "aux_4_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "joints"
+    {
+        over "front_left_leg" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+
+        over "front_left_foot" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+
+        over "front_right_leg" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+
+        over "front_right_foot" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+
+        over "left_back_leg" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+
+        over "left_back_foot" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+
+        over "right_back_leg" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+
+        over "right_back_foot" (
+            prepend apiSchemas = ["PhysxLimitAPI:angular", "PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.01
+            float physxLimit:angular:damping = 0.1 (
+                allowedTokens = []
+            )
+        }
+    }
+
+    over "front_left_leg"
+    {
+        over "collisions"
+        {
+            over "left_leg_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "front_left_foot"
+    {
+        over "collisions"
+        {
+            over "left_ankle_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "front_right_leg"
+    {
+        over "collisions"
+        {
+            over "right_leg_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "front_right_foot"
+    {
+        over "collisions"
+        {
+            over "right_ankle_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "left_back_leg"
+    {
+        over "collisions"
+        {
+            over "back_leg_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "left_back_foot"
+    {
+        over "collisions"
+        {
+            over "third_ankle_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "right_back_leg"
+    {
+        over "collisions"
+        {
+            over "rightback_leg_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+
+    over "right_back_foot"
+    {
+        over "collisions"
+        {
+            over "fourth_ankle_geom"
+            {
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+            }
+        }
+    }
+}
+
+over "physicsScene" (
+    prepend apiSchemas = ["PhysxSceneAPI"]
+)
+{
+}
+

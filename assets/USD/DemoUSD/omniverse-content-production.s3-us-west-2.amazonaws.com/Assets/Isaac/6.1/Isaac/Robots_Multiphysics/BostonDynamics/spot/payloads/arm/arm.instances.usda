@@ -1,0 +1,173 @@
+#usda 1.0
+
+def Scope "Instances"
+{
+    def Xform "visuals_1" (
+        prepend references = @./arm.geometries.usdc@</Geometries/visuals_1>
+    )
+    {
+        over "visuals_1"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/visuals_1/VisualMaterials/material_black_005>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_005" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_005>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "visuals_2" (
+        prepend references = @./arm.geometries.usdc@</Geometries/visuals_2>
+    )
+    {
+        over "visuals_2"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/visuals_2/VisualMaterials/material_black_001>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_001" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_001>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "visuals_3" (
+        prepend references = @./arm.geometries.usdc@</Geometries/visuals_3>
+    )
+    {
+        over "visuals_3"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/visuals_3/VisualMaterials/material_black_002>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_002" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_002>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "visuals_4" (
+        prepend references = @./arm.geometries.usdc@</Geometries/visuals_4>
+    )
+    {
+        over "visuals_4"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/visuals_4/VisualMaterials/material_black_007>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_007" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_007>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "visuals_5" (
+        prepend references = @./arm.geometries.usdc@</Geometries/visuals_5>
+    )
+    {
+        over "visuals_5"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/visuals_5/VisualMaterials/material_black_008>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_008" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_008>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "visuals_6" (
+        prepend references = @./arm.geometries.usdc@</Geometries/visuals_6>
+    )
+    {
+        over "visuals_6"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/visuals_6/VisualMaterials/material_black_003>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_003" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_003>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "mesh_0" (
+        prepend references = @./arm.geometries.usdc@</Geometries/mesh_0>
+    )
+    {
+        over "mesh_0"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/mesh_0/VisualMaterials/material_black_006>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_006" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_006>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "mesh_1" (
+        prepend references = @./arm.geometries.usdc@</Geometries/mesh_1>
+    )
+    {
+        over "mesh_1"
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/mesh_1/VisualMaterials/material_black_004>
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "material_black_004" (
+                instanceable = true
+                prepend references = @./arm.materials.usda@</Materials/material_black_004>
+            )
+            {
+            }
+        }
+    }
+}
+

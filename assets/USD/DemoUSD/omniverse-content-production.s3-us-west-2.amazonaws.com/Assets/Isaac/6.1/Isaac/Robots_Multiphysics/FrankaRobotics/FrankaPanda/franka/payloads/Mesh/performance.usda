@@ -1,0 +1,139 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary audioSettings = {
+            double dopplerLimit = 2
+            double dopplerScale = 1
+            double nonSpatialTimeScale = 1
+            double spatialTimeScale = 1
+            double speedOfSound = 340
+        }
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (1000.0000000000005, -2.2204460492503136e-13, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (1.9755832156208093, 0.918544123983318, 0.5874775538777527)
+                double radius = 808.1671358505603
+                double3 target = (-3.0952298253692048, -1.402244195632354, 0.9887232962856027)
+            }
+            dictionary Right = {
+                double3 position = (0, -1000, -2.220446049250313e-13)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 1000)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary navmeshSettings = {
+            double agentHeight = 180
+            double agentRadius = 20
+            bool excludeRigidBodies = 1
+            int ver = 1
+            double voxelCeiling = 460
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./franka.usd"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary physicsSettings = {
+            int "/persistent/simulation/minFrameRate" = 60
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "panda"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def "panda" (
+    customData = {
+        string[] variantPrimPaths = ["panda_link4/geometry", "panda_link2/geometry", "panda_link1/geometry", "panda_link5/geometry", "panda_link6/geometry", "panda_link3/geometry", "panda_link7/geometry", "panda_link0/geometry"]
+    }
+)
+{
+    over "panda_link0"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link0.usd@
+        )
+        {
+        }
+    }
+
+    over "panda_link1"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link1.usd@
+        )
+        {
+        }
+    }
+
+    over "panda_link2"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link2.usd@
+        )
+        {
+        }
+    }
+
+    over "panda_link3"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link3.usd@
+        )
+        {
+        }
+    }
+
+    over "panda_link4"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link4.usd@
+        )
+        {
+        }
+    }
+
+    over "panda_link5"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link5.usd@
+        )
+        {
+        }
+    }
+
+    over "panda_link6"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link6.usd@
+        )
+        {
+            double3 xformOp:translate = (-5.692792449209269e-9, 4.372753403814045e-7, 0)
+        }
+    }
+
+    over "panda_link7"
+    {
+        over "geometry" (
+            prepend references = @./dependencies/panda_link7.usd@
+        )
+        {
+        }
+    }
+}
+

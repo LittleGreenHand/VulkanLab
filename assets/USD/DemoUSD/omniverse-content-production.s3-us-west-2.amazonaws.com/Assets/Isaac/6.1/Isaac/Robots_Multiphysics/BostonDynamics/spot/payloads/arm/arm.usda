@@ -1,0 +1,15 @@
+#usda 1.0
+(
+    defaultPrim = "spot"
+    doc = "Spot manipulator arm payload extracted from spot_claw. Encapsulates 7 arm links (arm0_link_sh0..fngr), revolute joints arm0_sh0..arm0_f1x with drives, PhysX joint tuning, instanced visual meshes+materials, and arm_rest_pose. Gate via the 'Arm' variantSet on /spot."
+    subLayers = [
+        @./arm.physx.usda@,
+        @./arm.robot.usda@,
+        @./arm.base.usda@
+    ]
+)
+
+over "spot"
+{
+}
+

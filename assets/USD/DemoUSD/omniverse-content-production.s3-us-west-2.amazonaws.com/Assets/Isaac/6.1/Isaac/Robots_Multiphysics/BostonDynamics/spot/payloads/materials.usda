@@ -1,0 +1,427 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (-1.325775300113189, 0.13250527481682373, 0.5756606489421192)
+                double3 target = (6.490853026073124, 0.6013935022045278, -3.123050672650708)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./spot.usd"
+        }
+        dictionary renderSettings = {
+        }
+    }
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+def Scope "Materials"
+{
+    def Material "material_Material"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (1, 1, 1)
+            asset inputs:diffuse_texture = @../Textures/hip.png@
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_003"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_003/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_003/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_003/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (1, 1, 1)
+            asset inputs:diffuse_texture = @../Textures/yellow_leg.png@
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_004"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "aluminum"
+        custom token omni:simready:nonvisual:coating = "paint"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_004/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_004/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_004/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (1, 1, 1)
+            asset inputs:diffuse_texture = @../Textures/black_leg.png@
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_material_2"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_material_2/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_material_2/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_material_2/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.000741084, 0.000741084, 0.000741084)
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_001"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_001/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_001/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_001/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (1, 1, 1)
+            asset inputs:diffuse_texture = @../Textures/lleg.png@
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_1"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_1/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_1/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_1/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (1, 1, 1)
+            asset inputs:diffuse_texture = @../Textures/yellow_parts.png@
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_001_1"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_001_1/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_001_1/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_001_1/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (1, 1, 1)
+            asset inputs:diffuse_texture = @../Textures/body_others.png@
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_002"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_002/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_002/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_002/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.03967961, 0.03967961, 0.03967961)
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_003_1"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_003_1/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_003_1/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_003_1/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.0668067, 0.0668067, 0.0668067)
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_004_1"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_004_1/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_004_1/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_004_1/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.0290995, 0.0290995, 0.0290995)
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_Material_005"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_Material_005/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_Material_005/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_Material_005/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.8, 0.8, 0.8)
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+
+    def Material "material_material_1"
+    {
+        custom token[] omni:simready:nonvisual:attributes = ["none"]
+        custom token omni:simready:nonvisual:base = "plastic"
+        custom token omni:simready:nonvisual:coating = "none"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:mdl:displacement.connect = </Materials/material_material_1/Shader.outputs:out>
+        prepend token outputs:mdl:surface.connect = </Materials/material_material_1/Shader.outputs:out>
+        prepend token outputs:mdl:volume.connect = </Materials/material_material_1/Shader.outputs:out>
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "Shader" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            token info:implementationSource = "sourceAsset"
+            asset info:mdl:sourceAsset = @OmniPBR.mdl@
+            token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+            color3f inputs:diffuse_color_constant = (0.0528331, 0.0528331, 0.0528331)
+            color3f inputs:emissive_color = (0, 0, 0)
+            token outputs:out
+        }
+    }
+}
+

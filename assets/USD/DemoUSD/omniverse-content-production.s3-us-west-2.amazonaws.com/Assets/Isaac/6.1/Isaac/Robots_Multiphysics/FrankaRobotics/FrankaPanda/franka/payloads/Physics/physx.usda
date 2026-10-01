@@ -1,0 +1,211 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary audioSettings = {
+            double dopplerLimit = 2
+            double dopplerScale = 1
+            double nonSpatialTimeScale = 1
+            double spatialTimeScale = 1
+            double speedOfSound = 340
+        }
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (1000.0000000000005, -2.2204460492503136e-13, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (1.9755832156208093, 0.918544123983318, 0.5874775538777527)
+                double radius = 808.1671358505603
+                double3 target = (-3.0952298253692048, -1.402244195632354, 0.9887232962856027)
+            }
+            dictionary Right = {
+                double3 position = (0, -1000, -2.220446049250313e-13)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 1000)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary navmeshSettings = {
+            double agentHeight = 180
+            double agentRadius = 20
+            bool excludeRigidBodies = 1
+            int ver = 1
+            double voxelCeiling = 460
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./franka.usd"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary physicsSettings = {
+            int "/persistent/simulation/minFrameRate" = 60
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "panda"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    subLayers = [
+        @./physics.usda@
+    ]
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+over "panda" (
+    prepend apiSchemas = ["PhysxArticulationAPI"]
+)
+{
+    bool physxArticulation:enabledSelfCollisions = 0
+    int physxArticulation:solverPositionIterationCount = 32
+    int physxArticulation:solverVelocityIterationCount = 1
+
+    over "panda_link0" (
+        prepend apiSchemas = ["PhysxRigidBodyAPI"]
+    )
+    {
+        float physxRigidBody:angularDamping = 0.05
+        bool physxRigidBody:enableCCD = 0
+        bool physxRigidBody:enableSpeculativeCCD = 0
+        float physxRigidBody:linearDamping = 0
+        int physxRigidBody:lockedPosAxis = 0
+        int physxRigidBody:lockedRotAxis = 0
+        float physxRigidBody:maxAngularVelocity = 100
+        float physxRigidBody:maxDepenetrationVelocity = inf
+        float physxRigidBody:maxLinearVelocity = inf
+        float physxRigidBody:sleepThreshold = 0.5
+        int physxRigidBody:solverPositionIterationCount = 4
+        int physxRigidBody:solverVelocityIterationCount = 1
+        float physxRigidBody:stabilizationThreshold = 0.0009999999
+
+        over "panda_joint1" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 124.61832
+        }
+    }
+
+    over "panda_link1"
+    {
+        over "panda_joint2" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 124.61832
+        }
+    }
+
+    over "panda_link2" (
+        prepend apiSchemas = ["PhysxRigidBodyAPI"]
+    )
+    {
+        float physxRigidBody:angularDamping = 0.05
+        bool physxRigidBody:enableCCD = 0
+        bool physxRigidBody:enableSpeculativeCCD = 0
+        float physxRigidBody:linearDamping = 0
+        int physxRigidBody:lockedPosAxis = 0
+        int physxRigidBody:lockedRotAxis = 0
+        float physxRigidBody:maxAngularVelocity = 100
+        float physxRigidBody:maxDepenetrationVelocity = inf
+        float physxRigidBody:maxLinearVelocity = inf
+        float physxRigidBody:sleepThreshold = 0.5
+        int physxRigidBody:solverPositionIterationCount = 4
+        int physxRigidBody:solverVelocityIterationCount = 1
+        float physxRigidBody:stabilizationThreshold = 0.0009999999
+
+        over "panda_joint3" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 124.61832
+        }
+    }
+
+    over "panda_link3"
+    {
+        over "panda_joint4" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 124.61832
+        }
+    }
+
+    over "panda_link4"
+    {
+        over "panda_joint5" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 149.542
+        }
+    }
+
+    over "panda_link5"
+    {
+        over "panda_joint6" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 149.542
+        }
+    }
+
+    over "panda_link6"
+    {
+        over "panda_joint7" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 149.542
+        }
+    }
+
+    over "panda_link7" (
+        prepend apiSchemas = ["PhysxRigidBodyAPI"]
+    )
+    {
+        float physxRigidBody:angularDamping = 0.05
+        bool physxRigidBody:enableCCD = 0
+        bool physxRigidBody:enableSpeculativeCCD = 0
+        float physxRigidBody:linearDamping = 0
+        int physxRigidBody:lockedPosAxis = 0
+        int physxRigidBody:lockedRotAxis = 0
+        float physxRigidBody:maxAngularVelocity = 100
+        float physxRigidBody:maxDepenetrationVelocity = inf
+        float physxRigidBody:maxLinearVelocity = inf
+        float physxRigidBody:sleepThreshold = 0.5
+        int physxRigidBody:solverPositionIterationCount = 4
+        int physxRigidBody:solverVelocityIterationCount = 1
+        float physxRigidBody:stabilizationThreshold = 0.0009999999
+    }
+
+    over "panda_hand"
+    {
+        over "panda_finger_joint1" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 0.2
+        }
+
+        over "panda_finger_joint2" (
+            prepend apiSchemas = ["PhysxJointAPI", "PhysxMimicJointAPI:rotX"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 10
+            float physxMimicJoint:rotX:gearing = -1
+            rel physxMimicJoint:rotX:referenceJoint = </panda/panda_hand/panda_finger_joint1>
+        }
+    }
+}
+

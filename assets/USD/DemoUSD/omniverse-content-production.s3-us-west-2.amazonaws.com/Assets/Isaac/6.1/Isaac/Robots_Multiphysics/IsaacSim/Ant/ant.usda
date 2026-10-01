@@ -1,0 +1,70 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (50000.913137040225, -1.1102433003404901e-11, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (5, 4.9999999999999964, 5.000000000000003)
+                double3 target = (-3.98696791137354e-8, -3.98696791137354e-8, 7.947147739884031e-8)
+            }
+            dictionary Right = {
+                double3 position = (0, -50000.91313708642, -1.1102433003415162e-11)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 50000.25)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./ant.usd"
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "ant"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def Xform "ant" (
+    prepend references = @./payloads/base.usda@
+    variants = {
+        string Physics = "physx"
+    }
+    append variantSets = "Physics"
+)
+{
+    variantSet "Physics" = {
+        "none" {
+
+        }
+        "physics" (
+            prepend payload = @./payloads/Physics/physics.usda@
+        ) {
+
+        }
+        "physx" (
+            prepend payload = @./payloads/Physics/physx.usda@
+        ) {
+
+        }
+    }
+}
+
+over "Render" (
+    hide_in_stage_window = true
+)
+{
+}
+

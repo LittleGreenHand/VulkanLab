@@ -1,0 +1,499 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (50000.913137040225, -1.1102433003404901e-11, 0)
+                double radius = 500
+            }
+            dictionary Perspective = {
+                double3 position = (5, 4.9999999999999964, 5.000000000000003)
+                double3 target = (-3.98696791137354e-8, -3.98696791137354e-8, 7.947147739884031e-8)
+            }
+            dictionary Right = {
+                double3 position = (0, -50000.91313708642, -1.1102433003415162e-11)
+                double radius = 500
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 50000.25)
+                double radius = 500
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./ant.usd"
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            double "rtx:post:lensDistortion:cameraFocalLength" = 18.14756202697754
+        }
+    }
+    defaultPrim = "ant"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    subLayers = [
+        @./robot.usda@
+    ]
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def Xform "ant"
+{
+    def Xform "torso"
+    {
+        def "collisions"
+        {
+            def Sphere "torso_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                float3[] extent = [(-0.25, -0.25, -0.25), (0.25, 0.25, 0.25)]
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.25
+                matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_1_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, 0.7071068030891894, 0, 0), (-0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_2_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, 0.7071067480216797, 0, 0), (-0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_3_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, -0.7071067480216797, 0, 0), (0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_4_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, -0.7071068030891894, 0, 0), (0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Sphere "torso_geom"
+            {
+                float3[] extent = [(-0.25, -0.25, -0.25), (0.25, 0.25, 0.25)]
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.25
+                matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_1_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, 0.7071068030891894, 0, 0), (-0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_2_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, 0.7071067480216797, 0, 0), (-0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_3_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, -0.7071067480216797, 0, 0), (0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Capsule "aux_4_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, -0.7071068030891894, 0, 0), (0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def Xform "front_left_leg"
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.19999999, 0.2, 7.450581e-9)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "left_leg_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, 0.7071068030891894, 0, 0), (-0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "left_leg_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, 0.7071068030891894, 0, 0), (-0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def "joints"
+    {
+    }
+
+    def Xform "front_left_foot" (
+        prepend apiSchemas = ["PhysxArticulationForceSensorAPI"]
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.39999995, 0.39999998, 4.4703484e-8)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "left_ankle_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, 0.7071068030891894, 0, 0), (-0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.20000000298023224, 0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "left_ankle_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, 0.7071068030891894, 0, 0), (-0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.20000000298023224, 0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def Xform "front_right_leg"
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-0.20000002, 0.20000002, 1.4901161e-8)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "right_leg_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, 0.7071067480216797, 0, 0), (-0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "right_leg_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, 0.7071067480216797, 0, 0), (-0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, 0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def Xform "front_right_foot" (
+        prepend apiSchemas = ["PhysxArticulationForceSensorAPI"]
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-0.39999998, 0.39999998, -4.4703484e-8)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "right_ankle_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, 0.7071067480216797, 0, 0), (-0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.20000000298023224, 0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "right_ankle_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, 0.7071067480216797, 0, 0), (-0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.20000000298023224, 0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def Xform "left_back_leg"
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-0.20000002, -0.20000002, 1.4901161e-8)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "back_leg_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, -0.7071067480216797, 0, 0), (0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "back_leg_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, -0.7071067480216797, 0, 0), (0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def Xform "left_back_foot" (
+        prepend apiSchemas = ["PhysxArticulationForceSensorAPI"]
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-0.39999998, -0.39999998, -4.4703484e-8)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "third_ankle_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, -0.7071067480216797, 0, 0), (0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.20000000298023224, -0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "third_ankle_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (-0.7071066765757053, -0.7071067480216797, 0, 0), (0.7071067480216797, -0.7071066765757053, 0, 0), (0, 0, 1, 0), (-0.20000000298023224, -0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def Xform "right_back_leg"
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.19999999, -0.2, 7.450581e-9)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "rightback_leg_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, -0.7071068030891894, 0, 0), (0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "rightback_leg_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.22142136, -0.08, -0.08), (0.22142136, 0.08, 0.08)]
+                double height = 0.2828427255153656
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, -0.7071068030891894, 0, 0), (0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.10000000149011612, -0.10000000149011612, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def Xform "right_back_foot" (
+        prepend apiSchemas = ["PhysxArticulationForceSensorAPI"]
+    )
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.39999995, -0.39999998, 4.4703484e-8)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def "collisions"
+        {
+            def Capsule "fourth_ankle_geom" (
+                prepend apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                uniform token purpose = "guide"
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, -0.7071068030891894, 0, 0), (0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.20000000298023224, -0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+
+        def "visuals"
+        {
+            def Capsule "fourth_ankle_geom"
+            {
+                uniform token axis = "X"
+                float3[] extent = [(-0.36284274, -0.08, -0.08), (0.36284274, 0.08, 0.08)]
+                double height = 0.5656854510307312
+                color3f[] primvars:displayColor = [(0.97, 0.38, 0.06)]
+                double radius = 0.07999999821186066
+                matrix4d xformOp:transform = ( (0.7071067450934194, -0.7071068030891894, 0, 0), (0.7071068030891894, 0.7071067450934194, 0, 0), (0, 0, 1, 0), (0.20000000298023224, -0.20000000298023224, 0, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+}
+

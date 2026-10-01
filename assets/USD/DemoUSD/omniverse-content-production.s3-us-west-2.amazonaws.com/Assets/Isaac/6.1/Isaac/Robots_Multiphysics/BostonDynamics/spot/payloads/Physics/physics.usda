@@ -1,0 +1,682 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (-1.325775300113189, 0.13250527481682373, 0.5756606489421192)
+                double3 target = (6.490853026073124, 0.6013935022045278, -3.123050672650708)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./spot.usd"
+        }
+        dictionary renderSettings = {
+        }
+    }
+    defaultPrim = "spot"
+    endTimeCode = 0
+    metersPerUnit = 1
+    startTimeCode = -1
+    upAxis = "Z"
+)
+
+over "spot" (
+    prepend apiSchemas = ["PhysicsArticulationRootAPI"]
+)
+{
+    over "fl_hip" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (-0.01586739, 0.00855842, 0.00000903)
+        float3 physics:diagonalInertia = (0.001149959, 0.0016612653, 0.0017290359)
+        float physics:mass = 1.1368834
+        quatf physics:principalAxes = (0.9816311, 0.0044215247, 0.00104843, 0.19073467)
+
+        def PhysicsRevoluteJoint "fl_hy" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = 51.57
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/fl_hip>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fl_uleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0.110945, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -51.500023
+            float physics:upperLimit = 131.5
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "fl_uleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.00214442, -0.01110184, -0.07881204)
+        float3 physics:diagonalInertia = (0.026939424, 0.026025372, 0.0029866563)
+        float physics:mass = 2.2562037
+        quatf physics:principalAxes = (0.99868387, 0.045455117, -0.010625258, -0.02124732)
+
+        def PhysicsRevoluteJoint "fl_kn" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 115
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = -86.11
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/fl_uleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fl_lleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.025, 0, -0.3205)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -160.02138
+            float physics:upperLimit = -14.157786
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "fl_lleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.0059736, 0, -0.17466427)
+        float3 physics:diagonalInertia = (0.0070141945, 0.00709946, 0.00014465585)
+        float physics:mass = 0.33
+        quatf physics:principalAxes = (0.99998844, 0, -0.004804094, 0)
+
+        def PhysicsFixedJoint "fl_ank"
+        {
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/fl_lleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fl_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, -0.3365)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+    }
+
+    over "fl_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        float physics:mass = 0.000001
+    }
+
+    over "fr_hip" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (-0.01586739, -0.00855842, 0.00000903)
+        float3 physics:diagonalInertia = (0.001149959, 0.0016612653, 0.0017290359)
+        float physics:mass = 1.1368834
+        quatf physics:principalAxes = (0.9816311, -0.0044215247, 0.00104843, -0.19073467)
+
+        def PhysicsRevoluteJoint "fr_hy" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = 51.57
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/fr_hip>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fr_uleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, -0.110945, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -51.500023
+            float physics:upperLimit = 131.5
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "fr_uleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.00214442, 0.01110184, -0.07881204)
+        float3 physics:diagonalInertia = (0.026939424, 0.026025372, 0.0029866563)
+        float physics:mass = 2.2562037
+        quatf physics:principalAxes = (0.99868387, -0.045455117, -0.010625258, 0.02124732)
+
+        def PhysicsRevoluteJoint "fr_kn" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 115
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = -86.11
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/fr_uleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fr_lleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.025, 0, -0.3205)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -160.02138
+            float physics:upperLimit = -14.157786
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "fr_lleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.0059736, 0, -0.17466427)
+        float3 physics:diagonalInertia = (0.0070141945, 0.00709946, 0.00014465585)
+        float physics:mass = 0.33
+        quatf physics:principalAxes = (0.99998844, 0, -0.004804094, 0)
+
+        def PhysicsFixedJoint "fr_ank"
+        {
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/fr_lleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fr_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, -0.3365)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+    }
+
+    over "fr_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        float physics:mass = 0.000001
+    }
+
+    over "hl_hip" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.01586739, 0.00855842, 0.00000903)
+        float3 physics:diagonalInertia = (0.001149959, 0.0016612653, 0.0017290359)
+        float physics:mass = 1.1368834
+        quatf physics:principalAxes = (0.9816311, 0.0044215247, -0.00104843, -0.19073467)
+
+        def PhysicsRevoluteJoint "hl_hy" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = 63.11
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/hl_hip>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hl_uleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0.110945, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -51.500023
+            float physics:upperLimit = 131.5
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "hl_uleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.00214442, -0.01110184, -0.07881204)
+        float3 physics:diagonalInertia = (0.026939424, 0.026025372, 0.0029866563)
+        float physics:mass = 2.2562037
+        quatf physics:principalAxes = (0.99868387, 0.045455117, -0.010625258, -0.02124732)
+
+        def PhysicsRevoluteJoint "hl_kn" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 115
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = -86.11
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/hl_uleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hl_lleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.025, 0, -0.3205)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -160.02138
+            float physics:upperLimit = -14.157786
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "hl_lleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.0059736, 0, -0.17466427)
+        float3 physics:diagonalInertia = (0.0070141945, 0.00709946, 0.00014465585)
+        float physics:mass = 0.33
+        quatf physics:principalAxes = (0.99998844, 0, -0.004804094, 0)
+
+        def PhysicsFixedJoint "hl_ank"
+        {
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/hl_lleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hl_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, -0.3365)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+    }
+
+    over "hl_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        float physics:mass = 0.000001
+    }
+
+    over "hr_hip" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.01586739, -0.00855842, 0.00000903)
+        float3 physics:diagonalInertia = (0.001149959, 0.0016612653, 0.0017290359)
+        float physics:mass = 1.1368834
+        quatf physics:principalAxes = (0.9816311, -0.0044215247, -0.00104843, 0.19073467)
+
+        def PhysicsRevoluteJoint "hr_hy" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = 63.11
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/hr_hip>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hr_uleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, -0.110945, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -51.500023
+            float physics:upperLimit = 131.5
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "hr_uleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.00214442, 0.01110184, -0.07881204)
+        float3 physics:diagonalInertia = (0.026939424, 0.026025372, 0.0029866563)
+        float physics:mass = 2.2562037
+        quatf physics:principalAxes = (0.99868387, -0.045455117, -0.010625258, 0.02124732)
+
+        def PhysicsRevoluteJoint "hr_kn" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 115
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = -86.11
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "Y"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/hr_uleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hr_lleg>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.025, 0, -0.3205)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -160.02138
+            float physics:upperLimit = -14.157786
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+
+    over "hr_lleg" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.0059736, 0, -0.17466427)
+        float3 physics:diagonalInertia = (0.0070141945, 0.00709946, 0.00014465585)
+        float physics:mass = 0.33
+        quatf physics:principalAxes = (0.99998844, 0, -0.004804094, 0)
+
+        def PhysicsFixedJoint "hr_ank"
+        {
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/hr_lleg>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hr_foot>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, -0.3365)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+    }
+
+    over "hr_foot" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        float physics:mass = 0.000001
+    }
+
+    over "body" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0, 0, -0.00496172)
+        float3 physics:diagonalInertia = (0.08154379, 0.5492312, 0.5694544)
+        float physics:mass = 16.707651
+        quatf physics:principalAxes = (1, 0, 0, 0)
+
+        def PhysicsRevoluteJoint "fl_hx" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = 5.73
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride (
+                doc = "Name override for prim lookup in base name search"
+            )
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/body>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fl_hip>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.29785, 0.055, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -44.99999
+            float physics:upperLimit = 44.99999
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "fr_hx" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = -5.73
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/body>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/fr_hip>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.29785, -0.055, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -44.99999
+            float physics:upperLimit = 44.99999
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "hl_hx" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = 5.73
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/body>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hl_hip>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.29785, 0.055, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -44.99999
+            float physics:upperLimit = 44.99999
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "hr_hx" (
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
+        )
+        {
+            float drive:angular:physics:damping = 1.5
+            float drive:angular:physics:maxForce = 45
+            float drive:angular:physics:stiffness = 60
+            float drive:angular:physics:targetPosition = -5.73
+            uniform token drive:angular:physics:type = "force"
+            custom string isaac:nameOverride
+            custom float[] isaac:physics:AccelerationLimit
+            custom float[] isaac:physics:JerkLimit
+            custom int isaac:physics:Rot_X:DofOffset
+            custom int isaac:physics:Rot_Y:DofOffset
+            custom int isaac:physics:Rot_Z:DofOffset
+            custom int isaac:physics:Tr_X:DofOffset
+            custom int isaac:physics:Tr_Y:DofOffset
+            custom int isaac:physics:Tr_Z:DofOffset
+            uniform token physics:axis = "X"
+            custom rel physics:body0
+            prepend rel physics:body0 = </spot/body>
+            custom rel physics:body1
+            prepend rel physics:body1 = </spot/hr_hip>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.29785, -0.055, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -44.99999
+            float physics:upperLimit = 44.99999
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+    }
+}
+
+def PhysicsScene "physicsScene"
+{
+    vector3f physics:gravityDirection = (0, 0, -1)
+    float physics:gravityMagnitude = 9.81
+}
+
