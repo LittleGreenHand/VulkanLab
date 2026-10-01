@@ -106,6 +106,14 @@ bool Application::Init()
 		}
 	}
 
+	// USD场景
+	{
+		USDLoader loader;
+		std::filesystem::path path(ENGINE_SOURCE_DIR);
+		path /= "assets/USD/DemoUSD/DemoUSD.usd";
+		loader.Load(path.string());
+	}
+
 	m_init = true;
 	LOG_DEBUG("Application initialized successfully");
 	return true;

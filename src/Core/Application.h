@@ -5,6 +5,7 @@
 #include "ImGuiLayer.h"
 #include "Device/CameraDevice.h"
 #include "AI/HandPose.h"
+#include "USD/USDLoader.h"
 class Application
 {
 public:

@@ -1,0 +1,22 @@
+file(GLOB_RECURSE USD_SOURCES_FILE CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
+)
+
+add_library(${USD_PROJECT_NAME} STATIC ${USD_SOURCES_FILE})
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${USD_SOURCES_FILE})
+
+target_include_directories(${USD_PROJECT_NAME} PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_compile_definitions(${USD_PROJECT_NAME} PRIVATE
+    ENABLE_LOG=$<BOOL:${ENABLE_LOG}>
+    ENABLE_DEBUG_LOG=$<BOOL:${ENABLE_DEBUG_LOG}>
+)
+
+target_link_libraries(${USD_PROJECT_NAME} PUBLIC
+    USDDependencies
+)

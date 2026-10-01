@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 set(PROJECT_NAME VulkanLab CACHE STRING "可执行文件")
 set(AI_PROJECT_NAME VulkanLabAI CACHE STRING "管理AI模型与推理后端的静态库")
+set(USD_PROJECT_NAME VulkanLabUSD CACHE STRING "管理OpenUSD相关功能的静态库")
 project(${PROJECT_NAME})
 include(cmake/Dependencies.cmake)
 
@@ -57,7 +58,7 @@ set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
 add_subdirectory(thirdParty/glfw-3.5.1)
 
 add_subdirectory(thirdParty/ONNX_Runtime)
-
+add_subdirectory(src/USD)
 add_subdirectory(src/AI)
 add_subdirectory(src)
 

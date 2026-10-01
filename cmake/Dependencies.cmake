@@ -1,5 +1,4 @@
 # Application configurations and the installed SDK configuration are independent.
-set(VULKANLAB_DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/build/dependencies" CACHE PATH "build_dependencies.py的输出目录")
 set(VULKANLAB_DEPENDENCY_CONFIG Release CACHE STRING "Link Debug or Release dependency SDKs")
 set_property(CACHE VULKANLAB_DEPENDENCY_CONFIG PROPERTY STRINGS Debug Release)
 if(NOT VULKANLAB_DEPENDENCY_CONFIG MATCHES "^(Debug|Release)$")
@@ -16,7 +15,6 @@ endif()
 
 # Initialize all imported targets, including OpenCV, with the selected SDK ABI.
 foreach(_config IN ITEMS DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
-    # The empty fallback supports configuration-independent imports such as ONNX Runtime.
     set(CMAKE_MAP_IMPORTED_CONFIG_${_config} "${VULKANLAB_DEPENDENCY_CONFIG};")
 endforeach()
 if(MSVC)
@@ -27,10 +25,8 @@ if(MSVC)
     else()
         set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDebugDLL)
         add_compile_definitions(_ITERATOR_DEBUG_LEVEL=2 _DEBUG)
-        # /MDd defines _DEBUG; PhysX requires exactly one of _DEBUG and NDEBUG.
         add_compile_options(/UNDEBUG)
     endif()
-    # set(OPENCV_MAP_IMPORTED_CONFIG "DEBUG=${VULKANLAB_DEPENDENCY_CONFIG};RELEASE=${VULKANLAB_DEPENDENCY_CONFIG}")
 endif()
 
 if(WIN32)
@@ -42,13 +38,13 @@ else()
 endif()
 
 string(TOLOWER "${VULKANLAB_DEPENDENCY_CONFIG}" _dependency_config)
-set(VULKANLAB_SDK_ROOT "${VULKANLAB_DEPENDENCIES_DIR}/${_dependency_platform}/${_dependency_config}/install")
-set(TBB_DIR "${VULKANLAB_SDK_ROOT}/oneTBB/lib/cmake/TBB")
-set(pxr_DIR "${VULKANLAB_SDK_ROOT}/OpenUSD")
-set(PhysX_DIR "${VULKANLAB_SDK_ROOT}/PhysX/lib/cmake/PhysX")
+set(_sdk_suffix "install/${_dependency_platform}/${_dependency_config}")
+set(TBB_DIR "${PROJECT_SOURCE_DIR}/thirdParty/oneTBB/${_sdk_suffix}/lib/cmake/TBB")
+set(pxr_DIR "${PROJECT_SOURCE_DIR}/thirdParty/OpenUSD/${_sdk_suffix}")
+set(PhysX_DIR "${PROJECT_SOURCE_DIR}/thirdParty/PhysX/${_sdk_suffix}/lib/cmake/PhysX")
 foreach(_package IN ITEMS "${TBB_DIR}/TBBConfig.cmake" "${pxr_DIR}/pxrConfig.cmake" "${PhysX_DIR}/PhysXConfig.cmake")
     if(NOT EXISTS "${_package}")
-        message(FATAL_ERROR "Missing SDK package: ${_package}\nRun: python build_dependencies.py --config ${VULKANLAB_DEPENDENCY_CONFIG} --output-dir \"${VULKANLAB_DEPENDENCIES_DIR}\"")
+        message(FATAL_ERROR "Missing SDK package: ${_package}\nRun: python build_dependencies.py --config ${VULKANLAB_DEPENDENCY_CONFIG}")
     endif()
 endforeach()
 
@@ -57,8 +53,22 @@ find_package(pxr CONFIG REQUIRED PATHS "${pxr_DIR}" NO_DEFAULT_PATH)
 find_package(PhysX CONFIG REQUIRED PATHS "${PhysX_DIR}" NO_DEFAULT_PATH)
 add_library(VulkanLabDependencies INTERFACE)
 target_link_libraries(VulkanLabDependencies INTERFACE
-    TBB::tbb usd usdGeom usdShade usdPhysics usdUtils PhysX::physx_lib)
+  TBB::tbb
+  PhysX::physx_lib
+)
 message(STATUS "VulkanLab SDKs: ${VULKANLAB_SDK_ROOT}")
+add_library(USDDependencies INTERFACE)
+set(OPENUSD_INCLUDE_DIR "${pxr_DIR}/include")
+target_include_directories(USDDependencies INTERFACE "${OPENUSD_INCLUDE_DIR}")
+target_link_libraries(USDDependencies INTERFACE
+    TBB::tbb
+    usd
+    usdGeom
+    usdShade
+    usdLux
+    usdPhysics
+    usdUtils
+)
 
 function(vulkanlab_deploy_dependencies target)
     if(WIN32)

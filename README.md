@@ -56,14 +56,7 @@
 git submodule update --init --recursive
 ```
 
-然后运行**build_dependencies.py**脚本编译子模块，默认编译 OneTBB、OpenUSD 和 PhysX 的 **Release** 版本；默认生成 OpenUSD C++ 核心库和 PhysX CPU 库。首次构建完成后，重复执行脚本会进行增量构建。
-
-默认安装目录为：
-
-```text
-build/dependencies/windows-x86_64/release/install/
-build/dependencies/linux-x86_64/release/install/
-```
+然后运行**build_dependencies.py**脚本编译子模块，默认编译 OneTBB、OpenUSD 和 PhysX 的 **Release** 版本；默认生成 OpenUSD C++ 核心库和 PhysX CPU 库。
 
 ## 2. 生成主项目
 

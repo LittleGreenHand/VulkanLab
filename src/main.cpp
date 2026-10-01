@@ -1,7 +1,6 @@
 #include "RenderBase/VulkanRendererBase.h"
 #include "Core/Application.h"
 #include <iostream>
-
 int main(int argc, char** argv)
 {
 	for (size_t i = 0; i < argc; i++) { VulkanRendererBase::args.push_back(argv[i]); };
