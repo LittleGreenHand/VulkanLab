@@ -35,4 +35,5 @@ private:
 	bool m_showAIModelPanel = false;
 	bool m_showCameraDevicePanel = false;
 	bool m_runInference = false;
+	bool m_showSceneTree = false;
 };

@@ -1,12 +1,24 @@
 #pragma once
 
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <thread>
 #include <string>
 #include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 
 struct HandPoseResult;
-
+// 每个物理摄像头对应一份共享的采集状态。
+struct CameraCaptureState
+{
+	std::thread Worker;
+	std::atomic<bool> StopRequested{false};
+	std::atomic<bool> Running{false};
+	std::mutex FrameMutex;
+	cv::Mat LatestFrame;
+};
 struct CameraInfo
 {
 	// OpenCV 原生编号；直接使用时必须同时指定 Backend。
@@ -24,6 +36,8 @@ struct CameraInfo
 	double FPS = 0.0;
 	bool Available = false;
 	std::string Error;
+
+	std::shared_ptr<CameraCaptureState> Stream = std::make_shared<CameraCaptureState>();
 };
 
 class CameraDevice
@@ -58,6 +72,7 @@ public:
 	static int GetCameraDeviceCount() { return m_cameraDeviceList.size(); }
 	static void RefreshCameraList();
 	static std::vector<CameraInfo> m_cameraDeviceList;
+	static std::mutex m_cameraDeviceMutex;
 
 private:
 	std::string m_debugWindowName;

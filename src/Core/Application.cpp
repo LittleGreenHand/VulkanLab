@@ -208,12 +208,17 @@ void Application::AIInference()
 		return;
 	}
 	cv::Mat frame;
+
+	LOG_TIME_BEGIN(CameraCapture);
 	if (!m_cameraDevice.Capture(frame))
 	{
 		LOG_ERROR("Failed to capture camera frame");
 		m_cameraDevice.CloseDebugWindow();
 		return;
 	}
+	LOG_TIME_END(CameraCapture);
+
+	LOG_TIME_BEGIN(Inference);
 	InferenceInput input;
 	InferenceOutput output;
 	std::string error;
@@ -235,11 +240,15 @@ void Application::AIInference()
 		m_cameraDevice.CloseDebugWindow();
 		return;
 	}
+	LOG_TIME_END(Inference);
+
+	LOG_TIME_BEGIN(ShowHandPoseDebug);
 	if (!m_cameraDevice.ShowHandPoseDebug(frame, *output.HandPoses, error))
 	{
 		LOG_ERROR("Failed to show MediaPipe hand pose debug image: {}", error);
 		m_cameraDevice.CloseDebugWindow();
 	}
+	LOG_TIME_END(ShowHandPoseDebug);
 }
 
 void Application::Simulate()

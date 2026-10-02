@@ -12,6 +12,11 @@
 #include <fstream>
 #include <limits>
 #include <utility>
+#include <chrono>
+#include <future>
+#include <mutex>
+#include <thread>
+#include <system_error>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -160,9 +165,16 @@ namespace
 }
 
 std::vector<CameraInfo> CameraDevice::m_cameraDeviceList;
+std::mutex CameraDevice::m_cameraDeviceMutex;
 void CameraDevice::RefreshCameraList()
 {
-	m_cameraDeviceList.clear();
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+
+	// 有活动摄像头时保留列表：工作线程会持有其中 CameraInfo 的地址。
+	for (const auto &info : m_cameraDeviceList)
+		if (info.refCount > 0)
+			return;
+
 	m_cameraDeviceList = ScanCameras();
 }
 
@@ -170,43 +182,156 @@ CameraDevice::~CameraDevice() { Close(); }
 
 bool CameraDevice::Open(int cameraIndex)
 {
-	if (cameraIndex < 0 || cameraIndex >= m_cameraDeviceList.size())
-		return false;
-	if (cameraIndex == m_cameraIndex && IsOpened())
-		return true;
-	Close();
-	auto& info = m_cameraDeviceList[cameraIndex];
-	bool success = info.Capture.isOpened() || info.Capture.open(info.DeviceIndex, info.Backend);
-	if (success)
 	{
-		m_cameraIndex = cameraIndex;
-		info.refCount++;
+		std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+		if (cameraIndex < 0 || static_cast<std::size_t>(cameraIndex) >= m_cameraDeviceList.size())
+			return false;
+		if (cameraIndex == m_cameraIndex && m_cameraDeviceList[cameraIndex].Stream->Running.load())
+			return true;
 	}
-	return success;
+	Close();
+
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+	if (cameraIndex < 0 || static_cast<std::size_t>(cameraIndex) >= m_cameraDeviceList.size())
+		return false;
+
+	CameraInfo &info = m_cameraDeviceList[cameraIndex];
+	auto state = info.Stream;
+
+	if (info.refCount > 0)
+	{
+		if (!state->Running.load())
+			return false;
+		++info.refCount;
+		m_cameraIndex = cameraIndex;
+		return true;
+	}
+
+	state->StopRequested.store(false);
+	{
+		std::lock_guard<std::mutex> frameLock(state->FrameMutex);
+		state->LatestFrame.release();
+	}
+
+	std::promise<bool> startedPromise;
+	auto startedFuture = startedPromise.get_future();
+
+	try
+	{
+		// 打开、读取、释放 VideoCapture 均在采集线程进行。
+		state->Worker = std::thread([&info, state, promise = std::move(startedPromise)]() mutable
+									{
+#if defined(_WIN32)
+            const HRESULT comResult = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+            struct ComScope { HRESULT Result; ~ComScope() { if (SUCCEEDED(Result)) CoUninitialize(); } } comScope{ comResult };
+#endif
+            bool opened = false;
+            try
+            {
+                opened = info.Capture.open(info.DeviceIndex, info.Backend);
+                if (opened)
+                {
+                    info.Width = GetDimension(info.Capture.get(cv::CAP_PROP_FRAME_WIDTH));
+                    info.Height = GetDimension(info.Capture.get(cv::CAP_PROP_FRAME_HEIGHT));
+                    const double fps = info.Capture.get(cv::CAP_PROP_FPS);
+                    info.FPS = std::isfinite(fps) && fps > 0 ? fps : 0.0;
+                }
+            }
+            catch (const cv::Exception&) { opened = false; }
+            catch (const std::exception&) { opened = false; }
+
+            state->Running.store(opened);
+            promise.set_value(opened);
+
+            if (!opened)
+            {
+                info.Capture.release();
+                return;
+            }
+
+            try
+            {
+                cv::Mat nextFrame;
+                while (!state->StopRequested.load())
+                {
+                    if (!info.Capture.read(nextFrame) || nextFrame.empty())
+                    {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        continue;
+                    }
+                    {
+                        std::lock_guard<std::mutex> frameLock(state->FrameMutex);
+                        std::swap(state->LatestFrame, nextFrame);
+                    }
+                }
+            }
+            catch (const cv::Exception&) { }
+            catch (const std::exception&) { }
+
+            info.Capture.release();
+            state->Running.store(false); });
+	}
+	catch (const std::system_error &)
+	{
+		return false;
+	}
+
+	if (!startedFuture.get())
+	{
+		state->Worker.join();
+		return false;
+	}
+
+	++info.refCount;
+	m_cameraIndex = cameraIndex;
+	return true;
 }
 
-void CameraDevice::Close() 
-{ 
+void CameraDevice::Close()
+{
 	CloseDebugWindow();
-	if (m_cameraIndex < 0 || m_cameraIndex >= m_cameraDeviceList.size())
+
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+	if (m_cameraIndex < 0 || static_cast<std::size_t>(m_cameraIndex) >= m_cameraDeviceList.size())
 	{
 		m_cameraIndex = -1;
 		return;
 	}
-	auto& info = m_cameraDeviceList[m_cameraIndex];
+
+	CameraInfo &info = m_cameraDeviceList[m_cameraIndex];
 	m_cameraIndex = -1;
-	if (info.refCount > 0)
-		info.refCount--;
-	if (info.refCount <= 0)
-		info.Capture.release();
+
+	if (--info.refCount > 0)
+		return;
+
+	auto state = info.Stream;
+	state->StopRequested.store(true);
+
+	if (state->Worker.joinable())
+		state->Worker.join();
+
+	{
+		std::lock_guard<std::mutex> frameLock(state->FrameMutex);
+		state->LatestFrame.release();
+	}
 }
 
-bool CameraDevice::Capture(cv::Mat& frame)
+bool CameraDevice::Capture(cv::Mat &frame)
 {
 	frame.release();
-	if (!IsOpened())
+
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+	if (m_cameraIndex < 0 || static_cast<std::size_t>(m_cameraIndex) >= m_cameraDeviceList.size())
 		return false;
-	return m_cameraDeviceList[m_cameraIndex].Capture.read(frame) && !frame.empty();
+
+	auto state = m_cameraDeviceList[m_cameraIndex].Stream;
+	std::lock_guard<std::mutex> frameLock(state->FrameMutex);
+
+	if (!state->Running.load() || state->LatestFrame.empty())
+		return false;
+
+	frame = state->LatestFrame.clone();
+	return !frame.empty();
 }
 
 bool CameraDevice::ShowHandPoseDebug(const cv::Mat& frame, const HandPoseResult& result, std::string& error)
@@ -286,19 +411,26 @@ void CameraDevice::CloseDebugWindow()
 	m_debugWindowName.clear();
 }
 
-bool CameraDevice::IsOpened() const 
-{ 
-	return m_cameraIndex >= 0 && m_cameraIndex < m_cameraDeviceList.size() && m_cameraDeviceList[m_cameraIndex].Capture.isOpened();
+bool CameraDevice::IsOpened() const
+{
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+	return m_cameraIndex >= 0 && static_cast<std::size_t>(m_cameraIndex) < m_cameraDeviceList.size() && m_cameraDeviceList[m_cameraIndex].Stream->Running.load();
 }
-int CameraDevice::GetWidth() const 
-{ 
-	return IsOpened() ? GetDimension(m_cameraDeviceList[m_cameraIndex].Capture.get(cv::CAP_PROP_FRAME_WIDTH)) : 0; 
+
+int CameraDevice::GetWidth() const
+{
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+	return m_cameraIndex >= 0 && static_cast<std::size_t>(m_cameraIndex) < m_cameraDeviceList.size() ? m_cameraDeviceList[m_cameraIndex].Width : 0;
 }
-int CameraDevice::GetHeight() const 
-{ 
-	return IsOpened() ? GetDimension(m_cameraDeviceList[m_cameraIndex].Capture.get(cv::CAP_PROP_FRAME_HEIGHT)) : 0; 
+
+int CameraDevice::GetHeight() const
+{
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+	return m_cameraIndex >= 0 && static_cast<std::size_t>(m_cameraIndex) < m_cameraDeviceList.size() ? m_cameraDeviceList[m_cameraIndex].Height : 0;
 }
-double CameraDevice::GetFPS() const 
-{ 
-	return IsOpened() ? m_cameraDeviceList[m_cameraIndex].Capture.get(cv::CAP_PROP_FPS) : 0.0; 
+
+double CameraDevice::GetFPS() const
+{
+	std::lock_guard<std::mutex> lock(m_cameraDeviceMutex);
+	return m_cameraIndex >= 0 && static_cast<std::size_t>(m_cameraIndex) < m_cameraDeviceList.size() ? m_cameraDeviceList[m_cameraIndex].FPS : 0.0;
 }

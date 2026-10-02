@@ -511,6 +511,7 @@ void ImGuiLayer::Update()
 	}
 
 	//场景树
+	if (m_showSceneTree)
 	{
 		int nodeId = 0;
 		{
