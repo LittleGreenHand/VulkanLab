@@ -73,8 +73,7 @@ git submodule update --init --recursive
 在仓库根目录执行：
 
 ```bash
-cd build
-cmake ..
+cmake -S . -B build
 cmake --build . --parallel
 ```
 

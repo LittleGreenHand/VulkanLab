@@ -33,6 +33,8 @@ public:
 			format.get(),
 			std::make_format_args(args...));
 	}
+	static void BeginTimer(std::string_view name);
+	static void EndTimer(std::string_view name, const char *file, int line);
 
 private:
 	static void WriteFormatted(
@@ -102,6 +104,9 @@ private:
         __LINE__,                                       \
         __VA_ARGS__)
 
+#define LOG_TIME_BEGIN(name) Log::BeginTimer(#name)
+#define LOG_TIME_END(name) Log::EndTimer(#name, __FILE__, __LINE__)
+
 #else
 
 #define LOG_DEBUG(...)   ((void)0)
@@ -109,5 +114,6 @@ private:
 #define LOG_WARNING(...) ((void)0)
 #define LOG_ERROR(...)   ((void)0)
 #define LOG_FATAL(...)   ((void)0)
-
+#define LOG_TIME_BEGIN(name) ((void)0)
+#define LOG_TIME_END(name) ((void)0)
 #endif

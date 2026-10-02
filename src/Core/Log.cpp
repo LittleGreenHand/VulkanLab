@@ -4,6 +4,8 @@
 #include <iterator>
 #include <mutex>
 #include <string>
+#include <chrono>
+#include <unordered_map>
 
 #if defined(_WIN32)
 
@@ -23,7 +25,6 @@ namespace
 
 	// 防止多个线程同时输出日志时互相穿插。
 	std::mutex gLogMutex;
-
 
 	void BuildHighlightedFormat(
 		std::string_view format,
@@ -509,4 +510,29 @@ std::string_view Log::GetFileName(const char* file)
 
 	return path.substr(
 		slashPosition + 1);
+}
+
+using TimerClock = std::chrono::steady_clock;
+thread_local std::unordered_map<std::string_view, TimerClock::time_point> gTimers;
+
+void Log::BeginTimer(std::string_view name)
+{
+	gTimers.insert_or_assign(name, TimerClock::now());
+}
+
+void Log::EndTimer(std::string_view name, const char *file, int line)
+{
+	const auto end = TimerClock::now();
+	const auto it = gTimers.find(name);
+
+	if (it == gTimers.end())
+	{
+		Write(LogLevel::Warning, file, line, "[TIME] Timer '{}' not found", name);
+		return;
+	}
+
+	const double ms = std::chrono::duration<double, std::milli>(end - it->second).count();
+	gTimers.erase(it);
+
+	Write(LogLevel::Info, file, line, "[TIME] {}: {:.3f} ms", name, ms);
 }
