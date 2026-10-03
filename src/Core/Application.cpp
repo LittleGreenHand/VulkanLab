@@ -121,7 +121,8 @@ bool Application::Init()
 
 void Application::Destroy()
 {
-	LOG_DEBUG("Destroying application");
+	LOG_DEBUG("Destroying application"); 
+	StopAIInference();
 	m_cameraDevice.Close();
 	m_guiLayer.reset();	
 	m_renderer.reset();
@@ -194,61 +195,6 @@ bool Application::BeginFrame()
 
 void Application::UpdateScene()
 {
-}
-
-void Application::AIInference()
-{
-	if (!m_guiLayer->RunInference())
-		return;
-
-	auto* model = AIModelManager::Get().FindModel(DefaultHandPoseModel);
-	if (!model || !model->IsEnabled() || !m_cameraDevice.IsOpened())
-	{
-		m_cameraDevice.CloseDebugWindow();
-		return;
-	}
-	cv::Mat frame;
-
-	LOG_TIME_BEGIN(CameraCapture);
-	if (!m_cameraDevice.Capture(frame))
-	{
-		LOG_ERROR("Failed to capture camera frame");
-		m_cameraDevice.CloseDebugWindow();
-		return;
-	}
-	LOG_TIME_END(CameraCapture);
-
-	LOG_TIME_BEGIN(Inference);
-	InferenceInput input;
-	InferenceOutput output;
-	std::string error;
-	if (!MediaPipeHandAdapter::CreateInput(frame, input, error))
-	{
-		LOG_ERROR("Failed to create inference input: {}", error);
-		m_cameraDevice.CloseDebugWindow();
-		return;
-	}
-	if (!model->Run(input, output))
-	{
-		LOG_ERROR("Failed to run inference: {}", model->GetLastError());
-		m_cameraDevice.CloseDebugWindow();
-		return;
-	}
-	if (!output.HandPoses)
-	{
-		LOG_ERROR("Hand pose adapter returned no structured result");
-		m_cameraDevice.CloseDebugWindow();
-		return;
-	}
-	LOG_TIME_END(Inference);
-
-	LOG_TIME_BEGIN(ShowHandPoseDebug);
-	if (!m_cameraDevice.ShowHandPoseDebug(frame, *output.HandPoses, error))
-	{
-		LOG_ERROR("Failed to show MediaPipe hand pose debug image: {}", error);
-		m_cameraDevice.CloseDebugWindow();
-	}
-	LOG_TIME_END(ShowHandPoseDebug);
 }
 
 void Application::Simulate()
@@ -412,4 +358,115 @@ void Application::OnFramebufferResize(int framebufferWidth, int framebufferHeigh
 	{
 		m_minimized = false;
 	}
+}
+
+void Application::AIInference()
+{
+	auto* model = AIModelManager::Get().FindModel(DefaultHandPoseModel);
+	bool enabled = m_guiLayer->RunInference() && model && model->IsEnabled();
+
+	if (!enabled)
+	{
+		if (m_aiInferenceThread.joinable())
+		{
+			StopAIInference();
+			m_cameraDevice.CloseDebugWindow();
+		}
+		return;
+	}
+
+	// 启动推理线程
+	if (!m_aiInferenceThread.joinable())
+	{
+		m_aiInferenceStop.store(false);
+		m_aiInferenceThread = std::thread(&Application::AIInferenceWorker, this);
+	}
+
+	std::optional<AIInferenceResult> result;
+	{
+		std::lock_guard<std::mutex> lock(m_aiInferenceMutex);
+		result.swap(m_aiInferenceResult);
+	}
+
+	if (!result || !result->Output || !result->Output->HandPoses)
+		return;
+
+	//LOG_TIME_BEGIN(ShowHandPoseDebug);
+
+	//std::string error;
+	//if (!m_cameraDevice.ShowHandPoseDebug(result->Frame, *result->Output->HandPoses, error))
+	//{
+	//	LOG_ERROR("Failed to show MediaPipe hand pose debug image: {}", error);
+	//	m_cameraDevice.CloseDebugWindow();
+	//}
+
+	//LOG_TIME_END(ShowHandPoseDebug);
+}
+
+void Application::AIInferenceWorker()
+{
+	auto* model = AIModelManager::Get().FindModel(DefaultHandPoseModel);
+	if (!model)
+		return;
+
+	while (!m_aiInferenceStop.load())
+	{
+		cv::Mat frame;
+
+		LOG_TIME_BEGIN(CameraCapture);
+		if (!m_cameraDevice.Capture(frame))
+		{
+			LOG_ERROR("Failed to capture camera frame");
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			continue;
+		}
+		LOG_TIME_END(CameraCapture);
+
+		frame = frame.clone();
+		LOG_TIME_BEGIN(Inference);
+
+		InferenceInput input;
+		auto output = std::make_unique<InferenceOutput>();
+		std::string error;
+
+		if (!MediaPipeHandAdapter::CreateInput(frame, input, error))
+		{
+			LOG_ERROR("Failed to create inference input: {}", error);
+			continue;
+		}
+
+		if (m_aiInferenceStop.load())
+			break;
+
+		if (!model->Run(input, *output))
+		{
+			LOG_ERROR("Failed to run inference: {}", model->GetLastError());
+			continue;
+		}
+
+		if (!output->HandPoses)
+		{
+			LOG_ERROR("Hand pose adapter returned no structured result");
+			continue;
+		}
+
+		LOG_TIME_END(Inference);
+
+		// 更新最新结果
+		{
+			std::lock_guard<std::mutex> lock(m_aiInferenceMutex);
+			m_aiInferenceResult = AIInferenceResult{ std::move(frame), std::move(output) };
+		}
+	}
+}
+
+void Application::StopAIInference()
+{
+	m_aiInferenceStop.store(true);
+
+	if (m_aiInferenceThread.joinable())
+		m_aiInferenceThread.join();
+
+	std::lock_guard<std::mutex> lock(m_aiInferenceMutex);
+	m_aiInferenceResult.reset();
 }

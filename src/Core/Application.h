@@ -6,6 +6,7 @@
 #include "Device/CameraDevice.h"
 #include "AI/HandPose.h"
 #include "USD/USDLoader.h"
+#include "InferenceTypes.h"
 class Application
 {
 public:
@@ -31,7 +32,6 @@ public:
 	void Simulate();
 	void Render();
 	void EndFrame();
-	void AIInference();
 
 	void OnKey(int key, int scancode, int action, int mods);
 	void OnMouseButton(int button, int action, int mods, double cursorX, double cursorY);
@@ -47,4 +47,20 @@ private:
 	std::unique_ptr<GlfwWindow> m_window;
 	std::unique_ptr<ImGuiLayer> m_guiLayer;
 	CameraDevice m_cameraDevice;
+private:
+	void AIInference();
+	void AIInferenceWorker();
+	void StopAIInference();
+
+	std::thread m_aiInferenceThread;
+	std::atomic<bool> m_aiInferenceStop{ false };
+
+	std::mutex m_aiInferenceMutex;
+
+	struct AIInferenceResult
+	{
+		cv::Mat Frame;
+		std::unique_ptr<InferenceOutput> Output;
+	};
+	std::optional<AIInferenceResult> m_aiInferenceResult;
 };
