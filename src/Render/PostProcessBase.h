@@ -20,11 +20,13 @@ public:
 
 class PostProcessToneMapping;
 class PostProcessDOF;
+class PostProcessPointLine;
 class PostProcessManager
 {
 public:
 	PostProcessToneMapping* toneMappingProcess = nullptr;
 	PostProcessDOF* dofProcess = nullptr;
+	PostProcessPointLine* pointLineProcess = nullptr;
 public:
 	void Init();
 	void destroyALL();

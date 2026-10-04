@@ -1,7 +1,7 @@
 #include "MeshManager.h"
 #include "Render/VulkanContext.h"
 #include "RenderBase/VulkanDevice.h"
-#include "TextureManager.h"
+#include "GlobalTextureManager.h"
 #include "Render/VulkanDebugUtils.h"
 #include "Math/MathUtils.h"
 #include "Core/Log.h"
@@ -36,11 +36,11 @@ void MeshManager::LoadModels()
 	m_sceneTree[BaseModel::Cube].nodes[0]->update();
 
 	m_sceneTree[BaseModel::Cerberus].loadFromFile(getAssetPath() + "models/cerberus/cerberus.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
-	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setBaseColorTexture(&TextureManager::Get().textures.albedoMap);
-	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setNormalTexture(&TextureManager::Get().textures.normalMap);
-	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setAOTexture(&TextureManager::Get().textures.aoMap);
-	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setMetallicTexture(&TextureManager::Get().textures.metallicMap);
-	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setRoughnessTexture(&TextureManager::Get().textures.roughnessMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setBaseColorTexture(&GlobalTextureManager::Get().textures.albedoMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setNormalTexture(&GlobalTextureManager::Get().textures.normalMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setAOTexture(&GlobalTextureManager::Get().textures.aoMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setMetallicTexture(&GlobalTextureManager::Get().textures.metallicMap);
+	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.setRoughnessTexture(&GlobalTextureManager::Get().textures.roughnessMap);
 	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.updateDescriptorSet();
 	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.materialParameters.metallicFactor = 1;
 	m_sceneTree[BaseModel::Cerberus].linearNodes[0]->mesh->primitives[0]->material.materialParameters.roughnessFactor = 1;

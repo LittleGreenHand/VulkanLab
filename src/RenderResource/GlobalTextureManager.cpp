@@ -1,9 +1,9 @@
-#include "TextureManager.h"
+#include "GlobalTextureManager.h"
 #include "Render/VulkanContext.h"
 #include "Render/VulkanDebugUtils.h"
 #include "Core/Log.h"
 
-void TextureManager::Destroy()
+void GlobalTextureManager::Destroy()
 {
 	LOG_DEBUG("Destroying texture manager resources");
 	if (isTexturesLoaded)
@@ -18,7 +18,7 @@ void TextureManager::Destroy()
 	LOG_DEBUG("Destroying texture manager resources successfully");
 }
 
-void TextureManager::LoadTextures()
+void GlobalTextureManager::LoadTextures()
 {
 	LOG_DEBUG("Loading material textures");
 	auto vulkanDevice = VulkanContext::GetVulkanDevice();

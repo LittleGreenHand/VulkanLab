@@ -7,6 +7,7 @@
 #include "RenderBase/VulkanTools.h"
 #include "AI/AIModelManager.h"
 #include "AI/Adapter/MediaPipeHandAdapter.h"
+#include "Render/PostProcess_PointLine.h"
 
 namespace
 {
@@ -367,6 +368,7 @@ void Application::AIInference()
 
 	if (!enabled)
 	{
+		m_renderer->postProcessManager->pointLineProcess->ClearHandPoses();
 		if (m_aiInferenceThread.joinable())
 		{
 			StopAIInference();
@@ -391,16 +393,8 @@ void Application::AIInference()
 	if (!result || !result->Output || !result->Output->HandPoses)
 		return;
 
-	//LOG_TIME_BEGIN(ShowHandPoseDebug);
+	m_renderer->postProcessManager->pointLineProcess->SetHandPoses(*result->Output->HandPoses);
 
-	//std::string error;
-	//if (!m_cameraDevice.ShowHandPoseDebug(result->Frame, *result->Output->HandPoses, error))
-	//{
-	//	LOG_ERROR("Failed to show MediaPipe hand pose debug image: {}", error);
-	//	m_cameraDevice.CloseDebugWindow();
-	//}
-
-	//LOG_TIME_END(ShowHandPoseDebug);
 }
 
 void Application::AIInferenceWorker()

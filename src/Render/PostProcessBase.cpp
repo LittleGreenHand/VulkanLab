@@ -1,6 +1,7 @@
 #include "PostProcessBase.h"
 #include "PostProcess_ToneMapping.h"
 #include "PostProcess_DOF.h"
+#include "PostProcess_PointLine.h"
 #include "VulkanRenderer.h"
 #include "VulkanDebugUtils.h"
 
@@ -53,10 +54,20 @@ void PostProcessManager::Init()
 	if (!dofProcess)
 		dofProcess = new PostProcessDOF();
 	dofProcess->prepare();
+
+	if (!pointLineProcess)
+		pointLineProcess = new PostProcessPointLine();
+	pointLineProcess->prepare();
 }
 
 void PostProcessManager::destroyALL()
 {
+	if (pointLineProcess)
+	{
+		pointLineProcess->destroy();
+		delete pointLineProcess;
+		pointLineProcess = nullptr;
+	}
 	if(toneMappingProcess)
 	{
 		toneMappingProcess->destroy();

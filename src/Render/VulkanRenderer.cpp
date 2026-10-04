@@ -9,8 +9,9 @@
 #include "PipelineBuilder.h"
 #include "PostProcess_ToneMapping.h"
 #include "PostProcess_DOF.h"
+#include "PostProcess_PointLine.h"
 #include "imgui_impl_vulkan.h"
-#include "RenderResource/TextureManager.h"
+#include "RenderResource/GlobalTextureManager.h"
 #include "RenderResource/MeshManager.h"
 #include "RenderResource/EnvironmentManager.h"
 #include "VulkanDebugUtils.h"
@@ -44,7 +45,7 @@ VulkanRenderer::~VulkanRenderer()
 		delete postProcessManager;
 		postProcessManager = nullptr;
 	}
-	TextureManager::Get().Destroy();
+	GlobalTextureManager::Get().Destroy();
 	MeshManager::Get().Destroy();
 	EnvironmentManager::Get().Destroy();
 	if (device) {
@@ -75,7 +76,7 @@ void VulkanRenderer::Init(VkSurfaceKHR surface)
 	//加载渲染资源
 	{
 		auto tStart = std::chrono::high_resolution_clock::now();
-		TextureManager::Get().LoadTextures();
+		GlobalTextureManager::Get().LoadTextures();
 		MeshManager::Get().LoadModels();
 		EnvironmentManager::Get().LoadIBLTextures();
 		auto tEnd = std::chrono::high_resolution_clock::now();
@@ -568,6 +569,7 @@ void VulkanRenderer::render()
 			VulkanImageUtils::TransitionImageLayout(cmdBuffer, swapChain.swapChainImages[currentImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 			postProcessManager->toneMappingProcess->excute(cmdBuffer, offscreenTexture[0].descriptor, swapChain.swapChainImages[currentImageIndex].view);
 		}
+		postProcessManager->pointLineProcess->excute(cmdBuffer, swapChain.swapChainImages[currentImageIndex].view);
 
 	}
 
