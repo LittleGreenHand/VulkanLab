@@ -36,7 +36,7 @@ void PostProcessPointLine::prepare()
 	VK_CHECK_RESULT(builder.buildPipeline(renderInfo, renderer->pipelineCache, pipelineLayout, pipeline));
 	VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_PIPELINE, (uint64_t)pipeline, "PostProcess point/line pipeline");
 
-	builder.setDepthStencilState(VK_TRUE, VK_FALSE, VK_COMPARE_OP_LESS_OR_EQUAL);
+	builder.setDepthStencilState(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
 	renderInfo.depthAttachmentFormat = renderer->depthFormat;
 	VK_CHECK_RESULT(builder.buildPipeline(renderInfo, renderer->pipelineCache, pipelineLayout, worldPipeline));
 	VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_PIPELINE, (uint64_t)worldPipeline, "PostProcess world point/line pipeline");
@@ -93,7 +93,6 @@ void PostProcessPointLine::excute(VkCommandBuffer cmdBuffer, VkImageView writeIm
 	const auto vertices = frameGeometry.BuildVertices(space, renderer->globalParam.inverseView);
 	if (vertices.empty())
 		return;
-	LOG_TIME_BEGIN(PostProcessPointLine);
 	const VkDeviceSize bytes = vertices.size() * sizeof(PointLineGeometry::Vertex);
 	// BeginFrame 已等待当前帧的 fence，当前帧缓冲可安全更新或扩容。
 	auto& buffer = vertexBuffers[renderer->currentBuffer];
@@ -140,5 +139,4 @@ void PostProcessPointLine::excute(VkCommandBuffer cmdBuffer, VkImageView writeIm
 	vkCmdDraw(cmdBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 	vkCmdEndRendering(cmdBuffer);
 	VulkanDebugUtils::CmdEndLabel(cmdBuffer);
-	LOG_TIME_END(PostProcessPointLine);
 }

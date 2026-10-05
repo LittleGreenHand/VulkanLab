@@ -5,7 +5,6 @@
 #include <mutex>
 #include <string>
 #include <chrono>
-#include <unordered_map>
 
 #if defined(_WIN32)
 
@@ -512,15 +511,21 @@ std::string_view Log::GetFileName(const char* file)
 		slashPosition + 1);
 }
 
-using TimerClock = std::chrono::steady_clock;
-thread_local std::unordered_map<std::string_view, TimerClock::time_point> gTimers;
+namespace
+{
+	using TimerClock = std::chrono::steady_clock;
+	thread_local std::unordered_map<std::string_view, TimerClock::time_point> gTimers;
+	std::unordered_map<std::string, double> gTimerRecorder;
+	std::mutex gTimerRecorderMutex;
+	std::atomic<bool> gEnableTimerRecording{ false };
+}
 
 void Log::BeginTimer(std::string_view name)
 {
 	gTimers.insert_or_assign(name, TimerClock::now());
 }
 
-void Log::EndTimer(std::string_view name, const char *file, int line)
+void Log::EndTimer(std::string_view name, bool isWriteConsole, const char *file, int line)
 {
 	const auto end = TimerClock::now();
 	const auto it = gTimers.find(name);
@@ -533,6 +538,39 @@ void Log::EndTimer(std::string_view name, const char *file, int line)
 
 	const double ms = std::chrono::duration<double, std::milli>(end - it->second).count();
 	gTimers.erase(it);
+	if(isWriteConsole)
+	{
+		Write(LogLevel::Info, file, line, "[TIME] {}: {:.3f} ms", name, ms);
+	}
+	if(gEnableTimerRecording)
+	{
+		std::lock_guard<std::mutex> lock(gTimerRecorderMutex);
 
-	Write(LogLevel::Info, file, line, "[TIME] {}: {:.3f} ms", name, ms);
+		auto [iter, inserted] = gTimerRecorder.try_emplace(std::string{ name }, ms);
+		if (!inserted)
+		{
+			// ema = ema * (1-α) + ms * α
+			constexpr double kEmaAlpha = 0.8;
+			iter->second = iter->second * (1.0 - kEmaAlpha) + ms * kEmaAlpha;
+		}
+	}
+}
+
+std::unordered_map<std::string, double> Log::GetTimerRecords()
+{
+	std::lock_guard<std::mutex> lock(gTimerRecorderMutex);
+	return gTimerRecorder;
+}
+
+void Log::ClearTimerRecords()
+{
+	std::lock_guard<std::mutex> lock(gTimerRecorderMutex);
+	gTimerRecorder.clear();
+}
+
+void Log::EnableTimerRecording(bool enable)
+{
+	gEnableTimerRecording.store(enable);
+	if (!enable)
+		ClearTimerRecords();
 }

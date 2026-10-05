@@ -220,6 +220,16 @@ public:
     {
         return camFront;
     }
+    
+    glm::vec3 GetUp()
+    {
+        return camUp;
+    }
+
+	glm::vec3 GetRight()
+	{
+		return camRight;
+	}
     void update(float deltaTime)
     {
 		camFront.x = -cos(glm::radians(rotation.x * (flipY ? -1.0f : 1.0f))) * sin(glm::radians(rotation.y));

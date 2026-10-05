@@ -2,6 +2,7 @@
 
 #include <format>
 #include <string_view>
+#include <unordered_map>
 
 enum class LogLevel
 {
@@ -34,8 +35,10 @@ public:
 			std::make_format_args(args...));
 	}
 	static void BeginTimer(std::string_view name);
-	static void EndTimer(std::string_view name, const char *file, int line);
-
+	static void EndTimer(std::string_view name, bool isWriteConsole, const char *file, int line);
+	static void EnableTimerRecording(bool enable);
+	static std::unordered_map<std::string, double> GetTimerRecords();
+	static void ClearTimerRecords();
 private:
 	static void WriteFormatted(
 		LogLevel level,
@@ -105,7 +108,7 @@ private:
         __VA_ARGS__)
 
 #define LOG_TIME_BEGIN(name) Log::BeginTimer(#name)
-#define LOG_TIME_END(name) Log::EndTimer(#name, __FILE__, __LINE__)
+#define LOG_TIME_END(name, isWriteConsole) Log::EndTimer(#name, isWriteConsole, __FILE__, __LINE__)
 
 #else
 
@@ -115,5 +118,5 @@ private:
 #define LOG_ERROR(...)   ((void)0)
 #define LOG_FATAL(...)   ((void)0)
 #define LOG_TIME_BEGIN(name) ((void)0)
-#define LOG_TIME_END(name) ((void)0)
+#define LOG_TIME_END(name, isWriteConsole) ((void)0)
 #endif

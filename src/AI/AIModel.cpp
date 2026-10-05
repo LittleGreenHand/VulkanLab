@@ -149,13 +149,15 @@ bool AIModel::Run(const InferenceInput& input, InferenceOutput& output)
 	}
 
 	InferenceOutput backendOutput;
+
+	LOG_TIME_BEGIN(InferenceRun);
 	if (!m_backend->Run(*backendInput, backendOutput, error))
 	{
 		SetError(std::move(error));
 		LOG_ERROR("Inference failed for '{}': {}", m_info.Name, m_lastError);
 		return false;
 	}
-
+	LOG_TIME_END(InferenceRun, false);
 	if (m_adapter)
 	{
 		if (!m_adapter->PostProcess(backendOutput, output, error))

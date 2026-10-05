@@ -27,4 +27,5 @@ target_link_libraries(${AI_PROJECT_NAME} PUBLIC
     ${OpenCV_LIBS}
     ONNXRuntime::ONNXRuntime
     imgui
+    TBB::tbb
 )

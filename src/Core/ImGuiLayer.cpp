@@ -16,6 +16,31 @@
 #include "AI/AIModelManager.h"
 #include "Device/CameraDevice.h"
 #include "Render/PostProcess_PointLine.h"
+#include "Log.h"
+
+void DrawTimerRecordsUI()
+{
+	ImGui::SetNextWindowSize(ImVec2(560, 420), ImGuiCond_FirstUseEver);
+	ImGui::Begin("Timers");
+	auto records = Log::GetTimerRecords();
+	if (ImGui::BeginTable("t", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+	{
+		ImGui::TableSetupColumn("Name");
+		ImGui::TableSetupColumn("ms", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+		ImGui::TableHeadersRow();
+
+		for (auto& [name, ms] : records)
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::TextUnformatted(name.c_str());
+			ImGui::TableSetColumnIndex(1);
+			ImGui::Text("%8.3f", ms);
+		}
+		ImGui::EndTable();
+	}
+	ImGui::End();
+}
 
 void DrawCameraDevices()
 {
@@ -358,6 +383,15 @@ void ImGuiLayer::BeginFrame()
 		DrawAIModels();
 	if (m_showCameraDevicePanel)
 		DrawCameraDevices();
+	if (m_showPerformanceStatistics)
+	{
+		Log::EnableTimerRecording(true);
+		DrawTimerRecordsUI();
+	}
+	else
+	{
+		Log::EnableTimerRecording(false);
+	}
 }
 
 void ImGuiLayer::Update()
@@ -371,8 +405,9 @@ void ImGuiLayer::Update()
 		ImGui::Checkbox("显示AI模型面板", &m_showAIModelPanel);
 		ImGui::Checkbox("显示相机设备面板", &m_showCameraDevicePanel);
 		ImGui::Checkbox("启动物理模拟", &PhysicsContext::Get().isSimulationEnabled);
+		ImGui::Checkbox("显示性能统计", &m_showPerformanceStatistics);
 		ImGui::Checkbox("运行推理", &m_runInference);
-		if (m_runInference && ImGui::CollapsingHeader("手部姿态叠加"))
+		if (m_runInference && ImGui::CollapsingHeader("Hand Pose 设置"))
 		{
 			auto* overlay = renderer->postProcessManager->pointLineProcess;
 			ImGui::Checkbox("显示点线", &overlay->enabled);

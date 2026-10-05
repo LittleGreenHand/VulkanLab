@@ -331,10 +331,8 @@ void Application::OnMouseMove(double x, double y)
 		m_renderer->camera.rotate(glm::vec3(static_cast<float>(dy) * m_renderer->camera.rotationSpeed, -static_cast<float>(dx) * m_renderer->camera.rotationSpeed, 0.0f));
 	}
 	if (m_renderer->mouseState.buttons.right) {
-		m_renderer->camera.Translate(glm::vec3(static_cast<float>(dx) * .005f, 0.0f, static_cast<float>(dy) * .005f));
-	}
-	if (m_renderer->mouseState.buttons.middle) {
-		m_renderer->camera.Translate(glm::vec3(-static_cast<float>(dx) * 0.005f, -static_cast<float>(dy) * 0.005f, 0.0f));
+		glm::vec3 translation = -static_cast<float>(dx) * 0.005f * m_renderer->camera.GetRight() + static_cast<float>(dy) * 0.005f * m_renderer->camera.GetUp();
+		m_renderer->camera.Translate(translation);
 	}
 	m_renderer->mouseState.position = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
@@ -399,57 +397,58 @@ void Application::AIInference()
 
 void Application::AIInferenceWorker()
 {
-	auto* model = AIModelManager::Get().FindModel(DefaultHandPoseModel);
-	if (!model)
-		return;
-
 	while (!m_aiInferenceStop.load())
 	{
+		LOG_TIME_BEGIN(Inference);
 		cv::Mat frame;
-
-		LOG_TIME_BEGIN(CameraCapture);
 		if (!m_cameraDevice.Capture(frame))
 		{
 			LOG_ERROR("Failed to capture camera frame");
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			continue;
 		}
-		LOG_TIME_END(CameraCapture);
-
 		frame = frame.clone();
-		LOG_TIME_BEGIN(Inference);
-
-		InferenceInput input;
-		auto output = std::make_unique<InferenceOutput>();
-		std::string error;
-
-		if (!MediaPipeHandAdapter::CreateInput(frame, input, error))
+		int enabledModelCount = 0;
+		for (auto& model : AIModelManager::Get().GetModels())
 		{
-			LOG_ERROR("Failed to create inference input: {}", error);
-			continue;
+			if (model->IsEnabled() && model->IsLoaded())
+			{
+				enabledModelCount++;
+				InferenceInput input;
+				auto output = std::make_unique<InferenceOutput>();
+				std::string error;
+
+				if (!MediaPipeHandAdapter::CreateInput(frame, input, error))
+				{
+					LOG_ERROR("Failed to create inference input: {}", error);
+					continue;
+				}
+
+				if (m_aiInferenceStop.load())
+					break;
+
+				if (!model->Run(input, *output))
+				{
+					LOG_ERROR("Failed to run inference: {}", model->GetLastError());
+					continue;
+				}
+
+				if (!output->HandPoses)
+				{
+					LOG_ERROR("Hand pose adapter returned no structured result");
+					continue;
+				}
+
+				{
+					std::lock_guard<std::mutex> lock(m_aiInferenceMutex);
+					m_aiInferenceResult = AIInferenceResult{ std::move(frame), std::move(output) };
+				}
+			}
 		}
-
-		if (m_aiInferenceStop.load())
-			break;
-
-		if (!model->Run(input, *output))
+		LOG_TIME_END(Inference, false);
+		if (enabledModelCount == 0)
 		{
-			LOG_ERROR("Failed to run inference: {}", model->GetLastError());
-			continue;
-		}
-
-		if (!output->HandPoses)
-		{
-			LOG_ERROR("Hand pose adapter returned no structured result");
-			continue;
-		}
-
-		LOG_TIME_END(Inference);
-
-		// 更新最新结果
-		{
-			std::lock_guard<std::mutex> lock(m_aiInferenceMutex);
-			m_aiInferenceResult = AIInferenceResult{ std::move(frame), std::move(output) };
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
 }
