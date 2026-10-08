@@ -569,8 +569,10 @@ void VulkanRenderer::render()
 			VulkanImageUtils::TransitionImageLayout(cmdBuffer, swapChain.swapChainImages[currentImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 			postProcessManager->toneMappingProcess->excute(cmdBuffer, offscreenTexture[0].descriptor, swapChain.swapChainImages[currentImageIndex].view);
 		}
-		postProcessManager->pointLineProcess->excute(cmdBuffer, swapChain.swapChainImages[currentImageIndex].view);
-
+		//点线渲染
+		{
+			postProcessManager->pointLineProcess->excute(cmdBuffer, swapChain.swapChainImages[currentImageIndex].view);
+		}
 	}
 
 }
@@ -625,10 +627,10 @@ void VulkanRenderer::DrawImGui()
 
 void VulkanRenderer::OnFramebufferResize(int framebufferWidth, int framebufferHeight)
 {
-	if (m_framebufferWidth != framebufferWidth || m_framebufferHeiht != framebufferHeight)
+	if (m_framebufferWidth != framebufferWidth || m_framebufferHeight != framebufferHeight)
 	{
 		m_renderWidth = m_framebufferWidth = framebufferWidth;
-		m_renderHeiht = m_framebufferHeiht = framebufferHeight;
+		m_renderHeiht = m_framebufferHeight = framebufferHeight;
 		windowResize();
 		UpdateDescriptorSets();
 		LOG_INFO("Framebuffer resized to {} x {}", framebufferWidth, framebufferHeight);

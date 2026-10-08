@@ -1,41 +1,86 @@
 #include "Log.h"
 
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <deque>
 #include <iostream>
 #include <iterator>
 #include <mutex>
 #include <string>
-#include <chrono>
+#include <thread>
+#include <unordered_map>
 
 #if defined(_WIN32)
-
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-
 #endif
 
 #define ENABLE_FILE_LINE 0
 
+std::atomic<LogLevel> Log::sMinLevel{ LogLevel::Debug };
+
 namespace
 {
-	// 使用不可见控制字符作为格式化参数的内部标记。
-	// 它们只存在于格式化后的临时字符串中，真正输出控制台前会被移除。
 	constexpr char kHighlightBegin = '\x1D';
 	constexpr char kHighlightEnd = '\x1E';
 
-	// 防止多个线程同时输出日志时互相穿插。
-	std::mutex gLogMutex;
+	const char* GetLevelColor(LogLevel level)
+	{
+		switch (level)
+		{
+		case LogLevel::Debug:   return "\033[36m";
+		case LogLevel::Info:    return "\033[92m";
+		case LogLevel::Warning: return "\033[93m";
+		case LogLevel::Error:   return "\033[91m";
+		case LogLevel::Fatal:   return "\033[97;41m";
+		}
+		return "\033[0m";
+	}
 
-	void BuildHighlightedFormat(
-		std::string_view format,
-		std::string& result)
+	const char* GetHighlightColor(LogLevel level)
+	{
+		// Fatal 保留红色背景
+		return level == LogLevel::Fatal ? "\033[96;41m" : "\033[96m";
+	}
+
+	const char* GetFileColor() { return "\033[95;49m"; }
+	const char* GetLineColor() { return "\033[95;49m"; }
+	const char* ResetColor() { return "\033[0m"; }
+
+	std::string_view GetLevelName(LogLevel level)
+	{
+		switch (level)
+		{
+		case LogLevel::Debug:   return "DEBUG";
+		case LogLevel::Info:    return "INFO";
+		case LogLevel::Warning: return "WARNING";
+		case LogLevel::Error:   return "ERROR";
+		case LogLevel::Fatal:   return "FATAL";
+		}
+		return "UNKNOWN";
+	}
+
+	std::string_view GetFileName(const char* file)
+	{
+		if (file == nullptr)
+			return {};
+
+		std::string_view path(file);
+		const size_t slashPosition = path.find_last_of("/\\");
+
+		if (slashPosition == std::string_view::npos)
+			return path;
+
+		return path.substr(slashPosition + 1);
+	}
+
+	void BuildHighlightedFormat(std::string_view format, std::string& result)
 	{
 		result.clear();
 
-		// 一般日志只会多出少量 marker；保留 capacity 可以避免后续日志重复分配。
 		if (result.capacity() < format.size() + 16)
-		{
 			result.reserve(format.size() + 16);
-		}
 
 		size_t position = 0;
 
@@ -50,290 +95,32 @@ namespace
 				continue;
 			}
 
-			// "{{" 是 std::format 的转义左花括号，不是 replacement field。
-			if (position + 1 < format.size() &&
-				format[position + 1] == '{')
+			if (position + 1 < format.size() && format[position + 1] == '{')
 			{
 				result.append("{{");
 				position += 2;
 				continue;
 			}
 
-			// 找到真正的 replacement field：
-			//   {}
-			//   {:.2f}
-			//   {0}
-			//   {0:{1}}
-			//
-			// 对整个 replacement field 前后插入内部 marker。
 			const size_t fieldBegin = position;
 			size_t braceDepth = 0;
 
 			do
 			{
 				const char c = format[position];
-
-				if (c == '{')
-				{
-					++braceDepth;
-				}
-				else if (c == '}')
-				{
-					--braceDepth;
-				}
-
+				if (c == '{') ++braceDepth;
+				else if (c == '}') --braceDepth;
 				++position;
-
 			} while (position < format.size() && braceDepth != 0);
 
 			result.push_back(kHighlightBegin);
-			result.append(
-				format.data() + fieldBegin,
-				position - fieldBegin);
+			result.append(format.data() + fieldBegin, position - fieldBegin);
 			result.push_back(kHighlightEnd);
 		}
 	}
 
-
-#if defined(_WIN32)
-
-	HANDLE gConsoleHandle = INVALID_HANDLE_VALUE;
-
-	// 保存控制台原始颜色。
-	WORD gDefaultConsoleAttributes =
-		FOREGROUND_RED |
-		FOREGROUND_GREEN |
-		FOREGROUND_BLUE;
-
-	bool gConsoleInitialized = false;
-
-
-	void InitializeWindowsConsole()
-	{
-		if (gConsoleInitialized)
-		{
-			return;
-		}
-
-		gConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-		if (gConsoleHandle == INVALID_HANDLE_VALUE ||
-			gConsoleHandle == nullptr)
-		{
-			return;
-		}
-
-		CONSOLE_SCREEN_BUFFER_INFO info{};
-
-		if (GetConsoleScreenBufferInfo(
-			gConsoleHandle,
-			&info))
-		{
-			gDefaultConsoleAttributes = info.wAttributes;
-			gConsoleInitialized = true;
-		}
-	}
-
-
-	void SetConsoleAttributes(WORD attributes)
-	{
-		if (!gConsoleInitialized)
-		{
-			InitializeWindowsConsole();
-		}
-
-		if (gConsoleHandle == INVALID_HANDLE_VALUE ||
-			gConsoleHandle == nullptr)
-		{
-			return;
-		}
-
-		SetConsoleTextAttribute(
-			gConsoleHandle,
-			attributes);
-	}
-
-
-	WORD GetLevelColor(LogLevel level)
-	{
-		switch (level)
-		{
-		case LogLevel::Debug:
-			// 青色
-			return
-				FOREGROUND_GREEN |
-				FOREGROUND_BLUE;
-
-		case LogLevel::Info:
-			// 亮绿色
-			return
-				FOREGROUND_GREEN |
-				FOREGROUND_INTENSITY;
-
-		case LogLevel::Warning:
-			// 亮黄色
-			return
-				FOREGROUND_RED |
-				FOREGROUND_GREEN |
-				FOREGROUND_INTENSITY;
-
-		case LogLevel::Error:
-			// 亮红色
-			return
-				FOREGROUND_RED |
-				FOREGROUND_INTENSITY;
-
-		case LogLevel::Fatal:
-			// 亮白色 + 红色背景
-			return
-				FOREGROUND_RED |
-				FOREGROUND_GREEN |
-				FOREGROUND_BLUE |
-				FOREGROUND_INTENSITY |
-				BACKGROUND_RED;
-		}
-
-		return gDefaultConsoleAttributes;
-	}
-
-
-	void SetLevelColor(
-		std::ostream&,
-		LogLevel level)
-	{
-		SetConsoleAttributes(
-			GetLevelColor(level));
-	}
-
-
-	void SetHighlightColor(
-		std::ostream&,
-		LogLevel level)
-	{
-		// 格式化参数使用亮青色。
-		WORD color =
-			FOREGROUND_GREEN |
-			FOREGROUND_BLUE |
-			FOREGROUND_INTENSITY;
-
-		// Fatal 保留红色背景，不让参数高亮破坏整条 Fatal 的视觉语义。
-		if (level == LogLevel::Fatal)
-		{
-			color |= BACKGROUND_RED;
-		}
-
-		SetConsoleAttributes(color);
-	}
-
-
-	void SetFileColor(std::ostream&)
-	{
-		// 亮紫色
-		SetConsoleAttributes(
-			FOREGROUND_RED |
-			FOREGROUND_BLUE |
-			FOREGROUND_INTENSITY);
-	}
-
-
-	void SetLineColor(std::ostream&)
-	{
-		// 亮紫色
-		SetConsoleAttributes(
-			FOREGROUND_RED |
-			FOREGROUND_BLUE |
-			FOREGROUND_INTENSITY);
-	}
-
-
-	void ResetConsoleColor(std::ostream&)
-	{
-		if (!gConsoleInitialized)
-		{
-			return;
-		}
-
-		SetConsoleAttributes(
-			gDefaultConsoleAttributes);
-	}
-
-
-#else
-
-
-	const char* GetLevelColor(LogLevel level)
-	{
-		switch (level)
-		{
-		case LogLevel::Debug:
-			return "\033[36m";
-
-		case LogLevel::Info:
-			return "\033[92m";
-
-		case LogLevel::Warning:
-			return "\033[93m";
-
-		case LogLevel::Error:
-			return "\033[91m";
-
-		case LogLevel::Fatal:
-			return "\033[97;41m";
-		}
-
-		return "\033[0m";
-	}
-
-
-	void SetLevelColor(
-		std::ostream& output,
-		LogLevel level)
-	{
-		output << GetLevelColor(level);
-	}
-
-
-	void SetHighlightColor(
-		std::ostream& output,
-		LogLevel level)
-	{
-		if (level == LogLevel::Fatal)
-		{
-			// 亮青色 + 保留 Fatal 红色背景。
-			output << "\033[96;41m";
-		}
-		else
-		{
-			output << "\033[96m";
-		}
-	}
-
-
-	void SetFileColor(std::ostream& output)
-	{
-		// 亮紫色
-		output << "\033[95;49m";
-	}
-
-
-	void SetLineColor(std::ostream& output)
-	{
-		// 亮紫色
-		output << "\033[95;49m";
-	}
-
-
-	void ResetConsoleColor(std::ostream& output)
-	{
-		output << "\033[0m";
-	}
-
-
-#endif
-
-
-	void WriteHighlightedMessage(
-		std::ostream& output,
+	void AppendHighlightedMessage(
+		std::string& out,
 		LogLevel level,
 		std::string_view message)
 	{
@@ -342,46 +129,197 @@ namespace
 
 		while (position < message.size())
 		{
-			const char marker =
-				highlighting ? kHighlightEnd : kHighlightBegin;
-
-			const size_t markerPosition =
-				message.find(marker, position);
+			const char marker = highlighting ? kHighlightEnd : kHighlightBegin;
+			const size_t markerPosition = message.find(marker, position);
 
 			if (markerPosition == std::string_view::npos)
 			{
-				output.write(
-					message.data() + position,
-					static_cast<std::streamsize>(
-						message.size() - position));
+				out.append(message.data() + position, message.size() - position);
 				break;
 			}
 
 			if (markerPosition > position)
 			{
-				output.write(
-					message.data() + position,
-					static_cast<std::streamsize>(
-						markerPosition - position));
+				out.append(message.data() + position, markerPosition - position);
 			}
 
 			highlighting = !highlighting;
-
-			if (highlighting)
-			{
-				SetHighlightColor(output, level);
-			}
-			else
-			{
-				SetLevelColor(output, level);
-			}
-
+			out += highlighting ? GetHighlightColor(level) : GetLevelColor(level);
 			position = markerPosition + 1;
 		}
 	}
 
-} // namespace
+	struct LogMessage
+	{
+		LogLevel level;
+		const char* file;
+		int line;
+		std::string text;
+	};
 
+#if defined(_WIN32)
+	void EnableVirtualTerminal()
+	{
+		HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+		if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
+			return;
+
+		DWORD mode = 0;
+		if (!GetConsoleMode(handle, &mode))
+			return;
+
+		mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		SetConsoleMode(handle, mode);
+	}
+#endif
+
+	class AsyncLogger
+	{
+	public:
+		static AsyncLogger& Instance()
+		{
+			static AsyncLogger instance;
+			return instance;
+		}
+
+		void Enqueue(LogMessage&& msg)
+		{
+			{
+				std::unique_lock<std::mutex> lock(mutex_);
+
+				if (queue_.size() >= kMaxQueueSize)
+				{
+					// 队列满：低级别直接丢弃，避免阻塞业务线程
+					if (msg.level < LogLevel::Warning)
+						return;
+
+					// 高级别日志覆盖最旧一条
+					queue_.pop_front();
+				}
+
+				queue_.push_back(std::move(msg));
+			}
+
+			cv_.notify_one();
+		}
+
+		void Shutdown()
+		{
+			{
+				std::lock_guard<std::mutex> lock(mutex_);
+				if (!running_)
+					return;
+				running_ = false;
+			}
+
+			cv_.notify_all();
+
+			if (worker_.joinable())
+				worker_.join();
+		}
+
+	private:
+		AsyncLogger()
+			: worker_([this] { Worker(); })
+		{
+#if defined(_WIN32)
+			EnableVirtualTerminal();
+#endif
+		}
+
+		~AsyncLogger()
+		{
+			Shutdown();
+		}
+
+		void Worker()
+		{
+			std::deque<LogMessage> local;
+
+			while (true)
+			{
+				{
+					std::unique_lock<std::mutex> lock(mutex_);
+					cv_.wait(lock, [this]
+						{
+							return !queue_.empty() || !running_;
+						});
+
+					if (!running_ && queue_.empty())
+						break;
+
+					// 批量取，减少锁竞争
+					constexpr size_t kBatchSize = 128;
+					for (size_t i = 0; i < kBatchSize && !queue_.empty(); ++i)
+					{
+						local.push_back(std::move(queue_.front()));
+						queue_.pop_front();
+					}
+				}
+
+				for (auto& msg : local)
+				{
+					WriteMessageSync(msg);
+				}
+
+				local.clear();
+			}
+
+			// 退出前排空剩余日志
+			std::deque<LogMessage> remain;
+			{
+				std::lock_guard<std::mutex> lock(mutex_);
+				remain.swap(queue_);
+			}
+
+			for (auto& msg : remain)
+			{
+				WriteMessageSync(msg);
+			}
+		}
+
+		void WriteMessageSync(const LogMessage& msg)
+		{
+			std::ostream& output =
+				(msg.level == LogLevel::Error || msg.level == LogLevel::Fatal)
+				? std::cerr
+				: std::cout;
+
+			std::string line;
+			line.reserve(msg.text.size() + 64);
+
+			line += GetLevelColor(msg.level);
+			line += '[';
+			line.append(GetLevelName(msg.level));
+			line += "] ";
+
+			AppendHighlightedMessage(line, msg.level, msg.text);
+
+#if ENABLE_FILE_LINE
+			line += GetFileColor();
+			line += "   [";
+			line.append(GetFileName(msg.file));
+			line += ':';
+			line += std::to_string(msg.line);
+			line += ']';
+#endif
+
+			line += ResetColor();
+			line += '\n';
+
+			output.write(line.data(), static_cast<std::streamsize>(line.size()));
+		}
+
+		static constexpr size_t kMaxQueueSize = 10000;
+
+		std::mutex mutex_;
+		std::condition_variable cv_;
+		std::deque<LogMessage> queue_;
+		std::thread worker_;
+		bool running_ = true;
+	};
+
+} // namespace
 
 void Log::WriteFormatted(
 	LogLevel level,
@@ -390,125 +328,28 @@ void Log::WriteFormatted(
 	std::string_view format,
 	std::format_args args)
 {
-	std::string highlightedFormat;
+	if (!ShouldLog(level))
+		return;
+
+	// 线程局部复用，减少分配
+	thread_local std::string tlsHighlightedFormat;
+	BuildHighlightedFormat(format, tlsHighlightedFormat);
+
 	std::string formattedMessage;
-
-	BuildHighlightedFormat(
-		format,
-		highlightedFormat);
-
-	formattedMessage.clear();
+	formattedMessage.reserve(tlsHighlightedFormat.size() + 64);
 
 	std::vformat_to(
 		std::back_inserter(formattedMessage),
-		highlightedFormat,
+		tlsHighlightedFormat,
 		args);
 
-	WriteImpl(
-		level,
-		file,
-		line,
-		formattedMessage);
+	AsyncLogger::Instance().Enqueue(
+		LogMessage{ level, file, line, std::move(formattedMessage) });
 }
 
-
-void Log::WriteImpl(
-	LogLevel level,
-	const char* file,
-	int line,
-	std::string_view message)
+void Log::Shutdown()
 {
-	const std::scoped_lock lock(gLogMutex);
-
-	std::ostream& output =
-		(level == LogLevel::Error ||
-			level == LogLevel::Fatal)
-		? std::cerr
-		: std::cout;
-
-	SetLevelColor(
-		output,
-		level);
-
-	output
-		<< '['
-		<< GetLevelName(level)
-		<< "] ";
-
-	WriteHighlightedMessage(
-		output,
-		level,
-		message);
-
-
-#if ENABLE_FILE_LINE
-
-	// Source Location 整体弱化，行号单独突出。
-	SetFileColor(output);
-
-	output
-		<< "   ["
-		<< GetFileName(file)
-		<< ':';
-
-	SetLineColor(output);
-
-	output << line;
-
-	SetFileColor(output);
-
-	output << ']';
-
-#endif
-
-	ResetConsoleColor(output);
-	output << '\n';
-}
-
-
-std::string_view Log::GetLevelName(LogLevel level)
-{
-	switch (level)
-	{
-	case LogLevel::Debug:
-		return "DEBUG";
-
-	case LogLevel::Info:
-		return "INFO";
-
-	case LogLevel::Warning:
-		return "WARNING";
-
-	case LogLevel::Error:
-		return "ERROR";
-
-	case LogLevel::Fatal:
-		return "FATAL";
-	}
-
-	return "UNKNOWN";
-}
-
-
-std::string_view Log::GetFileName(const char* file)
-{
-	if (file == nullptr)
-	{
-		return {};
-	}
-
-	std::string_view path(file);
-
-	const size_t slashPosition =
-		path.find_last_of("/\\");
-
-	if (slashPosition == std::string_view::npos)
-	{
-		return path;
-	}
-
-	return path.substr(
-		slashPosition + 1);
+	AsyncLogger::Instance().Shutdown();
 }
 
 namespace
@@ -525,7 +366,7 @@ void Log::BeginTimer(std::string_view name)
 	gTimers.insert_or_assign(name, TimerClock::now());
 }
 
-void Log::EndTimer(std::string_view name, bool isWriteConsole, const char *file, int line)
+void Log::EndTimer(std::string_view name, bool isWriteConsole, const char* file, int line)
 {
 	const auto end = TimerClock::now();
 	const auto it = gTimers.find(name);
@@ -536,22 +377,28 @@ void Log::EndTimer(std::string_view name, bool isWriteConsole, const char *file,
 		return;
 	}
 
-	const double ms = std::chrono::duration<double, std::milli>(end - it->second).count();
+	const double ms =
+		std::chrono::duration<double, std::milli>(end - it->second).count();
+
 	gTimers.erase(it);
-	if(isWriteConsole)
+
+	if (isWriteConsole)
 	{
 		Write(LogLevel::Info, file, line, "[TIME] {}: {:.3f} ms", name, ms);
 	}
-	if(gEnableTimerRecording)
+
+	if (gEnableTimerRecording)
 	{
 		std::lock_guard<std::mutex> lock(gTimerRecorderMutex);
 
-		auto [iter, inserted] = gTimerRecorder.try_emplace(std::string{ name }, ms);
+		auto [iter, inserted] =
+			gTimerRecorder.try_emplace(std::string{ name }, ms);
+
 		if (!inserted)
 		{
-			// ema = ema * (1-α) + ms * α
 			constexpr double kEmaAlpha = 0.8;
-			iter->second = iter->second * (1.0 - kEmaAlpha) + ms * kEmaAlpha;
+			iter->second =
+				iter->second * (1.0 - kEmaAlpha) + ms * kEmaAlpha;
 		}
 	}
 }

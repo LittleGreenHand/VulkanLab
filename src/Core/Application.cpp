@@ -128,10 +128,12 @@ void Application::Destroy()
 	m_guiLayer.reset();	
 	m_renderer.reset();
 	m_window.reset();
+	m_handBuilder.Clear();
 	PhysicsContext::Get().Destroy();
 	AIModelManager::Get().Shutdown();
 	m_init = false;
 	LOG_DEBUG("Application destroyed");
+	Log::Shutdown();
 }
 
 void Application::Resize(int width, int height)
@@ -191,6 +193,8 @@ bool Application::BeginFrame()
 		return false;
 	}
 	m_guiLayer->BeginFrame();
+	if (m_guiLayer->RunInference())
+		m_handBuilder.DrawUI();
 	return true;
 }
 
@@ -331,6 +335,10 @@ void Application::OnMouseMove(double x, double y)
 		m_renderer->camera.rotate(glm::vec3(static_cast<float>(dy) * m_renderer->camera.rotationSpeed, -static_cast<float>(dx) * m_renderer->camera.rotationSpeed, 0.0f));
 	}
 	if (m_renderer->mouseState.buttons.right) {
+		auto camFront = m_renderer->camera.GetFront() * (static_cast<float>(dy) * 0.003f);
+		m_renderer->camera.Translate(camFront);
+	}
+	if (m_renderer->mouseState.buttons.middle) {
 		glm::vec3 translation = -static_cast<float>(dx) * 0.005f * m_renderer->camera.GetRight() + static_cast<float>(dy) * 0.005f * m_renderer->camera.GetUp();
 		m_renderer->camera.Translate(translation);
 	}
@@ -366,7 +374,7 @@ void Application::AIInference()
 
 	if (!enabled)
 	{
-		m_renderer->postProcessManager->pointLineProcess->ClearHandPoses();
+		m_handBuilder.Clear();
 		if (m_aiInferenceThread.joinable())
 		{
 			StopAIInference();
@@ -389,9 +397,15 @@ void Application::AIInference()
 	}
 
 	if (!result || !result->Output || !result->Output->HandPoses)
+	{
+		m_renderer->postProcessManager->pointLineProcess->AddGeometry(&m_handBuilder.GetGeometry());
 		return;
+	}
 
-	m_renderer->postProcessManager->pointLineProcess->SetHandPoses(*result->Output->HandPoses);
+	m_handBuilder.config.ViewportHeight = static_cast<float>(m_renderer->m_framebufferHeight);
+	m_handBuilder.config.ViewportWidth = static_cast<float>(m_renderer->m_framebufferWidth);
+	m_handBuilder.Build(*result->Output->HandPoses);
+	m_renderer->postProcessManager->pointLineProcess->AddGeometry(&m_handBuilder.GetGeometry());
 
 }
 

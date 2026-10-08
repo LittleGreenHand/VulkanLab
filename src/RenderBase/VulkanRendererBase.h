@@ -116,7 +116,7 @@ public:
 	uint32_t m_renderWidth = 1280; // 渲染分辨率，渲染时依此分辨率进行渲染
 	uint32_t m_renderHeiht = 720;
 	uint32_t m_framebufferWidth = 1280; //交换链Present的分辨率，也可以说是窗口的显示分辨率
-	uint32_t m_framebufferHeiht = 720;
+	uint32_t m_framebufferHeight = 720;
 
 	CommandLineParser commandLineParser;
 

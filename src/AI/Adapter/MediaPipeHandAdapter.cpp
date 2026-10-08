@@ -413,9 +413,10 @@ bool MediaPipeHandAdapter::PostProcess(const InferenceOutput& source,
 			handInput.Tensors.push_back(MakeInput(handImage, kHandInputSize));
 
 			InferenceOutput handOutput;
+			LOG_TIME_BEGIN(handpose_estimation_mediapipe);
 			if (!m_handBackend.Run(handInput, handOutput, error))
 				return false;
-
+			LOG_TIME_END(handpose_estimation_mediapipe, false);
 			if (handOutput.Tensors.size() != 4)
 			{
 				error = kHandOutputError;
@@ -502,8 +503,8 @@ bool MediaPipeHandAdapter::PostProcess(const InferenceOutput& source,
 		if (m_filterEnabled && !result.Hands.empty())
 			ApplyTemporalFilter(result.Hands, timestamp);
 		destination.HandPoses = std::move(result);
-		LOG_TIME_END(MediaPipeHandAdapter::PostProcess, true);
-		LOG_DEBUG("MediaPipe detected {} hands", destination.HandPoses->Hands.size());
+		LOG_TIME_END(MediaPipeHandAdapter::PostProcess, false);
+		//LOG_DEBUG("MediaPipe detected {} hands", destination.HandPoses->Hands.size());
 		return true;
 	}
 	catch (const std::exception& e)

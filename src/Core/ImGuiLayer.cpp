@@ -403,33 +403,12 @@ void ImGuiLayer::Update()
 		auto renderer = VulkanContext::GetVulkanRenderer();
 		ImGui::Text("FPS: %.1f  (%.3f ms)", FrameClock::Get().FPS(), FrameClock::Get().DeltaSeconds() * 1000);
 		ImGui::Checkbox("显示AI模型面板", &m_showAIModelPanel);
+		ImGui::Checkbox("显示场景树", &m_showSceneTree);
 		ImGui::Checkbox("显示相机设备面板", &m_showCameraDevicePanel);
 		ImGui::Checkbox("启动物理模拟", &PhysicsContext::Get().isSimulationEnabled);
 		ImGui::Checkbox("显示性能统计", &m_showPerformanceStatistics);
 		ImGui::Checkbox("运行推理", &m_runInference);
-		if (m_runInference && ImGui::CollapsingHeader("Hand Pose 设置"))
-		{
-			auto* overlay = renderer->postProcessManager->pointLineProcess;
-			ImGui::Checkbox("显示点线", &overlay->enabled);
-			int space = static_cast<int>(overlay->space);
-			if (ImGui::Combo("绘制空间", &space, "屏幕空间\0世界空间\0"))
-				overlay->space = static_cast<PointLineSpace>(space);
-			if (overlay->space == PointLineSpace::World)
-			{
-				ImGui::SliderFloat("世界关键点半径", &overlay->worldPointRadius, 0.001f, 0.03f, "%.3f");
-				ImGui::SliderFloat("世界骨架线宽", &overlay->worldLineThickness, 0.001f, 0.02f, "%.3f");
-				ImGui::DragFloat3("手部世界位置", &overlay->handWorldPosition.x, 0.01f);
-				ImGui::DragFloat3("手部世界旋转", &overlay->handWorldRotation.x, 1.0f);
-				ImGui::SliderFloat("手部世界缩放", &overlay->handWorldScale, 0.1f, 10.0f);
-				ImGui::SliderFloat("手部位置映射宽度", &overlay->handImageWidth, 0.0f, 2.0f);
-			}
-			else
-			{
-				ImGui::SliderFloat("关键点半径", &overlay->pointRadius, 1.0f, 12.0f, "%.1f px");
-				ImGui::SliderFloat("骨架线宽", &overlay->lineThickness, 1.0f, 8.0f, "%.1f px");
-			}
-			ImGui::SliderFloat("关键点置信度", &overlay->keypointConfidence, 0.0f, 1.0f);
-		}
+		ImGui::Checkbox("显示点线", &renderer->postProcessManager->pointLineProcess->enabled);
 
 		if (ImGui::CollapsingHeader("相机")) {
 			ImGui::Indent();

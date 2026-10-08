@@ -7,6 +7,7 @@
 #include "AI/HandPose.h"
 #include "USD/USDLoader.h"
 #include "InferenceTypes.h"
+#include "Simulation/HandBuilder.h"
 class Application
 {
 public:
@@ -47,6 +48,7 @@ private:
 	std::unique_ptr<GlfwWindow> m_window;
 	std::unique_ptr<ImGuiLayer> m_guiLayer;
 	CameraDevice m_cameraDevice;
+	HandBuilder m_handBuilder;
 private:
 	void AIInference();
 	void AIInferenceWorker();

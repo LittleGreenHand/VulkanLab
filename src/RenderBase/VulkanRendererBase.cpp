@@ -258,7 +258,7 @@ VulkanRendererBase::VulkanRendererBase()
 		settings.vsync = true;
 	}
 	if (commandLineParser.isSet("height")) {
-		m_framebufferHeiht = m_renderHeiht = commandLineParser.getValueAsInt("height", m_renderHeiht);
+		m_framebufferHeight = m_renderHeiht = commandLineParser.getValueAsInt("height", m_renderHeiht);
 	}
 	if (commandLineParser.isSet("width")) {
 		m_framebufferWidth = m_renderWidth = commandLineParser.getValueAsInt("width", m_renderWidth);
@@ -793,7 +793,7 @@ void VulkanRendererBase::InitSurfaceKHR(VkSurfaceKHR surface)
 
 void VulkanRendererBase::createSwapChain()
 {
-	swapChain.create(m_framebufferWidth, m_framebufferHeiht, settings.vsync, settings.fullscreen);
+	swapChain.create(m_framebufferWidth, m_framebufferHeight, settings.vsync, settings.fullscreen);
 	for (int i = 0; i < swapChain.swapChainImages.size(); i++)
 		VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_IMAGE, (uint64_t)swapChain.swapChainImages[i].image, ("swapchainImage" + std::to_string(i)));
 }
