@@ -4,6 +4,7 @@
 #include <thread>
 #include "RenderResource/MeshManager.h"
 #include "Simulation/PhysicsContext.h"
+#include "RenderResource/InstanceManager.h"
 #include "RenderBase/VulkanTools.h"
 #include "AI/AIModelManager.h"
 #include "AI/Adapter/MediaPipeHandAdapter.h"
@@ -200,6 +201,7 @@ bool Application::BeginFrame()
 
 void Application::UpdateScene()
 {
+	InstanceManager::Get().PollGeneration();
 }
 
 void Application::Simulate()
@@ -208,6 +210,7 @@ void Application::Simulate()
 	{
 		PhysicsContext::Get().Simulate(FrameClock::Get().DeltaSeconds());
 		MeshManager::Get().UpdateSimulationResults();
+		InstanceManager::Get().SyncPhysics();
 	}
 }
 

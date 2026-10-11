@@ -1,4 +1,5 @@
 #include "MeshManager.h"
+#include "InstanceManager.h"
 #include "Render/VulkanContext.h"
 #include "RenderBase/VulkanDevice.h"
 #include "GlobalTextureManager.h"
@@ -271,6 +272,7 @@ bool MeshManager::CreatePhysicsActor(vkglTF::Model& model, vkglTF::Node* node,	b
 	auto* mesh = node->mesh;
 	if (node->physicsComponent.physicsActor)
 	{
+		InstanceManager::Get().UnregisterActor(node->physicsComponent.physicsActor);
 		node->physicsComponent.physicsActor->release();
 		node->physicsComponent.physicsActor = nullptr;
 	}
@@ -350,6 +352,7 @@ bool MeshManager::CreatePhysicsActor(vkglTF::Model& model, vkglTF::Node* node,	b
 	node->physicsComponent.isDynamic = isDynamic;
 
 	PhysicsContext::Get().AddActor(node->physicsComponent.physicsActor);
+	InstanceManager::Get().RegisterActor(node->physicsComponent.physicsActor, { node->nodeId, 0 });
 	return true;
 }
 

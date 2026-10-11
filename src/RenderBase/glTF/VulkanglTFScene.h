@@ -4,6 +4,11 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <memory>
+#include "RenderResource/InstanceTypes.h"
+#include "RenderBase/VulkanBuffer.h"
+
+class ModelInstances;
 
 #include "vulkan/vulkan.h"
 #include "RenderResource/GeometryTypes.hpp"
@@ -57,6 +62,7 @@ namespace vkglTF
 		vks::VulkanDevice* device;
 		Node* parentNode = nullptr;
 		PhysicsMesh physicsMesh;
+		vks::Buffer identityInstances{};
 		std::vector<Primitive*> primitives;
 		std::string name;
 
@@ -96,6 +102,12 @@ namespace vkglTF
 	};
 
 	struct Node {
+		Node();
+		Node(const Node&) = delete;
+		Node& operator=(const Node&) = delete;
+		const NodeID nodeId;
+		InstanceSettings instanceSettings;
+		std::unique_ptr<ModelInstances> instances;
 		Node* parent = nullptr;
 		uint32_t index = 0;
 		std::vector<Node*> children;
@@ -108,7 +120,7 @@ namespace vkglTF
 		int32_t skinIndex = -1;
 		glm::vec3 translation{ 0, 0, 0 };
 		glm::vec3 scale{ 1.0f };
-		glm::quat rotation = glm::quat(0, 0, 0, 1);
+		glm::quat rotation = glm::quat(1, 0, 0, 0);
 		glm::mat4 GetLocalMatrix();
 		glm::mat4 GetWorldMatrix();
 		void update(bool isTransformChanged = false);

@@ -22,7 +22,7 @@ void vkLight::preperDescriptor(vks::VulkanDevice* vulkanDevice, VkDescriptorPool
 	VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
 	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(vulkanDevice->logicalDevice, &descriptorLayout, nullptr, &descriptorSetLayout));
 	VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, (uint64_t)descriptorSetLayout, "LightsDescriptorSetLayout");
-	
+
 	//分配描述符集
 	VkDescriptorSetAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -160,7 +160,7 @@ namespace vkLight {
 		if (isDescriptorUpdated)
 		{
 			lightResource.shadowCubeMap.updateDescriptor();
-			
+
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
 					vks::initializers::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2, &lightResource.shadowCubeMap.descriptor),
 			};
@@ -308,8 +308,10 @@ namespace vkLight {
 		pushConstantRange[0].offset = 0;
 		pushConstantRange[0].size = sizeof(PushConstants);
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vks::initializers::pipelineLayoutCreateInfo();
-		pipelineLayoutCreateInfo.setLayoutCount = 0;
-		pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+		std::array<VkDescriptorSetLayout, LBI_MESH + 1> shadowLayouts;
+		shadowLayouts.fill(vkglTF::MeshDescriptorSetLayout);
+		pipelineLayoutCreateInfo.setLayoutCount = uint32_t(shadowLayouts.size());
+		pipelineLayoutCreateInfo.pSetLayouts = shadowLayouts.data();
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
 		pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRange;
 		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
@@ -381,7 +383,7 @@ namespace vkLight {
 					for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 					{
 						vkCmdPushConstants(cmdBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4) * 2, sizeof(glm::vec4), &lightData.pointLights[id].position);
-						model.drawWithPushConstant(cmdBuffer, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, pipelineLayout, shadowProj * glm::translate(viewMatrix[face], glm::vec3(-lightData.pointLights[id].position)), true); 
+						model.drawWithPushConstant(cmdBuffer, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, pipelineLayout, shadowProj * glm::translate(viewMatrix[face], glm::vec3(-lightData.pointLights[id].position)), true, VulkanContext::GetVulkanRenderer()->currentBuffer);
 					}
 
 					vkCmdEndRenderPass(cmdBuffer);
@@ -662,8 +664,10 @@ namespace vkLight {
 		pushConstantRange.offset = 0;
 		pushConstantRange.size = sizeof(glm::mat4);
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vks::initializers::pipelineLayoutCreateInfo();
-		pipelineLayoutCreateInfo.setLayoutCount = 0;
-		pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+		std::array<VkDescriptorSetLayout, LBI_MESH + 1> shadowLayouts;
+		shadowLayouts.fill(vkglTF::MeshDescriptorSetLayout);
+		pipelineLayoutCreateInfo.setLayoutCount = uint32_t(shadowLayouts.size());
+		pipelineLayoutCreateInfo.pSetLayouts = shadowLayouts.data();
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
 		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
@@ -714,7 +718,7 @@ namespace vkLight {
 
 				for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 				{
-					model.drawWithPushConstant(cmdBuffer, VK_SHADER_STAGE_VERTEX_BIT, pipelineLayout, cascades[j].viewProjMatrix);
+					model.drawWithPushConstant(cmdBuffer, VK_SHADER_STAGE_VERTEX_BIT, pipelineLayout, cascades[j].viewProjMatrix, false, VulkanContext::GetVulkanRenderer()->currentBuffer);
 				}
 
 				vkCmdEndRenderPass(cmdBuffer);

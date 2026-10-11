@@ -45,8 +45,8 @@ public:
 	{
 		PointLineSpace Space = PointLineSpace::World;
 		float Confidence = 0.5f;   // 置信度
-		float JointRadius = 0.006f; // 关节球半径 米
-		float BoneThickness = 0.003f;// 骨骼直径 米
+		float JointRadius = 0.09f; // 关节球半径 米
+		float BoneThickness = 0.15f;// 骨骼直径 米
 		bool  bKinematic = true;
 
 		// ---- 几何 ----
@@ -59,7 +59,7 @@ public:
 		// ---- 世界变换 ----
 		glm::vec3 WorldPositionOffset = glm::vec3(0.0f);  // 米
 		glm::vec3 WorldRotationOffset = glm::vec3(0.0f);  // 角度（度），顺序 X→Y→Z
-		glm::vec3 WorldScaleOffset = glm::vec3(1.0f);  // 无单位，默认 1
+		glm::vec3 WorldScaleOffset = glm::vec3(10.0f);  // 无单位，默认 1
 	};
 	Config config;
 

@@ -1,3 +1,4 @@
+import "Binding_Mesh.slang";
 struct VSInput
 {
     float3 Pos;
@@ -15,11 +16,11 @@ struct PushConstants {
 [[vk::push_constant]] PushConstants PushConstant;
 
 [shader("vertex")]
-VSOutput vertexMain(VSInput input)
+VSOutput vertexMain(VSInput input, uint instanceIndex : SV_InstanceID)
 {
     VSOutput output;
-    output.Pos = mul(PushConstant.MVP, float4(input.Pos, 1.0));
-    output.WorldPos = mul(PushConstant.Model, float4(input.Pos, 1.0));
+    output.Pos = mul(PushConstant.MVP, mul(GetModelMatrix(instanceIndex), float4(input.Pos, 1.0)));
+    output.WorldPos = mul(GetModelMatrix(instanceIndex), float4(input.Pos, 1.0));
     return output;
 }
 

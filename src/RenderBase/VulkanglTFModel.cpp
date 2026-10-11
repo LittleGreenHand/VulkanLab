@@ -24,6 +24,8 @@
 
 #include "tiny_gltf.h"
 #include "VulkanglTFModel.h"
+#include "RenderResource/InstanceManager.h"
+#include "RenderResource/ModelInstances.h"
 #include "RenderConfig.hpp"
 #include "VulkanDevice.h"
 #include "VulkanTexture.h"
@@ -47,14 +49,14 @@ namespace vkglTF
 {
 	static void createMeshDescriptorSetLayout(VkDevice device)
 	{
-		VkDescriptorSetLayoutBinding setLayoutBinding = vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-			0);
+		const VkDescriptorSetLayoutBinding bindings[] = {
+			vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0),
+			vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1)
+		};
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCI{};
 		descriptorLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorLayoutCI.bindingCount = 1;
-		descriptorLayoutCI.pBindings = &setLayoutBinding;
+		descriptorLayoutCI.bindingCount = 2;
+		descriptorLayoutCI.pBindings = bindings;
 		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayoutCI, nullptr, &MeshDescriptorSetLayout));
 	}
 }
@@ -609,6 +611,7 @@ void vkglTF::Model::Destroy()
 	if (!device)
 		return;
 
+	VK_CHECK_RESULT(vkDeviceWaitIdle(device->logicalDevice));
 	vkDestroyBuffer(device->logicalDevice, vertices.buffer, nullptr);
 	vkFreeMemory(device->logicalDevice, vertices.memory, nullptr);
 	vkDestroyBuffer(device->logicalDevice, indices.buffer, nullptr);
@@ -625,10 +628,15 @@ void vkglTF::Model::Destroy()
 	m_indexBuffer.clear();
 	m_vertexBuffer.clear();
 
+	nodes.clear();
+	linearNodes.clear();
+	skins.clear();
+	textures.clear();
 	meshes.clear();
 	materials.clear();
 	animations.clear();
 	vkDestroyDescriptorPool(device->logicalDevice, descriptorPool, nullptr);
+	buffersBound = false;
 	device = nullptr;
 }
 
@@ -678,9 +686,6 @@ void vkglTF::Model::loadNode(vkglTF::Node *parent, const tinygltf::Node &node, u
 		newMesh->name = mesh.name;
 		for (size_t j = 0; j < mesh.primitives.size(); j++) {
 			const tinygltf::Primitive &primitive = mesh.primitives[j];
-			if (primitive.indices < 0) {
-				continue;
-			}
 			uint32_t indexStart = static_cast<uint32_t>(indexBuffer.size());
 			uint32_t vertexStart = static_cast<uint32_t>(vertexBuffer.size());
 			uint32_t indexCount = 0;
@@ -822,7 +827,7 @@ void vkglTF::Model::loadNode(vkglTF::Node *parent, const tinygltf::Node &node, u
 				}
 			}
 			// Indices
-			{
+			if (primitive.indices >= 0) {
 				const tinygltf::Accessor &accessor = model.accessors[primitive.indices];
 				const tinygltf::BufferView &bufferView = model.bufferViews[accessor.bufferView];
 				const tinygltf::Buffer &buffer = model.buffers[bufferView.buffer];
@@ -862,11 +867,33 @@ void vkglTF::Model::loadNode(vkglTF::Node *parent, const tinygltf::Node &node, u
 					return;
 				}
 			}
+			else {
+				indexCount = vertexCount;
+				for (uint32_t i = 0; i < vertexCount; ++i) indexBuffer.push_back(vertexStart + i);
+			}
+			MeshTopology topology = ConvertTopology(primitive.mode);
+			if (topology == MeshTopology::TriangleStrip || topology == MeshTopology::TriangleFan) {
+				// 统一为 TriangleList，普通渲染和实例渲染复用当前三角形管线。
+				std::vector<uint32_t> triangles;
+				triangles.reserve(indexCount > 2 ? (indexCount - 2) * 3 : 0);
+				for (uint32_t i = 0; i + 2 < indexCount; ++i) {
+					uint32_t a = indexBuffer[indexStart + (topology == MeshTopology::TriangleFan ? 0 : i)];
+					uint32_t b = indexBuffer[indexStart + i + 1];
+					uint32_t c = indexBuffer[indexStart + i + 2];
+					if (topology == MeshTopology::TriangleStrip && (i & 1)) std::swap(a, b);
+					if (a == b || b == c || a == c) continue;
+					triangles.insert(triangles.end(), { a, b, c });
+				}
+				indexBuffer.resize(indexStart);
+				indexBuffer.insert(indexBuffer.end(), triangles.begin(), triangles.end());
+				indexCount = uint32_t(triangles.size());
+				topology = MeshTopology::TriangleList;
+			}
 			Primitive *newPrimitive = new Primitive(indexStart, indexCount, primitive.material > -1 ? materials[primitive.material] : materials.back());
 			newPrimitive->firstVertex = vertexStart;
 			newPrimitive->vertexCount = vertexCount;
 			newPrimitive->setDimensions(posMin, posMax);
-			newPrimitive->topology = ConvertTopology(primitive.mode);
+			newPrimitive->topology = topology;
 			newMesh->primitives.push_back(newPrimitive);
 		}
 		newNode->mesh = newMesh;
@@ -1322,6 +1349,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice *device
 	imageBindingCount = detail::imageDescriptorBindingCount * materials.size();
 	std::vector<VkDescriptorPoolSize> poolSizes = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uboCount + 1 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, uboCount + 1 },
 	};
 	//if (imageCount > 0) 
 	{
@@ -1378,7 +1406,7 @@ void vkglTF::Model::bindBuffers(VkCommandBuffer commandBuffer)
 	buffersBound = true;
 }
 
-void vkglTF::Model::draw(VkCommandBuffer commandBuffer, uint32_t renderFlags, VkPipelineLayout pipelineLayout)
+void vkglTF::Model::draw(VkCommandBuffer commandBuffer, uint32_t renderFlags, VkPipelineLayout pipelineLayout, uint32_t frame)
 {
 	if (!buffersBound) {
 		const VkDeviceSize offsets[1] = { 0 };
@@ -1386,10 +1414,10 @@ void vkglTF::Model::draw(VkCommandBuffer commandBuffer, uint32_t renderFlags, Vk
 		vkCmdBindIndexBuffer(commandBuffer, indices.buffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 	for (auto& node : nodes) {
-		drawNode(node, commandBuffer, renderFlags, pipelineLayout);
+		drawNode(node, commandBuffer, renderFlags, pipelineLayout, frame);
 	}
 }
-void vkglTF::Model::drawNode(Node *node, VkCommandBuffer commandBuffer, uint32_t renderFlags, VkPipelineLayout pipelineLayout)
+void vkglTF::Model::drawNode(Node *node, VkCommandBuffer commandBuffer, uint32_t renderFlags, VkPipelineLayout pipelineLayout, uint32_t frame)
 {
 	if (!node->visible)
 		return;
@@ -1415,15 +1443,17 @@ void vkglTF::Model::drawNode(Node *node, VkCommandBuffer commandBuffer, uint32_t
 					vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, LBI_MATERIALS, 1, &material.descriptorSet, 0, nullptr);
 				}
 				vkCmdDrawIndexed(commandBuffer, primitive->indexCount, 1, primitive->firstIndex, 0, 0);
+				InstanceManager::Get().RecordDraw(1, false, false);
 			}
 		}
 	}
+	if (node->instances && pipelineLayout != VK_NULL_HANDLE) node->instances->Draw(commandBuffer, renderFlags, pipelineLayout, frame);
 	for (auto& child : node->children) {
-		drawNode(child, commandBuffer, renderFlags, pipelineLayout);
+		drawNode(child, commandBuffer, renderFlags, pipelineLayout, frame);
 	}
 }
 
-void vkglTF::Model::drawWithPushConstant(VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix)
+void vkglTF::Model::drawWithPushConstant(VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix, uint32_t frame)
 {
 	if (!buffersBound) {
 		const VkDeviceSize offsets[1] = { 0 };
@@ -1431,26 +1461,30 @@ void vkglTF::Model::drawWithPushConstant(VkCommandBuffer commandBuffer, VkShader
 		vkCmdBindIndexBuffer(commandBuffer, indices.buffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 	for (auto& node : nodes) {
-		drawNodeWithPushConstant(node, commandBuffer, stageFlags, pipelineLayout, VP, pushModelMatrix);
+		drawNodeWithPushConstant(node, commandBuffer, stageFlags, pipelineLayout, VP, pushModelMatrix, frame);
 	}
 }
-void vkglTF::Model::drawNodeWithPushConstant(Node* node, VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix)
+void vkglTF::Model::drawNodeWithPushConstant(Node* node, VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix, uint32_t frame)
 {
 	if (!node->visible)
 		return;
 	if (node->mesh) {
-		//通过推送常量更新MVP矩阵
-		vkCmdPushConstants(commandBuffer, pipelineLayout, stageFlags, 0, sizeof(glm::mat4), &(VP * node->mesh->uniformBlock.modelMatrix)[0]);
-		if (pushModelMatrix) {
-			vkCmdPushConstants(commandBuffer, pipelineLayout, stageFlags, sizeof(glm::mat4), sizeof(glm::mat4), &(node->mesh->uniformBlock.modelMatrix)[0]);
-		}
+		// 阴影 Shader 通过 Mesh/Instance 描述符读取模型矩阵，推送常量传入灯光 VP。
+		vkCmdPushConstants(commandBuffer, pipelineLayout, stageFlags, 0, sizeof(glm::mat4), &VP[0]);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, LBI_MESH, 1, &node->mesh->uniformBuffer.descriptorSet, 0, nullptr);
 
 		for (Primitive* primitive : node->mesh->primitives) {
 			vkCmdDrawIndexed(commandBuffer, primitive->indexCount, 1, primitive->firstIndex, 0, 0);
+			InstanceManager::Get().RecordDraw(1, false, true);
 		}
 	}
+	if (node->instances)
+	{
+		vkCmdPushConstants(commandBuffer, pipelineLayout, stageFlags, 0, sizeof(glm::mat4), &VP[0]);
+		node->instances->Draw(commandBuffer, 0, pipelineLayout, frame, true);
+	}
 	for (auto& child : node->children) {
-		drawNodeWithPushConstant(child, commandBuffer, stageFlags, pipelineLayout, VP, pushModelMatrix);
+		drawNodeWithPushConstant(child, commandBuffer, stageFlags, pipelineLayout, VP, pushModelMatrix, frame);
 	}
 }
 
@@ -1589,7 +1623,12 @@ void vkglTF::Model::prepareNodeDescriptor(vkglTF::Node* node, VkDescriptorSetLay
 		writeDescriptorSet.dstBinding = 0;
 		writeDescriptorSet.pBufferInfo = &node->mesh->uniformBuffer.descriptor;
 
-		vkUpdateDescriptorSets(device->logicalDevice, 1, &writeDescriptorSet, 0, nullptr);
+		InstanceGPUData identity;
+		identity.ids = { uint32_t(node->nodeId), uint32_t(node->nodeId >> 32), 0, 0 };
+		VK_CHECK_RESULT(device->createBuffer(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &node->mesh->identityInstances, sizeof(identity), &identity));
+		const auto instanceWrite = vks::initializers::writeDescriptorSet(node->mesh->uniformBuffer.descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1, &node->mesh->identityInstances.descriptor);
+		const VkWriteDescriptorSet writes[] = { writeDescriptorSet, instanceWrite };
+		vkUpdateDescriptorSets(device->logicalDevice, 2, writes, 0, nullptr);
 	}
 	for (auto& child : node->children) {
 		prepareNodeDescriptor(child, descriptorSetLayout);

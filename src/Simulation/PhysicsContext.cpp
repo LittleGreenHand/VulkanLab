@@ -122,8 +122,8 @@ bool PhysicsContext::Init()
 
 	// CPU Dispatcher
 	{
-		auto threadCount = std::thread::hardware_concurrency() - 2;
-		threadCount = threadCount > 0 ? threadCount : 1;
+		const auto availableThreads = std::thread::hardware_concurrency();
+		const auto threadCount = availableThreads > 2 ? availableThreads - 2 : 1;
 		m_dispatcher = physx::PxDefaultCpuDispatcherCreate(threadCount);
 		if (!m_dispatcher)
 		{

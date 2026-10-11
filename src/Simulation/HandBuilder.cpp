@@ -360,8 +360,8 @@ void HandBuilder::DrawUI()
 
 		if (config.Space == PointLineSpace::World)
 		{
-			ImGui::SliderFloat("关节球半径", &config.JointRadius, 0.001f, 0.03f, "%.3f");
-			ImGui::SliderFloat("骨骼直径", &config.BoneThickness, 0.001f, 0.02f, "%.3f");
+			ImGui::SliderFloat("关节球半径", &config.JointRadius, 0.001f, 1.f, "%.3f");
+			ImGui::SliderFloat("骨骼直径", &config.BoneThickness, 0.001f, 1.f, "%.3f");
 			ImGui::DragFloat3("手部世界位置", &config.WorldPositionOffset.x, 0.01f);
 			ImGui::DragFloat3("手部世界旋转", &config.WorldRotationOffset.x, 1.0f);
 			ImGui::DragFloat3("手部世界缩放", &config.WorldScaleOffset.x, 0.01f, 0.01f, 10.0f);

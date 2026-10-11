@@ -7,9 +7,13 @@
 #include "Core/Log.h"
 #include "RenderBase/VulkanDevice.h"
 #include "Simulation/PhysicsContext.h"
+#include "RenderResource/InstanceManager.h"
+#include "RenderResource/ModelInstances.h"
 
 namespace vkglTF
 {
+	Node::Node() : nodeId(InstanceManager::Get().RegisterNode(this)) {}
+
 	void Primitive::setDimensions(glm::vec3 min, glm::vec3 max)
 	{
 		dimensions.min = min;
@@ -36,6 +40,8 @@ namespace vkglTF
 
 	Mesh::~Mesh()
 	{
+		identityInstances.destroy();
+		vkUnmapMemory(device->logicalDevice, uniformBuffer.memory);
 		vkDestroyBuffer(device->logicalDevice, uniformBuffer.buffer, nullptr);
 		vkFreeMemory(device->logicalDevice, uniformBuffer.memory, nullptr);
 		for (auto primitive : primitives) {
@@ -139,15 +145,19 @@ namespace vkglTF
 
 	Node::~Node()
 	{
+		for (auto* ancestor = parent; ancestor; ancestor = ancestor->parent)
+			if (ancestor->instances) ancestor->instances->Clear();
+		instances.reset(); // 子树 Mesh 释放前取消生成，并释放实例 Actor/GPU 资源。
+		InstanceManager::Get().UnregisterNode(nodeId);
+		if (physicsComponent.physicsActor) {
+			physicsComponent.physicsActor->release();
+			physicsComponent.physicsActor = nullptr;
+		}
 		if (mesh) {
 			delete mesh;
 		}
 		for (auto& child : children) {
 			delete child;
-		}
-		if (physicsComponent.physicsActor) {
-			physicsComponent.physicsActor->release();
-			physicsComponent.physicsActor = nullptr;
 		}
 	}
 }

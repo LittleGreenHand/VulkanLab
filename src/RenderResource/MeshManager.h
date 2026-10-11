@@ -37,6 +37,7 @@ public:
 	void LoadModels();
 	bool ApplyPhysics(BaseModel key, bool isDynamic = false);
 	void UpdateSimulationResults();
+	static bool BuildPhysicsMeshData(const vkglTF::Model& model, const vkglTF::Mesh& mesh, PhysicsMeshData& physicsMesh, bool isDynamic);
 
 	Dimensions GetSceneDimensions();
 	void InitModelsSourceDebugName();
@@ -44,7 +45,7 @@ public:
 private:
 	bool ApplyPhysics(vkglTF::Model& model, vkglTF::Node* node, bool isDynamic);
 	bool CreatePhysicsActor(vkglTF::Model& model, vkglTF::Node* node, bool isDynamic);
-	bool BuildPhysicsMeshData(const vkglTF::Model& model,const vkglTF::Mesh& mesh,PhysicsMeshData& physicsMesh,bool isDynamic);
+
 	void UpdateSimulationResults(vkglTF::Node* node);
 
 public:

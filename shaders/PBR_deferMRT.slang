@@ -27,19 +27,19 @@ struct GBuffer {
 };
 
 [shader("vertex")]
-VSOutput vertexMain(VSInput input) {
+VSOutput vertexMain(VSInput input, uint instanceIndex : SV_InstanceID) {
     VSOutput output;
     // 世界空间位置
-    output.WorldPos = mul(meshInfo.model, float4(input.Pos, 1.0)).xyz;
+    output.WorldPos = mul(GetModelMatrix(instanceIndex), float4(input.Pos, 1.0)).xyz;
     // 裁剪空间位置（当前帧+前一帧，用于运动向量）
     output.currentClipPos = mul(globalParams.viewProj, float4(output.WorldPos, 1.0));
-    output.prevClipPos = mul(globalParams.prevViewProj, mul(meshInfo.prevModel, float4(input.Pos, 1.0)));
+    output.prevClipPos = mul(globalParams.prevViewProj, mul(GetPreviousModelMatrix(instanceIndex), float4(input.Pos, 1.0)));
     output.Pos = output.currentClipPos;
     // 纹理坐标与顶点属性
     output.UV = input.UV;
-    output.Tangent = mul((float3x3)meshInfo.model, input.Tangent.xyz);
+    output.Tangent = mul((float3x3)GetModelMatrix(instanceIndex), input.Tangent.xyz);
     output.Color = input.Color;
-    output.Normal = mul((float3x3)meshInfo.model, input.Normal);
+    output.Normal = GetNormal(instanceIndex, input.Normal);
     return output;
 }
 

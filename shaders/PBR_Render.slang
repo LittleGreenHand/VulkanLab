@@ -167,17 +167,17 @@ bool isZeroVector(float3 v) {
 }
 
 [shader("vertex")]
-PBR_VSOutput vertexMain(VSInput input)
+PBR_VSOutput vertexMain(VSInput input, uint instanceIndex : SV_InstanceID)
 { 
     // 前向渲染
     PBR_VSOutput output;
-    output.WorldPos = mul(meshInfo.model, float4(input.Pos, 1.0)).xyz;
-    output.Normal = mul((float3x3)meshInfo.model, input.Normal);
-    output.Tangent = mul((float3x3)meshInfo.model, input.Tangent.xyz);
+    output.WorldPos = mul(GetModelMatrix(instanceIndex), float4(input.Pos, 1.0)).xyz;
+    output.Normal = GetNormal(instanceIndex, input.Normal);
+    output.Tangent = mul((float3x3)GetModelMatrix(instanceIndex), input.Tangent.xyz);
     output.UV = input.UV;
     output.Pos = mul(globalParams.viewProj, float4(output.WorldPos, 1.0));
     output.currentClipPos = output.Pos;
-    output.prevClipPos = mul(globalParams.prevViewProj, mul(meshInfo.prevModel, float4(input.Pos.xyz, 1.0)));
+    output.prevClipPos = mul(globalParams.prevViewProj, mul(GetPreviousModelMatrix(instanceIndex), float4(input.Pos.xyz, 1.0)));
     output.Color = input.Color;
     return output;
 }

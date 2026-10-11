@@ -84,10 +84,10 @@ namespace vkglTF
 		vks::Texture* getTexture(uint32_t index);
 		void loadFromFile(std::string filename, vks::VulkanDevice* device, VkQueue transferQueue, uint32_t fileLoadingFlags = vkglTF::FileLoadingFlags::None, float scale = 1.0f);
 		void bindBuffers(VkCommandBuffer commandBuffer);
-		void drawNode(Node* node, VkCommandBuffer commandBuffer, uint32_t renderFlags = 0, VkPipelineLayout pipelineLayout = VK_NULL_HANDLE);
-		void draw(VkCommandBuffer commandBuffer, uint32_t renderFlags = 0, VkPipelineLayout pipelineLayout = VK_NULL_HANDLE);
-		void drawWithPushConstant(VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix = false);
-		void drawNodeWithPushConstant(Node* node, VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix = false);
+		void drawNode(Node* node, VkCommandBuffer commandBuffer, uint32_t renderFlags = 0, VkPipelineLayout pipelineLayout = VK_NULL_HANDLE, uint32_t frame = 0);
+		void draw(VkCommandBuffer commandBuffer, uint32_t renderFlags = 0, VkPipelineLayout pipelineLayout = VK_NULL_HANDLE, uint32_t frame = 0);
+		void drawWithPushConstant(VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix = false, uint32_t frame = 0);
+		void drawNodeWithPushConstant(Node* node, VkCommandBuffer commandBuffer, VkShaderStageFlags stageFlags, VkPipelineLayout pipelineLayout, const glm::mat4& VP, bool pushModelMatrix = false, uint32_t frame = 0);
 		void getNodeDimensions(Node* node, glm::vec3& min, glm::vec3& max);
 		void getSceneDimensions();
 		void updateAnimation(uint32_t index, float time);

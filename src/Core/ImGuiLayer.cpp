@@ -13,6 +13,8 @@
 #include "Simulation/PhysicsContext.h"
 #include "Core/FrameClock.h"
 #include "RenderBase/glTF/VulkanglTFScene.h"
+#include "RenderResource/InstanceManager.h"
+#include "RenderResource/ModelInstances.h"
 #include "AI/AIModelManager.h"
 #include "Device/CameraDevice.h"
 #include "Render/PostProcess_PointLine.h"
@@ -141,15 +143,13 @@ void DrawAIModels()
 	ImGui::End();
 }
 
-// 用于跟踪选中的节点
-vkglTF::Node* selectedNode = nullptr;
-void DrawNodeTree(vkglTF::Node* node, int& nodeId)
+// 场景树和实例编辑使用同一 ID 选择状态，后续鼠标拾取可调用 InstanceManager::Select。
+void DrawNodeTree(vkglTF::Node* node)
 {
 	if (!node) return;
 
-	// 保存当前节点ID
-	int originalNodeId = nodeId;
-	std::string baseId = std::to_string(originalNodeId);
+	auto& selection = InstanceManager::Get();
+	std::string baseId = std::to_string(node->nodeId);
 
 	// 处理节点名称
 	std::string displayName = node->name.empty() ? "Unnamed Node" : node->name;
@@ -160,7 +160,7 @@ void DrawNodeTree(vkglTF::Node* node, int& nodeId)
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 
 	// 选中节点高亮显示
-	if (selectedNode == node)
+	if (selection.GetSelection().node == node->nodeId)
 	{
 		flags |= ImGuiTreeNodeFlags_Selected;
 	}
@@ -177,32 +177,121 @@ void DrawNodeTree(vkglTF::Node* node, int& nodeId)
 	bool isOpen = ImGui::TreeNodeEx(displayName.c_str(), flags);
 	if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 	{
-		if (selectedNode == node)
-			selectedNode = nullptr; // 再次单击已选中节点，取消选择
+		if (selection.GetSelection().node == node->nodeId)
+			selection.ClearSelection();
 		else
-			selectedNode = node; // 单击节点文本区域，选中当前节点
+			selection.Select(node->nodeId);
 	}
 
-	// 递增节点ID
-	nodeId++;
 
 	// 递归绘制子节点
 	if (isOpen && isExpandable)
 	{
 		for (vkglTF::Node* child : node->children)
 		{
-			DrawNodeTree(child, nodeId);
+			DrawNodeTree(child);
 		}
 		ImGui::TreePop();
 	}
-	else if (!isExpandable)
+	else if (isOpen)
 	{
 		ImGui::TreePop();
 	}
 }
 
+bool DrawTransformEditor(glm::vec3& translation, glm::quat& rotation, glm::vec3& scale)
+{
+	bool changed = ImGui::DragFloat3("Translation", &translation.x, 0.01f);
+	glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
+	if (ImGui::DragFloat3("Rotation (deg)", &euler.x, 0.01f))
+	{
+		rotation = glm::quat(glm::radians(euler));
+		changed = true;
+	}
+	changed |= ImGui::DragFloat3("Scale", &scale.x, 0.01f);
+	return changed;
+}
+
+void DrawInstancePanel(vkglTF::Node& node)
+{
+	if (!ImGui::CollapsingHeader("实例管理", ImGuiTreeNodeFlags_DefaultOpen)) return;
+	ImGui::PushID("Instances");
+	auto& settings = node.instanceSettings;
+	ImGui::Text("NodeID: %llu", static_cast<unsigned long long>(node.nodeId));
+	ImGui::InputInt("实例数量", &settings.count);
+	ImGui::Checkbox("随机生成", &settings.random);
+	ImGui::InputScalar("随机种子", ImGuiDataType_U32, &settings.seed);
+	if (settings.random)
+	{
+		auto rangeEditor = [](const char* name, InstanceRange& range)
+		{
+			ImGui::PushID(name);
+			ImGui::TextUnformatted(name);
+			ImGui::DragFloat3("Min (X Y Z)", &range.min.x, 0.01f);
+			ImGui::DragFloat3("Max (X Y Z)", &range.max.x, 0.01f);
+			ImGui::PopID();
+		};
+		rangeEditor("Position", settings.position);
+		rangeEditor("Rotation (deg)", settings.rotation);
+		rangeEditor("Scale", settings.scale);
+		//ImGui::TextWrapped("反向边界自动交换；缩放范围限制为 0.0001..10000，非有限值会拒绝生成。");
+	}
+	const char* physicsTypes[] = { "None", "Static", "Dynamic" };
+	int type = int(settings.physics);
+	if (ImGui::Combo("物理类型", &type, physicsTypes, IM_ARRAYSIZE(physicsTypes))) settings.physics = InstancePhysicsType(type);
+	if (settings.physics == InstancePhysicsType::Dynamic)
+	{
+		ImGui::DragFloat("密度", &settings.density, 0.01f);
+		//if (!settings.random) ImGui::TextWrapped("复制属性的动态实例将完全重叠，可能产生强烈的碰撞响应。可启用随机位置分布。");
+	}
+	//ImGui::TextWrapped("实例保留生成时的父变换和子树几何快照；Position/Rotation/Scale 使用所选节点的局部坐标。原模型继续显示。");
+	if (ImGui::Button("生成实例"))
+	{
+		for (auto& [key, model] : MeshManager::Get().m_sceneTree)
+			if (std::find(model.linearNodes.begin(), model.linearNodes.end(), &node) != model.linearNodes.end() || std::find(model.nodes.begin(), model.nodes.end(), &node) != model.nodes.end())
+			{
+				InstanceManager::Get().Generate(model, node);
+				break;
+			}
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("清除实例") && node.instances) node.instances->Clear();
+	if (node.instances)
+	{
+		auto& instances = *node.instances;
+		ImGui::Text("当前实例: %zu", instances.GetCount());
+		ImGui::Text("生成耗时: %.2f ms", instances.GetGenerationMilliseconds());
+		ImGui::TextWrapped("%s", instances.GetStatus().c_str());
+		if (instances.GetCount())
+		{
+			auto& manager = InstanceManager::Get();
+			const auto selected = manager.GetSelection();
+			int index = selected.instance ? int(selected.instance - instances.GetID(0)) : 0;
+			bool select = ImGui::InputInt("实例索引 (从 0 开始)", &index);
+			ImGui::SameLine();
+			select |= ImGui::Button("选择实例");
+			if (select) manager.SelectIndex(node.nodeId, size_t(std::clamp(index, 0, int(instances.GetCount()) - 1)));
+			const auto id = manager.GetSelection().instance;
+			if (const auto* current = manager.FindInstance(node.nodeId, id))
+			{
+				ImGui::Text("InstanceID: %llu", static_cast<unsigned long long>(id));
+				auto transform = *current;
+				if (DrawTransformEditor(transform.translation, transform.rotation, transform.scale)) manager.SetInstanceTransform(node.nodeId, id, transform);
+			}
+		}
+	}
+	const auto& statistics = InstanceManager::Get().GetStatistics();
+	ImGui::Separator();
+	ImGui::Text("上一帧: 普通 Draw %llu / 实例 Draw %llu", static_cast<unsigned long long>(statistics.ordinaryDraws), static_cast<unsigned long long>(statistics.instanceDraws));
+	ImGui::Text("实例展开 Draw %llu / 合批节省 %llu", static_cast<unsigned long long>(statistics.unbatchedDraws), static_cast<unsigned long long>(statistics.unbatchedDraws - statistics.instanceDraws));
+	ImGui::Text("阴影 Draw %llu / 实例上传 %llu bytes", static_cast<unsigned long long>(statistics.shadowDraws), static_cast<unsigned long long>(statistics.uploadedBytes));
+	ImGui::PopID();
+}
+
 void DrawNodePropertiesPanel()
 {
+	auto& manager = InstanceManager::Get();
+	auto* selectedNode = manager.FindNode(manager.GetSelection().node);
 	if (!selectedNode)
 	{
 		ImGui::Text("Select a node to edit properties");
@@ -225,21 +314,8 @@ void DrawNodePropertiesPanel()
 	// 可见性控制
 	ImGui::Checkbox("Visible", &selectedNode->visible);
 
-	bool isTransformChanged = false;
-	if (ImGui::InputFloat3("Translation", &selectedNode->translation.x))
-	{
-		isTransformChanged = true;
-	}
-	glm::vec3 rotationEuler = glm::eulerAngles(selectedNode->rotation) * (180.0f / glm::pi<float>());
-	if (ImGui::InputFloat3("Rotation (deg)", &rotationEuler.x))
-	{
-		isTransformChanged = true;
-		selectedNode->rotation = glm::quat(glm::radians(rotationEuler));
-	}
-	if (ImGui::InputFloat3("Scale", &selectedNode->scale.x))
-	{
-		isTransformChanged = true;
-	}
+	const bool isTransformChanged = DrawTransformEditor(selectedNode->translation, selectedNode->rotation, selectedNode->scale);
+	DrawInstancePanel(*selectedNode);
 
 	ImGui::Separator();
 	ImGui::Separator();
@@ -304,7 +380,7 @@ void DrawNodePropertiesPanel()
 	// 取消选择按钮
 	if (ImGui::Button("Deselect"))
 	{
-		selectedNode = nullptr;
+		manager.ClearSelection();
 	}
 }
 
@@ -551,7 +627,6 @@ void ImGuiLayer::Update()
 	//场景树
 	if (m_showSceneTree)
 	{
-		int nodeId = 0;
 		{
 			// 创建左右分栏布局
 			ImGui::Begin("场景树");
@@ -565,20 +640,20 @@ void ImGuiLayer::Update()
 				{
 					for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 					{
-						model.nodes[0]->visible = true;
+						for (auto* root : model.nodes) root->visible = true;
 					}
 				}
 				else
 				{
 					for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 					{
-						model.nodes[0]->visible = false;
+						for (auto* root : model.nodes) root->visible = false;
 					}
 				}
 			}
 			for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 			{
-				DrawNodeTree(model.nodes[0], nodeId);
+				for (auto* root : model.nodes) DrawNodeTree(root);
 			}
 			ImGui::EndChild();
 

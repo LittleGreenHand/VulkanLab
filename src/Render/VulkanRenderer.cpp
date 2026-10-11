@@ -16,6 +16,7 @@
 #include "RenderResource/EnvironmentManager.h"
 #include "VulkanDebugUtils.h"
 #include "Core/Log.h"
+#include "RenderResource/InstanceManager.h"
 
 VulkanRenderer::VulkanRenderer() : VulkanRendererBase()
 {
@@ -416,6 +417,7 @@ void VulkanRenderer::InitPostProcess()
 
 void VulkanRenderer::render()
 {
+	InstanceManager::Get().PrepareGPU(currentBuffer);
 	VkCommandBuffer cmdBuffer = drawCmdBuffers[currentBuffer];
 
 	const int descriptorSetCount = 3;
@@ -461,7 +463,7 @@ void VulkanRenderer::render()
 				vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_DEFER_GEOMETRY_Opaque].pipeline);
 				for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 				{
-					model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderOpaqueNodes, pipelines[PL_PBR_DEFER_GEOMETRY_Opaque].layout);
+					model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderOpaqueNodes, pipelines[PL_PBR_DEFER_GEOMETRY_Opaque].layout, currentBuffer);
 				}
 
 				//绘制遮罩物体
@@ -469,7 +471,7 @@ void VulkanRenderer::render()
 				vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_DEFER_GEOMETRY_AlphaMasked].pipeline);
 				for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 				{
-					model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderAlphaMaskedNodes, pipelines[PL_PBR_DEFER_GEOMETRY_AlphaMasked].layout);
+					model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderAlphaMaskedNodes, pipelines[PL_PBR_DEFER_GEOMETRY_AlphaMasked].layout, currentBuffer);
 				}
 			}
 			vkCmdEndRendering(cmdBuffer);
@@ -525,7 +527,7 @@ void VulkanRenderer::render()
 			vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines[PL_PBR_BLEND].pipeline);
 			for (auto& [key, model] : MeshManager::Get().m_sceneTree)
 			{
-				model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderAlphaBlendedNodes, pipelines[PL_PBR_BLEND].layout);
+				model.draw(cmdBuffer, vkglTF::RenderFlags::BindMaterial | vkglTF::RenderFlags::RenderAlphaBlendedNodes, pipelines[PL_PBR_BLEND].layout, currentBuffer);
 			}
 			VulkanDebugUtils::CmdEndLabel(cmdBuffer);
 		}
@@ -593,6 +595,7 @@ bool VulkanRenderer::BeginFrame(double deltaTime)
 	camera.update(frameTimer);
 	PostProcessBase::UpdateResolution(m_renderWidth, m_renderHeiht);
 	updateUniformBuffers();
+	InstanceManager::Get().BeginFrame();
 
 	VkCommandBuffer cmdBuffer = drawCmdBuffers[currentBuffer];
 	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
