@@ -55,7 +55,7 @@ void MeshManager::LoadModels()
 	m_sceneTree[BaseModel::Sponza].loadFromFile(getAssetPath() + "models/sponza/sponza.gltf", vulkanDevice, VulkanContext::GetGraphicsQueue(), glTFLoadingFlags);
 	m_sceneTree[BaseModel::Sponza].nodes[0]->clearTransform();
 	m_sceneTree[BaseModel::Sponza].nodes[0]->rotation = EularToQuaternion(glm::vec3(0, 90, 0));
-	//m_sceneTree[BaseModel::Sponza].nodes[0]->scale = (glm::vec3(0.1, 0.1, 0.1));
+	m_sceneTree[BaseModel::Sponza].nodes[0]->scale = (glm::vec3(10, 10, 10));
 	m_sceneTree[BaseModel::Sponza].nodes[0]->translation = (glm::vec3(0, -1, 0));
 	m_sceneTree[BaseModel::Sponza].nodes[0]->update();
 

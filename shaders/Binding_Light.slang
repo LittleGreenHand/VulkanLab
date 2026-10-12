@@ -7,6 +7,7 @@ struct PointLightInfo {
     float range;
     int attenuationMode;
     int isRnder;
+    float shadowBias;
 };
 struct DirectLightInfo {
     float4 direct;
@@ -17,6 +18,7 @@ struct DirectLightInfo {
     int usePCF;
     int colorCascades;
     int isRnder;
+    float shadowBias;
 };
 struct LightParameters
 {
@@ -30,24 +32,18 @@ struct LightParameters
 [[vk::binding(2, LBI_LIGHTS)]] SamplerCubeArray pointLightShadowCubeMap;
 
 //计算定向光阴影
-float textureProj(float4 shadowCoord, float2 offset, uint cascadeIndex)
+float textureProj(float4 shadowCoord, float2 offset, uint cascadeIndex, float bias)
 {
-    float shadowFactor = 1.0; // 非阴影区域：直接光照完全贡献
-    float bias = 0.005;
-    if (shadowCoord.z > -1.0 && shadowCoord.z < 1.0)
-    {
-        float dist = directLightShadowMap.Sample(float3(shadowCoord.xy + offset, cascadeIndex)).r;
-        // 阴影区域：直接光照贡献衰减到最小值（非零）
-        if (shadowCoord.w > 0.0 && dist < shadowCoord.z - bias)
-        {
-            shadowFactor = SHADOW_ATTENUATION_MIN;
-        }
-    }
-    return shadowFactor; // 仅影响直接光照的贡献比例
+    float2 uv = shadowCoord.xy + offset;
+    if (shadowCoord.w <= 0.0 || shadowCoord.z < 0.0 || shadowCoord.z > 1.0 || any(uv < 0.0) || any(uv > 1.0))
+        return 1.0;
+
+    float dist = directLightShadowMap.Sample(float3(uv, cascadeIndex)).r;
+    return dist < shadowCoord.z - bias ? SHADOW_ATTENUATION_MIN : 1.0;
 }
 
 // 为定向光阴影计算PCF滤波
-float filterPCF(float4 sc, uint cascadeIndex)
+float filterPCF(float4 sc, uint cascadeIndex, float bias)
 {
     int3 texDim;
     directLightShadowMap.GetDimensions(texDim.x, texDim.y, texDim.z);
@@ -61,7 +57,7 @@ float filterPCF(float4 sc, uint cascadeIndex)
 
     for (int x = -range; x <= range; x++)    {
         for (int y = -range; y <= range; y++)        {
-            shadowFactor += textureProj(sc, float2(dx * x, dy * y), cascadeIndex);
+            shadowFactor += textureProj(sc, float2(dx * x, dy * y), cascadeIndex, bias);
             count++;
         }
     }

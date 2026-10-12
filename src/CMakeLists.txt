@@ -38,6 +38,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     ENGINE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
     SHADERS_DIR="${CMAKE_SOURCE_DIR}/shaders"
     SHADERS_SPV_DIR="${SHADERS_OUTPUT}"
+    GLM_FORCE_RADIANS
+    GLM_FORCE_DEPTH_ZERO_TO_ONE
 )
 
 add_dependencies(${PROJECT_NAME} Shaders)

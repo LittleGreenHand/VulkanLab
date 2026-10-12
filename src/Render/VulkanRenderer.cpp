@@ -22,8 +22,8 @@ VulkanRenderer::VulkanRenderer() : VulkanRendererBase()
 {
 	title = "VulkanEngine";
 	camera.type = Camera::CameraType::firstperson;
-	camera.movementSpeed = 0.5f;
-	camera.setPerspective(60.0f, (float)m_renderWidth / (float)m_renderHeiht, 0.01f, 256.0f);
+	camera.movementSpeed = 100.f;
+	camera.setPerspective(60.0f, (float)m_renderWidth / (float)m_renderHeiht, 0.01f, 512.0f);
 
 	camera.rotationSpeed = 0.15f;
 	camera.setRotation({ 0.0f, 0.0f, 0.0f });
@@ -154,7 +154,7 @@ void VulkanRenderer::prepareDescriptors()
 		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, MaxConcurrentFrames * 8),
 		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, MaxConcurrentFrames * 16)
 		};
-		VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, MaxConcurrentFrames * 2);
+		VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, MaxConcurrentFrames * 2 + 1);
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 		VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, (uint64_t)descriptorPool, "MainDescriptorPool");
 	}
@@ -417,6 +417,8 @@ void VulkanRenderer::InitPostProcess()
 
 void VulkanRenderer::render()
 {
+	// 级联覆盖范围与当前帧已上传的相机参数保持一致。
+	directLight.updateCascades(globalParam.viewProj, globalParam.nearPlane, globalParam.farPlane);
 	InstanceManager::Get().PrepareGPU(currentBuffer);
 	VkCommandBuffer cmdBuffer = drawCmdBuffers[currentBuffer];
 
@@ -424,7 +426,7 @@ void VulkanRenderer::render()
 	std::vector<VkDescriptorSet> descriptorSetsArray(descriptorSetCount);
 	descriptorSetsArray[LBI_GLOBAL] = globalDescriptorSets[currentBuffer];
 	descriptorSetsArray[LBI_IBL] = IBLDescriptorSet;
-	descriptorSetsArray[LBI_LIGHTS] = vkLight::descriptorSet;
+	descriptorSetsArray[LBI_LIGHTS] = vkLight::descriptorSets[currentBuffer];
 	//资源预处理
 	{
 		//绘制方向光和点光的阴影贴图	

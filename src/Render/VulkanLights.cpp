@@ -5,11 +5,12 @@
 #include "RenderResource/MeshManager.h"
 #include "VulkanDebugUtils.h"
 #include "Math/MathUtils.h"
+#include <algorithm>
 
 VkDescriptorSetLayout vkLight::descriptorSetLayout{ VK_NULL_HANDLE };
-VkDescriptorSet vkLight::descriptorSet{ VK_NULL_HANDLE };
+std::array<VkDescriptorSet, MaxConcurrentFrames> vkLight::descriptorSets{};
 vkLight::LightUbo vkLight::lightData{};
-vks::Buffer vkLight::lightBuffer{};
+std::array<vks::Buffer, MaxConcurrentFrames> vkLight::lightBuffers{};
 
 void vkLight::preperDescriptor(vks::VulkanDevice* vulkanDevice, VkDescriptorPool descriptorPool)
 {
@@ -24,39 +25,29 @@ void vkLight::preperDescriptor(vks::VulkanDevice* vulkanDevice, VkDescriptorPool
 	VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, (uint64_t)descriptorSetLayout, "LightsDescriptorSetLayout");
 
 	//分配描述符集
-	VkDescriptorSetAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	allocInfo.descriptorPool = descriptorPool;
-	allocInfo.pSetLayouts = &descriptorSetLayout;
-	allocInfo.descriptorSetCount = 1;
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(vulkanDevice->logicalDevice, &allocInfo, &descriptorSet));
-	VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET, (uint64_t)descriptorSet, "LightsDescriptorSet");
-
-	//创建Buffer
-	VK_CHECK_RESULT(vulkanDevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &lightBuffer, sizeof(LightUbo)));
-	VK_CHECK_RESULT(lightBuffer.map());
-	updateLightBuffer();
-
-	//绑定Buffer到描述符集
-	VkWriteDescriptorSet writeDescriptorSet{};
-	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	writeDescriptorSet.dstSet = descriptorSet;
-	writeDescriptorSet.dstBinding = 0;
-	writeDescriptorSet.dstArrayElement = 0;
-	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	writeDescriptorSet.descriptorCount = 1;
-	writeDescriptorSet.pBufferInfo = &lightBuffer.descriptor;
-	vkUpdateDescriptorSets(vulkanDevice->logicalDevice, 1, &writeDescriptorSet, 0, nullptr);
+	for (uint32_t frame = 0; frame < MaxConcurrentFrames; ++frame)
+	{
+		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(vulkanDevice->logicalDevice, &allocInfo, &descriptorSets[frame]));
+		VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET, (uint64_t)descriptorSets[frame], "LightsDescriptorSet[" + std::to_string(frame) + "]");
+		VK_CHECK_RESULT(vulkanDevice->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &lightBuffers[frame], sizeof(LightUbo)));
+		VK_CHECK_RESULT(lightBuffers[frame].map());
+		memcpy(lightBuffers[frame].mapped, &lightData, sizeof(LightUbo));
+		VkWriteDescriptorSet write = vks::initializers::writeDescriptorSet(descriptorSets[frame], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &lightBuffers[frame].descriptor);
+		vkUpdateDescriptorSets(vulkanDevice->logicalDevice, 1, &write, 0, nullptr);
+	}
 }
 
 void vkLight::updateLightBuffer()
 {
-	memcpy(lightBuffer.mapped, &lightData, sizeof(LightUbo));
+	const uint32_t frame = VulkanContext::GetVulkanRenderer()->currentBuffer;
+	memcpy(lightBuffers[frame].mapped, &lightData, sizeof(LightUbo));
 }
 
 void vkLight::destroyLightBuffer()
 {
-	lightBuffer.destroy();
+	for (auto& buffer : lightBuffers)
+		buffer.destroy();
 }
 
 //-------------------------点光 START-------------------------
@@ -69,7 +60,7 @@ namespace vkLight {
 		lightResource.shadowCubeMap.format = shadowCubeFormat;
 		lightResource.shadowCubeMap.device = vulkanDevice;
 		lightResource.shadowCubeMap.mipLevels = 1;
-		lightResource.shadowCubeMap.layerCount = 6 * lightData.activePointLightCount;//每个点光源都有6个面来构成立方体阴影贴图
+		lightResource.shadowCubeMap.layerCount = 6 * std::max(1, lightData.activePointLightCount);//每个点光源都有6个面来构成立方体阴影贴图
 
 		// Cube map image description
 		VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
@@ -161,10 +152,11 @@ namespace vkLight {
 		{
 			lightResource.shadowCubeMap.updateDescriptor();
 
-			std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-					vks::initializers::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2, &lightResource.shadowCubeMap.descriptor),
-			};
-			vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+			for (auto set : descriptorSets)
+			{
+				VkWriteDescriptorSet write = vks::initializers::writeDescriptorSet(set, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2, &lightResource.shadowCubeMap.descriptor);
+				vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
+			}
 			isDescriptorUpdated = false;
 		}
 	}
@@ -288,11 +280,29 @@ namespace vkLight {
 		subpass.pColorAttachments = &colorReference;
 		subpass.pDepthStencilAttachment = &depthReference;
 
+		// 六面共享深度附件；外部依赖同时覆盖上一帧采样与本帧距离写入。
+		const VkPipelineStageFlags depthStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+		std::array<VkSubpassDependency, 2> dependencies{};
+		dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependencies[0].dstSubpass = 0;
+		dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | depthStages;
+		dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | depthStages;
+		dependencies[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		dependencies[1].srcSubpass = 0;
+		dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+		dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | depthStages;
+		dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | depthStages;
+		dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
 		VkRenderPassCreateInfo renderPassCreateInfo = vks::initializers::renderPassCreateInfo();
 		renderPassCreateInfo.attachmentCount = 2;
 		renderPassCreateInfo.pAttachments = osAttachments;
 		renderPassCreateInfo.subpassCount = 1;
 		renderPassCreateInfo.pSubpasses = &subpass;
+		renderPassCreateInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+		renderPassCreateInfo.pDependencies = dependencies.data();
 
 		VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass.renderPass));
 	}
@@ -320,8 +330,10 @@ namespace vkLight {
 		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "light_point.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
 		builder.addShaderStage(VulkanContext::GetVulkanRenderer()->loadShader(VulkanContext::GetVulkanRenderer()->getShadersPath() + "light_point.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT));
 		builder.setDepthStencilState(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
-		builder.buildPipeline(renderPass.renderPass, VulkanContext::GetVulkanRenderer()->pipelineCache, pipelineLayout, pipeline);
-		VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_PIPELINE, (uint64_t)pipeline, "DirectLightShadowMapGenerate pipeline");
+		// 立方体投影保持采样所需的 Y 方向，阴影采用双面投影。
+		builder.setRasterizationState(VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
+		VK_CHECK_RESULT(builder.buildPipeline(renderPass.renderPass, VulkanContext::GetVulkanRenderer()->pipelineCache, pipelineLayout, pipeline));
+		VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_PIPELINE, (uint64_t)pipeline, "PointLightShadowMapGenerate pipeline");
 	}
 
 	void VulkanPointLights::preperViewMatrix()
@@ -401,10 +413,14 @@ namespace vkLight {
 namespace vkLight {
 	void VulkanDirectLights::updateCascades()
 	{
+		const auto& camera = VulkanContext::GetVulkanRenderer()->camera;
+		updateCascades(camera.matrices.perspective * camera.matrices.view, camera.getNearClip(), camera.getFarClip());
+	}
+
+	void VulkanDirectLights::updateCascades(const glm::mat4& cameraViewProjection, float nearClip, float farClip)
+	{
 		float cascadeSplits[MAX_CASCADES];
 
-		float nearClip = VulkanContext::GetVulkanRenderer()->camera.getNearClip();
-		float farClip = VulkanContext::GetVulkanRenderer()->camera.getFarClip();
 		float clipRange = farClip - nearClip;
 
 		float minZ = nearClip;
@@ -440,7 +456,7 @@ namespace vkLight {
 			};
 
 			// Project frustum corners into world space
-			glm::mat4 invCam = glm::inverse(VulkanContext::GetVulkanRenderer()->camera.matrices.perspective * VulkanContext::GetVulkanRenderer()->camera.matrices.view);
+			glm::mat4 invCam = glm::inverse(cameraViewProjection);
 			for (int j = 0; j < 8; j++) {
 				glm::vec4 invCorner = invCam * glm::vec4(frustumCorners[j], 1.0f);
 				frustumCorners[j] = invCorner / invCorner.w;
@@ -475,7 +491,7 @@ namespace vkLight {
 			glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 			lightOrthoMatrix[1][1] *= -1.0f;
 			// Store split distance and matrix in cascade
-			cascades[i].splitDepth = (VulkanContext::GetVulkanRenderer()->camera.getNearClip() + splitDist * clipRange) * -1.0f;
+			cascades[i].splitDepth = (nearClip + splitDist * clipRange) * -1.0f;
 			cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
 			cascades[i].viewMat = lightViewMatrix;
 			cascades[i].Proj = lightOrthoMatrix;
@@ -596,10 +612,11 @@ namespace vkLight {
 		{
 			renderPass.depthAttachment.updateDescriptor();
 			renderPass.depthAttachment.descriptor.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-			std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-					vks::initializers::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, &renderPass.depthAttachment.descriptor),
-			};
-			vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+			for (auto set : descriptorSets)
+			{
+				VkWriteDescriptorSet write = vks::initializers::writeDescriptorSet(set, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, &renderPass.depthAttachment.descriptor);
+				vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
+			}
 			isDescriptorUpdated = false;
 		}
 	}
@@ -632,19 +649,17 @@ namespace vkLight {
 		dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependencies[0].dstSubpass = 0;
 		dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 		dependencies[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 		//确保当前渲染通道的深度写入操作完全完成后，后续阶段才能读取该阴影图，保证读取到的是最新数据
 		dependencies[1].srcSubpass = 0;
 		dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-		dependencies[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+		dependencies[1].srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 		dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 		dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
 		VkRenderPassCreateInfo renderPassCreateInfo = vks::initializers::renderPassCreateInfo();
 		renderPassCreateInfo.attachmentCount = 1;
@@ -681,7 +696,7 @@ namespace vkLight {
 		builder.rasterizationState.depthBiasEnable = VK_TRUE;
 		builder.dynamicStateEnables.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS); //向动态状态添加深度偏移，这样我们就能在运行时对其进行更改
 		builder.dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(builder.dynamicStateEnables);
-		builder.buildPipeline(renderPass.renderPass, VulkanContext::GetVulkanRenderer()->pipelineCache, pipelineLayout, pipeline);
+		VK_CHECK_RESULT(builder.buildPipeline(renderPass.renderPass, VulkanContext::GetVulkanRenderer()->pipelineCache, pipelineLayout, pipeline));
 		VulkanDebugUtils::SetObjectDebugName(VK_OBJECT_TYPE_PIPELINE, (uint64_t)pipeline, "DirectLightShadowMapGenerate pipeline");
 	}
 

@@ -489,10 +489,10 @@ void ImGuiLayer::Update()
 		if (ImGui::CollapsingHeader("相机")) {
 			ImGui::Indent();
 			{
-				ImGui::SliderFloat("移动速度", &renderer->camera.movementSpeed, 0.1f, 10);
-				ImGui::SliderFloat("旋转速度", &renderer->camera.rotationSpeed, 0.1f, 1.f);
-				ImGui::InputFloat3("位置", (float*)&renderer->camera.position);
-				ImGui::InputFloat3("旋转", (float*)&renderer->camera.rotation);
+				ImGui::DragFloat("移动速度", &renderer->camera.movementSpeed, 0.1f);
+				ImGui::DragFloat("旋转速度", &renderer->camera.rotationSpeed, 0.1f);
+				ImGui::DragFloat3("位置", (float*)&renderer->camera.position,0.01f);
+				ImGui::DragFloat3("旋转", (float*)&renderer->camera.rotation,0.01f);
 				ImGui::Checkbox("景深", &renderer->camera.enableDOF);
 				if (renderer->camera.enableDOF)
 				{
@@ -525,9 +525,9 @@ void ImGuiLayer::Update()
 					float fov = renderer->camera.fov;
 					float znear = renderer->camera.znear;
 					float zfar = renderer->camera.zfar;
-					ImGui::InputFloat("FOV", &fov, 0.5f, 5, "%.1f");
-					ImGui::InputFloat("NearPlane", &znear, 1, 100, "%.4f");
-					ImGui::InputFloat("FarPlane", &zfar, 1, 100, "%.1f");
+					ImGui::DragFloat("FOV", &fov, 0.1f, 1.f, 180.f);
+					ImGui::DragFloat("NearPlane", &znear, 1, 0.001f);
+					ImGui::DragFloat("FarPlane", &zfar, 1, 0.002);
 					if (fov != renderer->camera.fov || znear != renderer->camera.znear || zfar != renderer->camera.zfar)
 					{
 						renderer->camera.setPerspective(fov, (float)renderer->m_renderWidth / (float)renderer->m_renderHeiht, znear, zfar);
@@ -565,10 +565,10 @@ void ImGuiLayer::Update()
 					bool colorCascades = vkLight::lightData.directLight.colorCascades;
 					if (ImGui::Checkbox("PCF", &PCF) ||
 						ImGui::Checkbox("colorCascades", &colorCascades) ||
-						ImGui::InputFloat("深度偏移", &renderer->directLight.depthBiasConstant) ||
-						ImGui::InputFloat("深度偏移斜率", &renderer->directLight.depthBiasSlope) ||
+						ImGui::DragFloat("深度偏移", &renderer->directLight.depthBiasConstant, 0.01f, 0.0f, 1.0f) ||
+						ImGui::DragFloat("深度偏移斜率", &renderer->directLight.depthBiasSlope, 0.01f, 0.0f, 1.0f) ||
 						ImGui::ColorEdit3("太阳光颜色", (float*)&vkLight::lightData.directLight.color) ||
-						ImGui::InputFloat("太阳光强度", &vkLight::lightData.directLight.color.w)
+						ImGui::DragFloat("太阳光强度", &vkLight::lightData.directLight.color.w, 0.01f, 0.1f, 10.f)
 						)
 					{
 						vkLight::lightData.directLight.usePCF = PCF;
@@ -580,6 +580,8 @@ void ImGuiLayer::Update()
 					{
 						renderer->directLight.updateCascades();
 					}
+					if (ImGui::DragFloat("Bias", &vkLight::lightData.directLight.shadowBias, 0.0001f, 0.0f, 0.5f, "%.4f"))
+						vkLight::updateLightBuffer();
 				}
 
 				if (ImGui::CollapsingHeader("点光源")) {
@@ -609,13 +611,16 @@ void ImGuiLayer::Update()
 						}
 						ImGui::SameLine(0, 4);
 						if (ImGui::CollapsingHeader(lightName.c_str())) {
-							if (ImGui::InputFloat3(("位置" + str_id).c_str(), (float*)&vkLight::lightData.pointLights[i].position, "%.2f") ||
-								ImGui::ColorEdit3(("颜色" + str_id).c_str(), (float*)&vkLight::lightData.pointLights[i].color) ||
-								ImGui::SliderFloat(("范围" + str_id).c_str(), &vkLight::lightData.pointLights[i].range, 0, 256) ||
+							if (ImGui::DragFloat3(("位置" + str_id).c_str(), (float*)&vkLight::lightData.pointLights[i].position, 0.1f) ||
+								ImGui::DragFloat3(("颜色" + str_id).c_str(), (float*)&vkLight::lightData.pointLights[i].color, 0.1f) ||
+								ImGui::DragFloat(("强度" + str_id).c_str(), (float*)&vkLight::lightData.pointLights[i].color.w, 0.01f, 0.f, 10.f) ||
+								ImGui::DragFloat(("范围" + str_id).c_str(), &vkLight::lightData.pointLights[i].range, 1, 0.1, 512) ||
 								ImGui::SliderInt(("衰减模式" + str_id).c_str(), &vkLight::lightData.pointLights[i].attenuationMode, 0, 2))
 							{
 								vkLight::updateLightBuffer();
 							}
+							if (ImGui::DragFloat(("Bias" + str_id).c_str(), &vkLight::lightData.pointLights[i].shadowBias, 0.0001f, 0.0f, 0.5f, "%.4f"))
+								vkLight::updateLightBuffer();
 						}
 					}
 				}

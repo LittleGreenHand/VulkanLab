@@ -258,31 +258,34 @@ FSOutput fragmentMain(PBR_VSOutput input)
             float3 L = normalize(lightDir);
 
             // 计算阴影因子
-            const float EPSILON = 0.15;
+            float shadowBias = max(lightParameter.pointLights[i].shadowBias, 0.0) * (2.0 - saturate(dot(N, L)));
             float sampledDist = pointLightShadowCubeMap.Sample(float4(-L, i)).r;
-            float shadowFactor = (distance <= sampledDist + EPSILON) ? 1.0 : 0;
+            float shadowFactor = (distance <= sampledDist + shadowBias) ? 1.0 : 0;
 
             // 计算衰减因子
             float attenuation = calculateAttenuation(distance, lightParameter.pointLights[i].range, lightParameter.pointLights[i].attenuationMode);
-
+            float intensity = lightParameter.pointLights[i].color.w;
             // 累加每个光源的贡献（已包含衰减）
             if(anisotropicFactor != 0.0)
             {
-                Lo += shadowFactor * anisSpecularContribution(albedoColor.rgb, lightParameter.pointLights[i].color.xyz, L, V, N, F0, metallic, roughness, attenuation,
+                Lo += intensity * shadowFactor * anisSpecularContribution(albedoColor.rgb, lightParameter.pointLights[i].color.xyz, L, V, N, F0, metallic, roughness, attenuation,
                                                         T, B, anisotropicFactor);
             }
             else
             {
-                Lo += shadowFactor * specularContribution(albedoColor.rgb, lightParameter.pointLights[i].color.xyz, L, V, N, F0, metallic, roughness, attenuation);        
+                Lo += intensity * shadowFactor * specularContribution(albedoColor.rgb, lightParameter.pointLights[i].color.xyz, L, V, N, F0, metallic, roughness, attenuation);        
             }
         }
     }
     uint cascadeIndex = 0;
     //计算定向光贡献
-    if (lightParameter.directLight.isRnder == 1)
+    if (lightParameter.directLight.isRnder == 1 && lightParameter.directLight.cascadeCount > 0)
     {
+        float3 lightDir = lightParameter.directLight.direct.xyz;
+        float3 L = normalize(lightDir);
+        uint cascadeCount = uint(lightParameter.directLight.cascadeCount);
         // 获取级联阴影贴图级别
-        for (uint i = 0; i < lightParameter.directLight.cascadeCount - 1; ++i) {
+        for (uint i = 0; i < cascadeCount - 1; ++i) {
             if (ViewPos.z < lightParameter.directLight.cascadeSplits[i]) {
                 cascadeIndex = i + 1;
             }
@@ -295,23 +298,27 @@ FSOutput fragmentMain(PBR_VSOutput input)
             0.0, 0.0, 0.0, 1.0);
         //将世界位置转换到定向光坐标空间，并通过biasMat转换到NDC空间得到阴影采样坐标
         float4 shadowCoord = mul(biasMat, mul(lightParameter.directLight.ViewProj[cascadeIndex], float4(WorldPos, 1.0)));
-        float shadow = 0;
-        if (lightParameter.directLight.usePCF == 1) {
-            shadow = filterPCF(shadowCoord / shadowCoord.w, cascadeIndex);
-        } else {
-            shadow = textureProj(shadowCoord / shadowCoord.w, float2(0.0, 0.0), cascadeIndex);
+        // 正交投影的 Z 行长度将世界距离偏置转换为当前级联的深度偏置。
+        float depthScale = length(lightParameter.directLight.ViewProj[cascadeIndex][2].xyz);
+        float shadowBias = max(lightParameter.directLight.shadowBias, 0.0) * (2.0 - saturate(dot(N, L))) * depthScale;
+        float shadow = 1.0;
+        if (shadowCoord.w > 0.0) {
+            if (lightParameter.directLight.usePCF == 1) {
+                shadow = filterPCF(shadowCoord / shadowCoord.w, cascadeIndex, shadowBias);
+            } else {
+                shadow = textureProj(shadowCoord / shadowCoord.w, float2(0.0, 0.0), cascadeIndex, shadowBias);
+            }
         }
 
-        float3 lightDir = lightParameter.directLight.direct.xyz;
-        float3 L = normalize(lightDir);
+        float sunIntensity = lightParameter.directLight.color.w;
         if (anisotropicFactor != 0.0)
         {
-            Lo += shadow * anisSpecularContribution(albedoColor.rgb, lightParameter.directLight.color.xyz, L, V, N, F0, metallic, roughness, 1.0,
+            Lo += sunIntensity * shadow * anisSpecularContribution(albedoColor.rgb, lightParameter.directLight.color.xyz, L, V, N, F0, metallic, roughness, 1.0,
                                                 T, B, anisotropicFactor);            
         }
         else
         {
-            Lo += shadow * specularContribution(albedoColor.rgb, lightParameter.directLight.color.xyz, L, V, N, F0, metallic, roughness, 1.0);
+            Lo += sunIntensity * shadow * specularContribution(albedoColor.rgb, lightParameter.directLight.color.xyz, L, V, N, F0, metallic, roughness, 1.0);
         }
     }
 
